@@ -165,6 +165,17 @@ def analysis_scan(prefix_name = 'TEST_B2V_align_test_CRY5.0', config_file = 'con
     fig1.savefig("./Outputdata/Lossmap_outputs/Angular_scan_"+ str(n_sig) + ".png")
     # inital angle: 1.9235399773503744e-05
 
+
+
+    fig2 = plt.figure( figsize=(10, 8))
+    ax = fig2.add_subplot(1,1,1)
+    ax.plot(scan_df['theta'], scan_df['losses_at_CRY1'], label = 'TCCS')
+    ax.plot(scan_df['theta'], scan_df['losses_at_absorber'], label ='TCLA') 
+    ax.set_xlabel('Rotation angle wrt ' + n_sig + r'$\sigma$ envelope [$\mu$rad]')
+    ax.set_ylabel("Losses")
+    ax.legend(loc='center right')
+    fig2.savefig("./Outputdata/Lossmap_outputs/Angular_scan_"+ str(n_sig) + "_sovrapp.png")
+
     return scan_df
 
 
