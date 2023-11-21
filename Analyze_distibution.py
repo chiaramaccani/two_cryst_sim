@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 import pandas as pd
 import json
+    
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import xobjects as xo
 import xtrack as xt
@@ -257,27 +259,29 @@ def angular_distribution(prefix_name = 'TEST_B2V_ABS_CRY1_5.5', config_file = 'c
         TCCS_name = 'tccs.5r3.b2'
 
         line_coll = setup_line(config_file)
+        print('OK')
         TCCS_idx = line_coll.element_names.index(TCCS_name)
         cry_impact_parts = df_particles[(df_particles.at_element == TCCS_idx) & (df_particles.state<0)]
+        print(cry_impact_parts)
 
-        twiss=line_coll.twiss()
+        twiss = line_coll.twiss()
 
         beta_y_optics = twiss['bety',TCCS_name]
         alfa_y_optics = twiss['alfy',TCCS_name]
 
-        with open(config_file, 'r') as stream:
+        """with open(config_file, 'r') as stream:
             config_dict = yaml.safe_load(stream)
 
         file_dict = config_dict['input_files']
         sub_dict = config_dict['run']
         beam          = sub_dict['beam']
-        plane         = sub_dict['plane']
+        plane         = sub_dict['plane']"""
 
-        part_ref_dict = json.load(open(file_dict[f'line_b{beam}']))['particle_ref']
-        critical_angle = np.sqrt(2*16/(part_ref_dict['p0c'][0]*part_ref_dict['beta0'][0]))
+        critical_angle = np.sqrt(2*16/(line.particle_ref._xobject.p0c[0]*line.particle_ref._xobject.beta0[0]))
 
         normalized_emittance = 3.5e-6
-        emittance_phy = normalized_emittance/(part_ref_dict['beta0'][0]*part_ref_dict['gamma0'][0])
+        emittance_phy = normalized_emittance/(line.particle_ref._xobject.beta0[0]*line.particle_ref._xobject.gamma0[0])
+        sigma = np.sqrt(emittance_phy*beta_y_optics)
 
         n_sig = prefix_name.split('CRY1_')[1]
 
@@ -285,36 +289,75 @@ def angular_distribution(prefix_name = 'TEST_B2V_ABS_CRY1_5.5', config_file = 'c
 
         py_central = - float(n_sig) * alfa_y_optics * np.sqrt(emittance_phy/beta_y_optics)
 
+        fig1 = plt.figure( figsize=(24, 10))
 
-        fig1 = plt.figure( figsize=(24, 5))
-        ax1 = fig1.add_subplot(1,3,1)
-        ax1.hist(cry_impact_parts['px'], bins=100)
-        ax1.set_xlabel(r'px [$\mu$rad]')
+        ax1 = fig1.add_subplot(2,3,1)
+        ax1.hist(cry_impact_parts['x'], bins=100)
+        ax1.set_xlabel('x [mm]')
         ax1.set_ylabel("")
-        ax1.set_yscale("log")
-        precision = 6  # Set the desired precision
-        ax1.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e6:.{0}f}" for x in plt.xticks()[0]])
+        #ax1.set_yscale("log")
+        ax1.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e3:.{1}f}" for x in plt.xticks()[0]])
+
+
+        ax2 = fig1.add_subplot(2,3,2)
+        ax2.hist(cry_impact_parts['y'], bins=100) 
+        ax2.set_xlabel('y [mm]')
+        ax2.set_ylabel('')
+        #ax2.set_yscale("log")
+        ax2.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e3:.{1}f}" for x in plt.xticks()[0]])
+        ax2.set_title(f'Total particles hitting the crystal: {len(cry_impact_parts)}')
+
+        ax3 = fig1.add_subplot(2,3,3)
+        h = ax3.hist2d(cry_impact_parts['x'], cry_impact_parts['y'], bins=100, norm=matplotlib.colors.LogNorm())#, range = ([-40e-6, 40e-6], [-40e-6,40e-6])) 
+        ax3.set_xlabel(r'x [mm]')
+        ax3.set_ylabel(r'y [mm]')
+        ax3.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e3:.{1}f}" for x in plt.xticks()[0]])
+        ax3.set_yticks(ticks=plt.yticks()[0], labels=[f"{y*1e3:.{1}f}" for y in plt.yticks()[0]])
+        
+        axins = inset_axes(ax3, height="100%",  width="5%", loc='right', borderpad=-6 )
+        fig1.colorbar(h[3], cax=axins, orientation='vertical', label='Count (log scale)')
+
+        ax3_tw = ax3.twinx()
+        ticks = np.arange(1, max(ax3.get_yticks())/sigma+1, 2.0)
+    
+        ax3_tw.set_yticks(ticks)
+        #ax3_tw.set_ybound(ax3.get_ybound())
+        ax3_tw.set_ylabel(r' n $\sigma$')
+        #ax3_tw.set_yticklabels([f"{x /sigma :.{0}f}"  for x in ticks])
+        ax3_tw.axhline(5, color = 'r', linestyle = '--')
+        ax3_tw.text( max(ax3.get_xticks())-1.5e-3, 4, r'TCP $\sigma$')
+        ax3.grid(linestyle=':')
+
+
+        ax12 = fig1.add_subplot(2,3,4)
+        ax12.hist(cry_impact_parts['px'], bins=100)
+        ax12.set_xlabel(r'px [$\mu$rad]')
+        ax12.set_ylabel("")
+        ax12.set_yscale("log")
+        ax12.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e6:.{0}f}" for x in plt.xticks()[0]])
         #ax1.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useMathText=True)
 
 
-        ax2 = fig1.add_subplot(1,3,2)
-        ax2.hist(cry_impact_parts['py'], bins=100) 
-        ax2.set_xlabel(r'py [$\mu$rad]')
-        ax2.set_ylabel('')
-        ax2.set_yscale("log")
-        ax2.axvline(py_central, color = 'red', linestyle = '-', alpha = 0.8)
-        ax2.axvline(py_central + critical_angle, color = 'red', linestyle = '--', alpha = 0.9)
-        ax2.axvline(py_central - critical_angle, color = 'red', linestyle = '--', alpha = 0.9)
-        ax2.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e6:.{0}f}" for x in plt.xticks()[0]])
-        #ax2.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useMathText=True)
+        ax22 = fig1.add_subplot(2,3,5)
+        ax22.hist(cry_impact_parts['py'], bins=100) 
+        ax22.set_xlabel(r'py [$\mu$rad]')
+        ax22.set_ylabel('')
+        ax22.set_yscale("log")
+        ax22.axvline(py_central, color = 'red', linestyle = '-', alpha = 0.8)
+        ax22.axvline(py_central + critical_angle, color = 'red', linestyle = '--', alpha = 0.9)
+        ax22.axvline(py_central - critical_angle, color = 'red', linestyle = '--', alpha = 0.9)
+        ax22.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e6:.{0}f}" for x in plt.xticks()[0]])
+        #ax22.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useMathText=True)
+        chann = len(cry_impact_parts[(cry_impact_parts.py > py_central - critical_angle) & (cry_impact_parts.py < py_central + critical_angle)])
+        ax22.set_title(f'N particle inside critical angle range: {chann}')
 
-        ax3 = fig1.add_subplot(1,3,3)
-        h = ax3.hist2d(cry_impact_parts['px'], cry_impact_parts['py'], bins=100, norm=matplotlib.colors.LogNorm(), range = ([-40e-6, 40e-6], [-40e-6,40e-6])) 
-        ax3.set_xlabel(r'px [$\mu$rad]')
-        ax3.set_ylabel(r'py [$\mu$rad]')
-        ax3.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e6:.{0}f}" for x in plt.xticks()[0]])
-        ax3.set_yticks(ticks=plt.yticks()[0], labels=[f"{y*1e6:.{0}f}" for y in plt.yticks()[0]])
-        fig1.colorbar(h[3], orientation='vertical', label='Count (log scale)')
+        ax32 = fig1.add_subplot(2,3,6)
+        h2 = ax32.hist2d(cry_impact_parts['px'], cry_impact_parts['py'], bins=100, norm=matplotlib.colors.LogNorm(), range = ([-40e-6, 40e-6], [-40e-6,40e-6])) 
+        ax32.set_xlabel(r'px [$\mu$rad]')
+        ax32.set_ylabel(r'py [$\mu$rad]')
+        ax32.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e6:.{0}f}" for x in plt.xticks()[0]])
+        ax32.set_yticks(ticks=plt.yticks()[0], labels=[f"{y*1e6:.{0}f}" for y in plt.yticks()[0]])
+        fig1.colorbar(h2[3], orientation='vertical', label='Count (log scale)')
         fig1.suptitle('CRY1 at ' + n_sig + r'$\sigma$')
         #ax3.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useMathText=True)
         #ax3.ticklabel_format(style='sci', axis='y', scilimits=(0,0), useMathText=True)

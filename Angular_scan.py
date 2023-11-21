@@ -21,7 +21,7 @@ def submit_scan(config_file, lower_limit = -10e-6, upper_limit = 10e-6, step = 1
     scan_range = np.arange(lower_limit, upper_limit, step)
 
     name_splitted = config_file.split('.yaml')
-    working_directory = '/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/TEST_B2V_align_test_CRY6.5_'
+    working_directory = config_dict['jobsubmission']['working_directory'] #'/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/TEST_B2V_align_test_CRY6.5_'
     job_submitter_script = '/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Submit_HTCondor.py'
 
     for _angle in scan_range:
@@ -251,7 +251,7 @@ def main():
         submit_scan(config_file, lower_limit, upper_limit, step)
 
     elif sys.argv[1] == '--analysis':
-        prefix_name = sys.argv[2] if len(sys.argv) > 2 else 'TEST_B2V_align_test_CRY5.0'
+        prefix_name = sys.argv[2] if len(sys.argv) > 2 else 'TEST_B2V_align_test_CRY5.0_'
         config_file = sys.argv[3] if len(sys.argv) > 3 else 'config_sim.yaml'
         analysis_scan(prefix_name, config_file)
     

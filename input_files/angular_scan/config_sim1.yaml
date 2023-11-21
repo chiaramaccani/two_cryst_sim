@@ -1,6 +1,5 @@
 input_files:
   collimators: /afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/input_files/flat_top.yaml
-  line_b1: /afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/input_files/flat_top_b1.json
   line_b2: /afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/input_files/flat_top_b2.json
 jobsubmission:
   dryrun: false
@@ -8,16 +7,17 @@ jobsubmission:
     MY.WantOS: '"el9"'
     accounting_group: group_u_BE.ABP.normal
     notification: never
-  jobflavour: workday
+  jobflavour: testmatch
   mask: /afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/mask_condor_script.sh
-  num_jobs: 100
+  num_jobs: 200
   run_local: false
-  working_directory: /afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/TEST_B2V_align_test_CRY6.5_1_
+  working_directory: /afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/new_sim_6sig/TEST_B2V_align_test_CRY6.01_
 run:
   TTCS_align_angle_step: 1.0e-06
   beam: '2'
   engine: everest
-  nparticles: 100000
+  mode: angular_scan
+  nparticles: 500000
   plane: V
   seed: 12345
   turns: 200
