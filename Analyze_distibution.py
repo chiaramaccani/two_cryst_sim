@@ -254,15 +254,13 @@ def angular_distribution(prefix_name = 'TEST_B2V_ABS_CRY1_5.5', config_file = 'c
 
         if n_jobs != n_jobs_verify:
             print("!!! Succesful Jobs: ", n_jobs_verify, '/', n_jobs, ' in file: ', test_name)
-
+        print("Loading particles: done! ", len(df_particles))
 
         TCCS_name = 'tccs.5r3.b2'
 
         line_coll = setup_line(config_file)
-        print('OK')
         TCCS_idx = line_coll.element_names.index(TCCS_name)
         cry_impact_parts = df_particles[(df_particles.at_element == TCCS_idx) & (df_particles.state<0)]
-        print(cry_impact_parts)
 
         twiss = line_coll.twiss()
 
@@ -277,10 +275,10 @@ def angular_distribution(prefix_name = 'TEST_B2V_ABS_CRY1_5.5', config_file = 'c
         beam          = sub_dict['beam']
         plane         = sub_dict['plane']"""
 
-        critical_angle = np.sqrt(2*16/(line.particle_ref._xobject.p0c[0]*line.particle_ref._xobject.beta0[0]))
+        critical_angle = np.sqrt(2*16/(line_coll.particle_ref._xobject.p0c[0]*line_coll.particle_ref._xobject.beta0[0]))
 
         normalized_emittance = 3.5e-6
-        emittance_phy = normalized_emittance/(line.particle_ref._xobject.beta0[0]*line.particle_ref._xobject.gamma0[0])
+        emittance_phy = normalized_emittance/(line_coll.particle_ref._xobject.beta0[0]*line_coll.particle_ref._xobject.gamma0[0])
         sigma = np.sqrt(emittance_phy*beta_y_optics)
 
         n_sig = prefix_name.split('CRY1_')[1]
@@ -311,6 +309,7 @@ def angular_distribution(prefix_name = 'TEST_B2V_ABS_CRY1_5.5', config_file = 'c
         h = ax3.hist2d(cry_impact_parts['x'], cry_impact_parts['y'], bins=100, norm=matplotlib.colors.LogNorm())#, range = ([-40e-6, 40e-6], [-40e-6,40e-6])) 
         ax3.set_xlabel(r'x [mm]')
         ax3.set_ylabel(r'y [mm]')
+        ax3.set_ylim(0,0.008)
         ax3.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e3:.{1}f}" for x in plt.xticks()[0]])
         ax3.set_yticks(ticks=plt.yticks()[0], labels=[f"{y*1e3:.{1}f}" for y in plt.yticks()[0]])
         
@@ -357,10 +356,12 @@ def angular_distribution(prefix_name = 'TEST_B2V_ABS_CRY1_5.5', config_file = 'c
         ax32.set_ylabel(r'py [$\mu$rad]')
         ax32.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e6:.{0}f}" for x in plt.xticks()[0]])
         ax32.set_yticks(ticks=plt.yticks()[0], labels=[f"{y*1e6:.{0}f}" for y in plt.yticks()[0]])
-        fig1.colorbar(h2[3], orientation='vertical', label='Count (log scale)')
+        axins_2 = inset_axes(ax32, height="100%",  width="5%", loc='right', borderpad=-6 )
+        fig1.colorbar(h2[3], cax=axins_2, orientation='vertical', label='Count (log scale)')
+        ax32.grid(linestyle=':')
+
         fig1.suptitle('CRY1 at ' + n_sig + r'$\sigma$')
-        #ax3.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useMathText=True)
-        #ax3.ticklabel_format(style='sci', axis='y', scilimits=(0,0), useMathText=True)
+
 
         fig1.savefig("./Outputdata/impact_angles_" + n_sig + ".png")
 
