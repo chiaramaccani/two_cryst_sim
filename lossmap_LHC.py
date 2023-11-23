@@ -187,8 +187,10 @@ def main():
 
         if mode == 'cry_black_absorbers':
             black_absorbers = ['target.4l3.b2', 'tccs.5r3.b2']
-        else: 
+        elif mode == 'angular_scan': 
             black_absorbers = ['target.4l3.b2',]
+        else: 
+            black_absorbers = []
 
         everest_colls = [name for name in coll_names if name not in black_absorbers]
         coll_manager.install_everest_collimators(names=everest_colls,verbose=True)
@@ -255,11 +257,12 @@ def main():
 
 
     # Save a summary of the collimator losses to a text file
-    summary = coll_manager.summary(part, file=Path(path_out,f'coll_summary_B{beam}{plane}.out'))
+    summary = coll_manager.summary(part) #, file=Path(path_out,f'coll_summary_B{beam}{plane}.out')
     print(summary)
 
-    df_part = part.to_pandas()
-    df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='df', mode='w') 
+    if mode == 'cry_black_absorbers':
+        df_part = part.to_pandas()
+        df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='df', mode='w') 
 
 
 if __name__ == "__main__":

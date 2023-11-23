@@ -1,0 +1,14 @@
+         collname  nabs  length             s               type
+0      tcl.4l1.b2     0     1.0  26508.853172  EverestCollimator
+1      tcl.5l1.b2     0     1.0  26474.619172  EverestCollimator
+2      tcl.6l1.b2     0     1.0  26439.263172  EverestCollimator
+3    tctph.4r8.b2     0     1.0  23433.459588  EverestCollimator
+4    tctpv.4r8.b2     0     1.0  23431.459589  EverestCollimator
+..            ...   ...     ...           ...                ...
+56   tctph.4r2.b2     0     1.0   3450.817214  EverestCollimator
+57   tctpv.4r2.b2     0     1.0   3448.817214  EverestCollimator
+58  tcld.a11l2.b2     0     0.6   2906.570823  EverestCollimator
+59   tctph.4r1.b2     0     1.0    147.945000  EverestCollimator
+60   tctpv.4r1.b2     0     1.0    145.945000  EverestCollimator
+
+[61 rows x 5 columns]
