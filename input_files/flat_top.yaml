@@ -180,8 +180,8 @@ collimators:
     tcld.a11l2.b2:      { <<: *TCLD                   }
     tctph.4r1.b2:       { <<: *TCT15,  angle:   0     }
     tctpv.4r1.b2:       { <<: *TCT15,  angle:  90     }
-    tccs.5r3.b2:          { <<: *TCCS3,  gap: 6.0, length: 0.004,  bend: 80.00,  xdim: 2.0e-3,  ydim: 35.0e-3}   # !! 50e-3
-    tccp.4l3.b2:          { <<: *TCCP3,  gap: 25, length: 0.070,  angle: 90, bend: 10.00,  xdim: 8.0e-3,  ydim: 4.0e-3}    # xdim: 2.0e-3,  ydim: 8.0e-3 ????
+    tccs.5r3.b2:          { <<: *TCCS3,  gap: 6.0, length: 0.004,  bend: 80.00,  xdim: 2.0e-3,  ydim: 35.0e-3}   # 
+    tccp.4l3.b2:          { <<: *TCCP3,  gap: 25, length: 0.070,  angle: 90, bend: 10.00,  xdim: 8.0e-3,  ydim: 2.0e-3}    # xdim: 10.0e-3
     target.4l3.b2:       { <<: *TARGET3,  gap: 25, length: 0.005,  angle: 90,  xdim: 8.0e-3,  ydim: 4.0e-3  }
 
 
