@@ -104,7 +104,7 @@ def find_bad_offset_apertures(line):
 
 def main():
 
-    
+
     
     config_file = sys.argv[1]
     
@@ -115,6 +115,10 @@ def main():
 
     run_dict = config_dict['run']
     file_dict = config_dict['input_files']
+
+    coll_file = config_dict['input_files']['collimators']
+    with open(coll_file, 'r') as stream:
+        coll_dict = yaml.safe_load(stream)['collimators']['b'+config_dict['run']['beam']]
 
 
     context = xo.ContextCpu(omp_num_threads='auto')
@@ -144,10 +148,15 @@ def main():
 
     end_s = line.get_length()
 
+    TCCS_name = 'tccs.5r3.b2'
+    TCCP_name = 'tccp.4l3.b2'
+    TARGET_name = 'target.4l3.b2'
+    TCLA_name = 'tcla.a5l3.b2'
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
     TARGET_loc = end_s - (6653.3 + 0.07/2 +0.005/2)
+    TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
 
 
     line.insert_element(at_s=TCCS_loc, element=xt.Marker(), name='tccs.5r3.b2')
@@ -215,8 +224,6 @@ def main():
     # or manually override with the option gaps={collname: gap}
     coll_manager.set_openings()
 
-
-    TTCS_name = 'tccs.5r3.b2'
 
     if mode == 'angular_scan':
         print("\nTTCS aligned to beam: ", line[TTCS_name].align_angle)

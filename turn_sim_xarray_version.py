@@ -301,7 +301,59 @@ def main():
 
 
 
+def plot_distributions_at_turn(arr_path, turn):
+    
+    arr =  xr.open_dataarray(arr_path)
+    alive_arr = arr.where(arr.loc[:, 'state', turn] > 0, drop = True)[:,:,turn]
 
+    fig1 = plt.figure( figsize=(24, 5))
+    ax1 = fig1.add_subplot(1,3,1)
+    ax1.hist(alive_arr.loc[:, 'x'], bins=100)
+    ax1.set_xlabel('x [mm]')
+    ax1.set_ylabel("")
+    #ax1.set_yscale("log")
+    ax1.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e3:.{1}f}" for x in plt.xticks()[0]])
+
+
+    ax2 = fig1.add_subplot(1,3,2)
+    ax2.hist(alive_arr.loc[:, 'y'], bins=100) 
+    ax2.set_xlabel('y [mm]')
+    ax2.set_ylabel('')
+    #ax2.set_yscale("log")
+    ax2.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e3:.{1}f}" for x in plt.xticks()[0]])
+    ax2.set_title(f'Total particles: {alive_arr.shape[0]}')
+
+    ax3 = fig1.add_subplot(1,3,3)
+    h = ax3.hist2d(alive_arr.loc[:, 'x'], alive_arr.loc[:, 'y'], bins=100, norm=matplotlib.colors.LogNorm())#vmin = 1, vmax = 1e6, range = ([-40e-6, 40e-6], [-40e-6,40e-6])) 
+    ax3.set_xlabel(r'x [mm]')
+    #ax3.set_ylim(0,0.008)
+    ax3.set_ylabel(r'y [mm]')
+    ax3.set_xticks(ticks=plt.xticks()[0], labels=[f"{x*1e3:.{1}f}" for x in plt.xticks()[0]])
+    ax3.set_yticks(ticks=plt.yticks()[0], labels=[f"{y*1e3:.{1}f}" for y in plt.yticks()[0]])
+
+    axins = inset_axes(ax3, height="100%",  width="5%", loc='right', borderpad=-6 )
+    fig1.colorbar(h[3], cax=axins, orientation='vertical', label='Count (log scale)')
+    ax3.grid(linestyle=':')
+
+    
+
+    
+
+
+    """ax3_tw = ax3.twinx()
+    ticks = np.arange(1, max(ax3.get_yticks())/sigma+1, 2.0)
+    ax3_tw.set_yticks(ticks)
+    ax3_tw.set_ylabel(r' n $\sigma$')
+    ax3_tw.set_yticklabels([f"{x /sigma :.{0}f}"  for x in ticks])
+    ax3_tw.axhline(5, color = 'r', linestyle = '--')
+    ax3_tw.text( max(ax3.get_xticks())-1.5e-3, 4, r'TCP $\sigma$')"""
+    
+
+    fig1.suptitle('plot')
+    plt.show()
+
+
+    return fig1, [ax1,ax2,ax3]
 
 
 
