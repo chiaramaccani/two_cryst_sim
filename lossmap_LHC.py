@@ -155,7 +155,7 @@ def main():
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
-    TARGET_loc = end_s - (6653.3 + 0.07/2 +0.005/2)
+    TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
     TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
 
 
@@ -166,7 +166,13 @@ def main():
     line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name='target.4l3.b2')
     line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='target.4l3.b2_aper')
 
-    #line.cycle(name_first_element='ip3', inplace=True)
+
+    TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+    TARGET_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+    dx = 1e-11
+    line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
+    line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
+
 
     bad_aper = find_bad_offset_apertures(line)
     print('Bad apertures : ', bad_aper)
@@ -181,8 +187,6 @@ def main():
     print('\nAperture model check on imported model:')
     df_imported = line.check_aperture()
     assert not np.any(df_imported.has_aperture_problem)
-
-
 
 
     # Initialise collmanager
@@ -236,7 +240,7 @@ def main():
     # Aperture model check
     print('\nAperture model check after introducing collimators:')
     df_with_coll = line.check_aperture()
-    #assert not np.any(df_with_coll.has_aperture_problem)
+    assert not np.any(df_with_coll.has_aperture_problem)
 
 
     # Generate initial pencil distribution on horizontal collimator
