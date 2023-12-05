@@ -179,21 +179,6 @@ def main():
     # invert x and y dimension, angle: 90 
     xdim_TCCS = 0.035                               # xdim = 0.05, 
     ydim_TCCS = 0.002                               # ydim = 0.002,
-
-
-    #------------------------ XSUITE ----------------------------------------------
-    pot_Si_xsuite = 21.34
-    dp_Si_xsuite = 0.96e-7           # 1.92e-10
-
-    xpcrit0_xsuite = np.sqrt((2.0e-9*pot_Si_xsuite)/p0c_ft)    # Critical angle (rad) for straight crystals
-    Rcrit_xsuite   = (p0c_ft/(2.0e-6*pot_Si_xsuite))*dp_Si_xsuite     # Critical curvature radius [m]
-
-    # If R>Rcritical=>no channeling is possible (ratio<1)
-
-    #ratio  = bend_TCCS / Rcrit
-    xpcrit_xsuite = ( xpcrit0_xsuite * (bend_TCCS - Rcrit_xsuite) ) / bend_TCCS      # Critical angle for curved crystal
-    #print(xpcrit_xsuite)                   # theta_c_Si = 1.5e-6, 
-    #------------------------ XSUITE ----------------------------------------------
     
 
     pot_crit_Si = 21.34 #16 #eV
