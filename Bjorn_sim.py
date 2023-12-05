@@ -36,9 +36,11 @@ class SimpleCrystal(xt.BeamElement):
         #define XTRACK_SIMPLECRYSTAL_H
 
         #include <math.h>
+        //#include <stdio.h>
 
         /*gpufun*/
         void SimpleCrystal_track_local_particle(SimpleCrystalData el, LocalParticle* part0){
+            
 
             double length = SimpleCrystalData_get_length(el);
             double xdim = SimpleCrystalData_get_xdim(el);
@@ -59,11 +61,16 @@ class SimpleCrystal(xt.BeamElement):
                 double y = LocalParticle_get_y(part);
                 double py = LocalParticle_get_py(part);
 
-                if ((x <= xdim/2.0) && (x >= -xdim/2.0) && (y >= jaw_L) && (y <= jaw_L + ydim) && (py <= align_angle + theta_c_Si) && (py >= align_angle -theta_c_Si)) {
+                if ( (x <= xdim/2.0) && (x >= -xdim/2.0) && (y >= jaw_L) && (y <= jaw_L + ydim)&& (py <= align_angle + theta_c_Si) && (py >= align_angle -theta_c_Si)) {  
+                    
+                    //printf("%lf", align_angle);
                     double y_in = -1 + 2 * ((float)rand()) / RAND_MAX;
-                    double yp_in = py / theta_c_Si;
+                    //double yp_in = py / theta_c_Si;
+                    double yp_in = (py - align_angle) / theta_c_Si;
+
 
                     if (yp_in * yp_in / (1 - y_in * y_in) < 1) {
+                    
                         double ph_in = atan2(yp_in, y_in);
                         double A = sqrt(y_in * y_in + yp_in * yp_in);
 
@@ -71,14 +78,14 @@ class SimpleCrystal(xt.BeamElement):
                         for (int i = 0; i < len_fit_coeffs; i++) {
                             double A_pow = 1.0;
                             for (int j = 0; j < (len_fit_coeffs - i - 1); j++) {
-                                A_pow *= A;
+                                A_pow *= y_in;
                             }
                             lambda += SimpleCrystalData_get_fit_coeffs(el, i) * A_pow;
                         }
 
-                        double phAdv = 1e6/lambda;
+                        double phAdv = 2*M_PI*1e6/lambda;
 
-                        double y_out = A * sin(ph_in + length * phAdv) * dp_Si;
+                        double y_out = A * sin(ph_in + length * phAdv) * dp_Si/2;
                         double yp_out = A * cos(ph_in + length * phAdv) * theta_c_Si;   
 
                         LocalParticle_set_y(part, y_out + y + length * theta_bend * 0.5);
@@ -102,6 +109,7 @@ class SimpleCrystal(xt.BeamElement):
                        bend = 40, 
                        theta_c_Si = 1.5e-6, 
                        **kwargs):
+        
         wavelength = np.array([[-0.784,0.841],[-0.768,0.746],[-0.749,0.673],[-0.735,0.649],[-0.703,0.63],[-0.68,0.638],
                         [-0.652,0.655],[-0.634,0.676],[-0.606,0.695],[-0.578,0.732],[-0.536,0.78],[-0.495,0.803],
                         [-0.444,0.826],[-0.375,0.851],[-0.324,0.88],[-0.268,0.913],[-0.222,0.947],[-0.19,0.97],
@@ -146,7 +154,7 @@ class SimpleCrystal(xt.BeamElement):
 
 def main():
 
-    n_part = 1000000
+    n_part = 10000000
 
     # EXAMPLE
 
@@ -167,31 +175,45 @@ def main():
     jaw_L_TCCS_5s = 0.0016912979598174786           # jaw_L = 0.0015, 
     length_TCCS = 0.004                             # length = 0.002, 
     bend_TCCS = 80                                  # bend = 40, 
+    bend_angle_TCCS = length_TCCS / bend_TCCS
     # invert x and y dimension, angle: 90 
     xdim_TCCS = 0.035                               # xdim = 0.05, 
     ydim_TCCS = 0.002                               # ydim = 0.002,
 
 
-    pot_Si = 21.34
-    dp_Si = 0.96e-7           # 1.92e-10
+    #------------------------ XSUITE ----------------------------------------------
+    pot_Si_xsuite = 21.34
+    dp_Si_xsuite = 0.96e-7           # 1.92e-10
 
-    xpcrit0 = np.sqrt((2.0e-9*pot_Si)/p0c_ft)    # Critical angle (rad) for straight crystals
-    Rcrit   = (p0c_ft/(2.0e-6*pot_Si))*dp_Si     # Critical curvature radius [m]
+    xpcrit0_xsuite = np.sqrt((2.0e-9*pot_Si_xsuite)/p0c_ft)    # Critical angle (rad) for straight crystals
+    Rcrit_xsuite   = (p0c_ft/(2.0e-6*pot_Si_xsuite))*dp_Si_xsuite     # Critical curvature radius [m]
 
     # If R>Rcritical=>no channeling is possible (ratio<1)
 
     #ratio  = bend_TCCS / Rcrit
-    xpcrit = ( xpcrit0 * (bend_TCCS - Rcrit) ) / bend_TCCS      # Critical angle for curved crystal
+    xpcrit_xsuite = ( xpcrit0_xsuite * (bend_TCCS - Rcrit_xsuite) ) / bend_TCCS      # Critical angle for curved crystal
+    #print(xpcrit_xsuite)                   # theta_c_Si = 1.5e-6, 
+    #------------------------ XSUITE ----------------------------------------------
+    
 
-    print(xpcrit)                   # theta_c_Si = 1.5e-6, 
+    pot_crit_Si = 21.34 #16 #eV
+    en_crit_Si = 5.7e9 / 1e-2 #eV/m
+    dp_Si = 1.92e-10 #m
+
+    xp_crit0 = np.sqrt(2.0*pot_crit_Si/p0c_ft)
+    Rcrit = p0c_ft/en_crit_Si
+    theta_c_Si = xp_crit0*(1-Rcrit/bend_TCCS)
 
 
+
+    #align_angle_TCCS_5s = 0 
     x = np.random.uniform(-0.001, 0.001, n_part)
     px = np.zeros(n_part)
     y = np.random.uniform(0.0 + jaw_L_TCCS_5s, ydim_TCCS + jaw_L_TCCS_5s, n_part)
     py = np.random.normal(align_angle_TCCS_5s, 1e-6, n_part)
-    #y = np.random.uniform(0.0, 0.002, n_part)
-    #py = np.random.normal(0.0, 1e-6, n_part)
+
+    #theta_c_Si = 0.8e-6
+    #print(theta_c_Si)
 
 
 
@@ -201,35 +223,51 @@ def main():
                         py=py, 
                         p0c=p0c_ft)
     
-    crystal = SimpleCrystal(align_angle = align_angle_TCCS_5s, 
+
+    
+    crystal = SimpleCrystal(
+                        align_angle = align_angle_TCCS_5s, 
                         jaw_L = jaw_L_TCCS_5s,
                         length = length_TCCS, 
                         xdim = xdim_TCCS, 
                         ydim = ydim_TCCS,
                         bend = bend_TCCS, 
-                        # theta_c_Si = xpcrit, 
+                        theta_c_Si = theta_c_Si, 
                         )
+                        
+    drift_length = 200
+    drift =  xt.Drift(length=drift_length)
 
-
-    line = xt.Line(elements=[crystal], element_names=["crys"])
+    line = xt.Line(elements=[crystal, drift], element_names=["TCCS", "drift"])
     line.build_tracker(_context=xo.ContextCpu(omp_num_threads=6))
 
     line.track(part, num_turns=1)
 
-    '''plt.figure()
-    plt.hist(y, bins=1000, histtype='step', density=False, range=[-10e-6, 0.0025])
-    plt.hist(part.y, bins=1000, histtype='step', density=False, range=[-10e-6, 0.0025]) #part.py-py
-    plt.show()
-    '''
-    plt.figure()
-    plt.hist(py, bins=1000, histtype='step', density=True, range=[align_angle_TCCS_5s - 1e-5, align_angle_TCCS_5s + 1e-5])
-    plt.hist(part.py, bins=1000, histtype='step', density=True, range=[align_angle_TCCS_5s - 1e-5, align_angle_TCCS_5s + 1e-5]) #part.py-py
-    plt.show()
+    fig1 = plt.figure(figsize=(19, 12)) #figsize=(24, 5)
+    ax1 = fig1.add_subplot(2,2,1)
+    ax1.hist(y, bins=1000, histtype='step', density=True, range=[-4e-3, ydim_TCCS + jaw_L_TCCS_5s + bend_angle_TCCS * drift_length ], label = 'incoming')
+    ax1.hist(part.y, bins=1000, histtype='step', density=True, range=[-4e-3, ydim_TCCS + jaw_L_TCCS_5s  + bend_angle_TCCS * drift_length ], label = 'outgoing')
+    ax1.legend()
+    ax1.set_xlabel('y [m]')
+  
+    ax2 = fig1.add_subplot(2,2,2)
+    ax2.hist(py, bins=1000, histtype='step', density=True,  label = 'incoming')#, range=[align_angle_TCCS_5s - 1e-5, align_angle_TCCS_5s + bend_angle_TCCS + 1e-5])
+    ax2.hist(part.py, bins=1000, histtype='step', density=True, label = 'outgoing')#, #range=[align_angle_TCCS_5s - 1e-5, align_angle_TCCS_5s + bend_angle_TCCS + 1e-5]) #part.py-py
+    ax2.set_xlabel('py [rad]')
+    ax2.legend()
 
-    plt.figure()
-    plt.hist2d(py, part.py, bins=500, range=[[-10e-6, 10e-6], [40e-6, 60e-6]])
-    plt.show()
+    ax3 = fig1.add_subplot(2,2,3)
+    ax3.hist2d(py, part.py, bins=500, range=[[align_angle_TCCS_5s - 1e-5, align_angle_TCCS_5s + 1e-5], [align_angle_TCCS_5s - 1e-5, align_angle_TCCS_5s + bend_angle_TCCS + 1e-5]]) 
+    ax3.set_xlabel('y [m]')
+    ax3.set_xlabel('py [rad]')
 
+    ax4 = fig1.add_subplot(2,2,4)
+    ax4.hist(py, bins=1000, histtype='step', density=True, label = 'incoming')#, range=[align_angle_TCCS_5s - 1e-5, align_angle_TCCS_5s + bend_angle_TCCS + 1e-5])
+    ax4.hist(part.py-py, bins=1000, histtype='step', density=True , label= 'outgoing-incoming')
+    ax4.set_xlabel('py [rad]')
+    ax4.legend()
+
+    plt.savefig("./Outputdata/Bjorn_sim_TCCS.png")
 
 if __name__ == "__main__":
     main()

@@ -183,7 +183,7 @@ def bs():
     xp_out = A*np.cos(ph_in + lcry*phAdv)*theta_c_Si   
 
     x1  = x_out + x0 + lcry*theta_bend*0.5 ### NOTE crosscheck this
-    xp1 = xp_out + theta_bend   \
+    xp1 = xp_out + theta_bend   
 
 
 def main():
