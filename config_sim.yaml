@@ -5,21 +5,22 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200
-  nparticles: 500000 #100000 #1000
+  nparticles: 100000 #100000 #1000
   engine: 'everest'
   seed: 12345
   TTCS_align_angle_step: 0
-  mode: 'angular_scan'   #angular_scan    cry_black_absorbers
+  mode: 'xsuite'   #angular_scan    cry_black_absorbers    xsuite  simple_model
 
 
 jobsubmission:
-  working_directory: '/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/new_sim_6sig/TEST_B2V_align_test_CRY6.0_'
-  num_jobs: 200 #5 100
+  working_directory: '/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/TEST_'
+  num_jobs: 100 #5 100
   run_local: False
   dryrun: False
-  jobflavour: 'testmatch'  #'workday' #'espresso' 
+  jobflavour: 'workday'  #'workday' #'espresso' testmatch
   htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"' }
-  mask: '/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/mask_condor_script.sh'
+  #mask: '/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/mask_condor_script.sh'
+  mask: '/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/mask_condor_script_bjorn.sh'
 
 
 input_files:

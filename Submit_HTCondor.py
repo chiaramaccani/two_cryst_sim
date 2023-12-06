@@ -43,7 +43,7 @@ def main():
     executable = sub_dict.get('executable', 'bash')
     mask_abspath = Path(sub_dict['mask']).resolve()
 
-    workdir = workdir.parent / Path(f'{workdir.name}_{time.strftime("%Y%m%d-%H%M")}')
+    workdir = workdir.parent / Path(f"{workdir.name}_{config_dict['run']['mode']}_{time.strftime('%Y%m%d-%H%M')}")
 
     input_cache = Path(workdir, 'input_cache')
     os.makedirs(workdir)
@@ -78,10 +78,12 @@ def main():
     processed_opts = {'working_directory', 'num_jobs', 'executable', 'mask', 'jobflavour'}
     submitter_opts = list(set(sub_dict.keys()) - processed_opts)
     submitter_options_dict = { op: sub_dict[op] for op in submitter_opts }
+    
 
     htcondor_submit(
         mask=mask_abspath,
         working_directory=workdir,
+        output_destination = 'root://eosuser.cern.ch//eos/user/c/cmaccani/xsuite_sim/twocryst_sim/Condor/' + Path(workdir).name,
         executable=executable,
         replace_dict=replace_dict,
         jobflavour = jobflavour,
