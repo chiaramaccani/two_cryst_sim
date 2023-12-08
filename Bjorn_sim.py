@@ -78,7 +78,7 @@ class SimpleCrystal(xt.BeamElement):
                         for (int i = 0; i < len_fit_coeffs; i++) {
                             double A_pow = 1.0;
                             for (int j = 0; j < (len_fit_coeffs - i - 1); j++) {
-                                A_pow *= y_in;
+                                A_pow *= A;
                             }
                             lambda += SimpleCrystalData_get_fit_coeffs(el, i) * A_pow;
                         }

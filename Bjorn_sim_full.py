@@ -171,7 +171,7 @@ class SimpleCrystal(xt.BeamElement):
                         for (int i = 0; i < len_fit_coeffs; i++) {
                             double A_pow = 1.0;
                             for (int j = 0; j < (len_fit_coeffs - i - 1); j++) {
-                                A_pow *= y_in;
+                                A_pow *= A;
                             }
                             lambda += SimpleCrystalData_get_fit_coeffs(el, i) * A_pow;
                         }
@@ -289,6 +289,9 @@ def main():
 
     # Load from json
     line = xt.Line.from_json(file_dict[f'line_b{beam}'])
+    line.particle_ref = xp.Particles(p0c=1e12, q0=1, mass0=xp.PROTON_MASS_EV)
+    print(line.particle_ref)
+    
 
     end_s = line.get_length()
 
@@ -315,7 +318,7 @@ def main():
 
     elif(mode == 'simple_model'):
 
-        p0c_ft = 6.8e12
+        p0c_ft = 1e12
 
         #CRY1 at 5 sigma
         align_angle_TCCS_5s = -1.1763616021881982e-05   # align_angle = 12e-6, 

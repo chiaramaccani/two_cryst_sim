@@ -14,7 +14,7 @@ run:
 
 jobsubmission:
   working_directory: '/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/TEST_'
-  num_jobs: 100 #5 100
+  num_jobs: 3 #5 100
   run_local: False
   dryrun: False
   jobflavour: 'workday'  #'workday' #'espresso' testmatch
