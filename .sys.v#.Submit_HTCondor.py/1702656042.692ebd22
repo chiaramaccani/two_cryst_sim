@@ -83,7 +83,7 @@ def main():
     htcondor_submit(
         mask=mask_abspath,
         working_directory=workdir,
-        output_destination = 'root://eosuser.cern.ch//eos/user/c/cmaccani/xsuite_sim/two_cryst_sim/Condor/' + Path(workdir).name,
+        output_destination = 'root://eosuser.cern.ch//eos/user/c/cmaccani/xsuite_sim/twocryst_sim/Condor/' + Path(workdir).name,
         executable=executable,
         replace_dict=replace_dict,
         jobflavour = jobflavour,

@@ -160,24 +160,6 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
-   "id": "ebaf8081",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\r\n"
-     ]
-    }
-   ],
-   "source": [
-    "!echo $HOME_TWOCRYST"
-   ]
-  },
-  {
-   "cell_type": "code",
    "execution_count": 3,
    "id": "d703b60d",
    "metadata": {},
@@ -1294,8 +1276,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "file_path_xsuite = Path('/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/TEST__xsuite_20231208-1614/Job.2/Outputdata/')\n",
-    "file_path_simple = Path('/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/TEST__simple_model_20231208-1613/Job.2/Outputdata')\n",
+    "file_path_xsuite = Path('/eos/home-c/cmaccani/xsuite_sim/twocryst_sim/Condor/TEST__xsuite_20231208-1614/Job.2/Outputdata/')\n",
+    "file_path_simple = Path('/eos/home-c/cmaccani/xsuite_sim/twocryst_sim/Condor/TEST__simple_model_20231208-1613/Job.2/Outputdata')\n",
     "#file_path_simple = Path('/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Outputdata/Bjorn_model')\n"
    ]
   },
