@@ -116,7 +116,8 @@ def main():
     run_dict = config_dict['run']
     file_dict = config_dict['input_files']
 
-    coll_file = config_dict['input_files']['collimators']
+    coll_file = os.path.expandvars(file_dict['collimators'])
+    print(coll_file)
     with open(coll_file, 'r') as stream:
         coll_dict = yaml.safe_load(stream)['collimators']['b'+config_dict['run']['beam']]
 
@@ -144,7 +145,7 @@ def main():
 
 
     # Load from json
-    line = xt.Line.from_json(file_dict[f'line_b{beam}'])
+    line = xt.Line.from_json(os.path.expandvars(file_dict[f'line_b{beam}']))
 
     end_s = line.get_length()
 
@@ -190,7 +191,7 @@ def main():
 
 
     # Initialise collmanager
-    coll_manager = xc.CollimatorManager.from_yaml(file_dict['collimators'], line=line, beam=beam, _context=context, ignore_crystals=False)
+    coll_manager = xc.CollimatorManager.from_yaml(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False)
 
     #print(coll_manager.collimator_names)
 

@@ -37,11 +37,12 @@ def main():
     file_dict = config_dict['input_files']
 
     sub_dict = config_dict['jobsubmission']
-    workdir = Path(sub_dict['working_directory']).resolve()
+    workdir = Path(os.path.expandvars(sub_dict['working_directory'])).resolve()
     num_jobs = sub_dict['num_jobs']
     replace_dict_in = sub_dict.get('replace_dict', {})
     executable = sub_dict.get('executable', 'bash')
-    mask_abspath = Path(sub_dict['mask']).resolve()
+    mask_abspath = Path(os.path.expandvars(sub_dict['mask'])).resolve()
+
 
     workdir = workdir.parent / Path(f"{workdir.name}_{config_dict['run']['mode']}_{time.strftime('%Y%m%d-%H%M')}")
 

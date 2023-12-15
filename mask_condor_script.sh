@@ -1,5 +1,6 @@
 #!/bin/bash
-
+export HOME_TWOCRYST=/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim
+echo $HOME_TWOCRYST
 PYTHON_SCRIPT_DIR=/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim
 
 echo /cvmfs/sft.cern.ch/lcg/views/LCG_104a/x86_64-el9-gcc11-opt/setup.sh
@@ -59,5 +60,5 @@ echo $(which python3)
 
 # you can execute now any command you want. here it's a python script, but it could be anything
 
-python3 $PYTHON_SCRIPT_DIR/lossmap_LHC.py  ${CONFIGFILE}  
+python3 $HOME_TWOCRYST/lossmap_LHC.py  ${CONFIGFILE}  
 
