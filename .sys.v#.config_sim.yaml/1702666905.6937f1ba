@@ -19,7 +19,7 @@ jobsubmission:
   jobflavour: 'espresso'  #'workday' #'espresso' testmatch
   htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"' }
   mask: ${HOME_TWOCRYST}/mask_condor_script.sh
-  #mask: $HOME_TWOCRYST/Bjorn_model/mask_condor_script_bjorn.sh
+  #mask: $HOME_TWOCRYST/mask_condor_script_bjorn.sh
 
 
 input_files:

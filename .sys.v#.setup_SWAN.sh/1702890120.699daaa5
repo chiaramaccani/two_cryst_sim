@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export HOME_TWOCRYST=$CERNBOX_HOME/xsuite_sim/two_cryst_sim
+echo "export HOME_TWOCRYST=$(pwd -P)" >> $HOME/.bashrc
+source $HOME/.bashrc
