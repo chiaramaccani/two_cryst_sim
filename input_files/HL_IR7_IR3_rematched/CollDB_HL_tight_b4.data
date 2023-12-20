@@ -7,28 +7,28 @@ NSIG_FAM tcsg3                21.300000 SECONDARY
 NSIG_FAM tcsm3                 0.000000 UNKNOWN
 NSIG_FAM tcla3                23.700000 TERTIARY
 # Betatron cleaning 
-NSIG_FAM tcp7                  8.500000 PRIMARY
-NSIG_FAM tcsg7                10.100000 SECONDARY
+NSIG_FAM tcp7                  6.700000 PRIMARY
+NSIG_FAM tcsg7                 9.100000 SECONDARY
 NSIG_FAM tcsm7                 0.000000 UNKNOWN
-NSIG_FAM tcla7                14.000000 TERTIARY
+NSIG_FAM tcla7                12.700000 TERTIARY
 # Injection protection  
 NSIG_FAM tcli                999.000000 TERTIARY     
 NSIG_FAM tdi                 999.000000 TERTIARY   
 # Dump protection  
-NSIG_FAM tcdq                 11.100000 TERTIARY
-NSIG_FAM tcstcdq              11.100000 SECONDARY
+NSIG_FAM tcdq                 10.100000 TERTIARY
+NSIG_FAM tcstcdq              10.100000 SECONDARY
 # Physics background minimalisation and debris cleaning 
-NSIG_FAM tcth1                13.200000 TERTIARY
+NSIG_FAM tcth1                12.000000 TERTIARY
 NSIG_FAM tcth2                43.800000 TERTIARY
-NSIG_FAM tcth5                13.200000 TERTIARY
+NSIG_FAM tcth5                12.000000 TERTIARY
 NSIG_FAM tcth8                17.700000 TERTIARY
-NSIG_FAM tctv1                13.200000 TERTIARY
+NSIG_FAM tctv1                12.000000 TERTIARY
 NSIG_FAM tctv2                43.800000 TERTIARY
-NSIG_FAM tctv5                13.200000 TERTIARY
+NSIG_FAM tctv5                12.000000 TERTIARY
 NSIG_FAM tctv8                17.700000 TERTIARY
 NSIG_FAM tclp                 16.400000 TERTIARY 
 NSIG_FAM tcxrp                 0.000000 UNKNOWN
-NSIG_FAM tcryo               999.000000 TERTIARY
+NSIG_FAM tcryo               999.00000 TERTIARY
 #
 # Collimators
 # name                                                opening/fam mat.     length[m]    angle[deg]     offset[m]    
@@ -70,15 +70,15 @@ tcsg.a6r7.b2                                                tcsg7 C         1.00
 tcsg.b5r7.b2                                                tcsg7 MoGR      1.000000    143.500145      0.000000   
 tcsg.a5r7.b2                                                tcsg7 C         1.000000     40.700057      0.000000   
 tcsg.d4r7.b2                                                tcsg7 MoGR      1.000000     90.000000      0.000000   
-#tcsg.b4r7.b2                                                tcsg7 C      1.000000      0.000000      0.000000   
+#tcsg.b4r7.b2                                                tcsg7 C         1.000000      0.000000      0.000000   
 tcspm.b4r7.b2                                               tcsg7 MoGR      1.000000      0.000000      0.000000
 tcsg.a4r7.b2                                                tcsg7 MoGR      1.000000    134.599818      0.000000   
 tcsg.a4l7.b2                                                tcsg7 MoGR      1.000000     46.300146      0.000000   
 tcsg.b5l7.b2                                                tcsg7 MoGR      1.000000    141.499949      0.000000   
 tcsg.d5l7.b2                                                tcsg7 MoGR      1.000000     51.400044      0.000000  
-#tcsg.e5l7.b2                                                tcsg7 C      1.000000    130.499732      0.000000 
+#tcsg.e5l7.b2                                                tcsg7 C         1.000000    130.499732      0.000000 
 tcspm.e5l7.b2                                               tcsg7 MoGR      1.000000    130.499732      0.000000
-#tcsg.6l7.b2                                                 tcsg7 C      1.000000      0.500192      0.000000   
+#tcsg.6l7.b2                                                 tcsg7 C         1.000000      0.500192      0.000000   
 tcspm.6l7.b2                                                tcsg7 MoGR      1.000000      0.500192      0.000000
 tcla.a6l7.b2                                                tcla7 Iner      1.000000     90.000000      0.000000   
 tcla.b6l7.b2                                                tcla7 Iner      1.000000      0.000000      0.000000 
@@ -97,4 +97,4 @@ tctpxv.4r1.b2                                               tctv1 Iner      1.00
 SETTINGS
 ONESIDED tcdqa.a4l6.b2                                    1
 ONESIDED tcdqa.c4l6.b2                                    1
-ONESIDED tcdqa.b4l6.b2                                    1
+ONESIDED tcdqa.b4l6.b2                                    1         
