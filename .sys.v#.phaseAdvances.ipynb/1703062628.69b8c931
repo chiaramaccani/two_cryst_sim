@@ -272,7 +272,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 40,
+   "execution_count": 7,
    "metadata": {},
    "outputs": [
     {
@@ -713,17 +713,17 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 49,
+   "execution_count": 26,
    "metadata": {},
    "outputs": [],
    "source": [
     "def calculate_delta_phase_adv(tw):\n",
-    "    return (float(tw[tw.name == TCCS_name]['muy'])% 1* 2*np.pi - float(tw[tw.name == TCP_name]['muy'])% 1* 2*np.pi)"
+    "    return (float(tw[tw.name == TCCS_name]['muy']) - float(tw[tw.name == TCP_name]['muy']))"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 50,
+   "execution_count": 27,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -733,23 +733,23 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 53,
+   "execution_count": 28,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Run3:  173.97026540976458 \t 24.6199773286571 \t 155.38002267134289\n",
-      "HL rematched IR7:  150.78126328722277 \t 21.478417841081004 \t 158.521582158919\n",
-      "HL rematched IR7 and IR3:  130.31930415659858 \t 21.478417841081004 \t 158.521582158919\n"
+      "Run3:  29.483250737249346 \t 24.6199773286571\n",
+      "HL rematched IR7:  29.418836842464508 \t 21.478417841081004\n",
+      "HL rematched IR7 and IR3:  29.361998067101663 \t 21.478417841081004\n"
      ]
     }
    ],
    "source": [
-    "print('Run3: ', calculate_delta_phase_adv(tw_RUN3)*180/np.pi, '\\t', calculate_optimal_phase_adv(5, 5.5), '\\t',  180- calculate_optimal_phase_adv(5, 5.5))\n",
-    "print('HL rematched IR7: ', calculate_delta_phase_adv(tw_HL_IR7)*180/np.pi, '\\t', calculate_optimal_phase_adv(6.7, 7.2),  '\\t', 180- calculate_optimal_phase_adv(6.7, 7.2))\n",
-    "print('HL rematched IR7 and IR3: ', calculate_delta_phase_adv(tw_HL_IR7_IR3)*180/np.pi, '\\t', calculate_optimal_phase_adv(6.7, 7.2),  '\\t', 180- calculate_optimal_phase_adv(6.7, 7.2))"
+    "print('Run3: ', calculate_delta_phase_adv(tw_RUN3), '\\t', calculate_optimal_phase_adv(5, 5.5))\n",
+    "print('HL rematched IR7: ', calculate_delta_phase_adv(tw_HL_IR7), '\\t', calculate_optimal_phase_adv(6.7, 7.2))\n",
+    "print('HL rematched IR7 and IR3: ', calculate_delta_phase_adv(tw_HL_IR7_IR3), '\\t', calculate_optimal_phase_adv(6.7, 7.2))"
    ]
   },
   {
@@ -806,22 +806,22 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 41,
+   "execution_count": 31,
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "4.676135957010215"
+       "2.3380679785051073"
       ]
      },
-     "execution_count": 41,
+     "execution_count": 31,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
-    "(float(tw_RUN3[tw_RUN3.name == TCCS_name]['muy']) % 1) * 2*np.pi"
+    "(float(tw_RUN3[tw_RUN3.name == TCCS_name]['muy']) % 1) * np.pi"
    ]
   },
   {

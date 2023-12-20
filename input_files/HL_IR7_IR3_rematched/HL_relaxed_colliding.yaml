@@ -31,8 +31,8 @@ families:
   - &TCSG3   { <<: *ALL,  gap: 18.0,    stage: secondary,  material: C,     length: 1      }
   - &TCLA3   { <<: *ALL,  gap: 20.0,    stage: tertiary,   material: Iner,  length: 1      }
   # Betatron cleaning
-  - &TCP7    { <<: *ALL,  gap: 5.0,     stage: primary,    material: C,     length: 0.6    }
-  - &TCSG7   { <<: *ALL,  gap: 6.5,   stage: secondary,  material: C,     length: 1      }
+  - &TCP7    { <<: *ALL,  gap: 5.0,     stage: primary,      length: 0.6    } # da correggere, materiale vario C or MoGR
+  - &TCSG7   { <<: *ALL,  gap: 6.5,   stage: secondary, length: 1      } # da correggere, materiale vario C or MoGR
   - &TCLA7   { <<: *ALL,  gap: 10.0,    stage: tertiary,   material: Iner,  length: 1      }
   - &CRY7    { <<: *ALL,  gap: null,  stage: special,    material: Si,    length: 0.004, side: left,  crystal: strip, active: false }
   # Injection protection
@@ -56,6 +56,11 @@ families:
   - &TCCS3    { <<: *ALL,  gap: null,  stage: special,    material: Si,   side: left, angle: 90, crystal: strip, active: true }  #crystal: strip,
   - &TCCP3    { <<: *ALL,  gap: null,  stage: special,    material: Si,   side: left, angle: 90, crystal: strip,  active: true }  #crystal: strip,
   - &TARGET3  { <<: *ALL,  gap: null,  stage: special,    material: Iner, side: left, angle: 90, active: true }
+  
+  #HL COLLIMATORS
+    - &TCLP    { <<: *ALL, gap: ,  stage: tertiary, length: 1,   angle: 0}
+    - &TCRYO    { <<: *ALL, gap: , material: Iner, stage: tertiary, length: 0.6, angle: 0}
+    - &TCSTCDQ    { <<: *ALL, gap: , material: C, stage: secondary, length: 1, angle: 0}
 
 emittance:
   x: 2.5e-6
