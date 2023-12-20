@@ -2048,7 +2048,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 104,
+   "execution_count": 85,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -2268,7 +2268,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 105,
+   "execution_count": 97,
    "metadata": {
     "scrolled": false
    },
@@ -2375,7 +2375,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 106,
+   "execution_count": 98,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -2390,7 +2390,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 107,
+   "execution_count": 99,
    "metadata": {},
    "outputs": [
     {
@@ -2476,20 +2476,6 @@
     "        print('Aperture after: ',aper_after, line[idx_aper_after])\n",
     "        print('\\n------------------------- \\n')"
    ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": []
   },
   {
    "cell_type": "code",
