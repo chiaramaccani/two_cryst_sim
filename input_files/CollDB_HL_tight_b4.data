@@ -29,6 +29,10 @@ NSIG_FAM tctv8                17.700000 TERTIARY
 NSIG_FAM tclp                 16.400000 TERTIARY 
 NSIG_FAM tcxrp                 0.000000 UNKNOWN
 NSIG_FAM tcryo               999.00000 TERTIARY
+# Twocryst setup in IR3
+NSIG_FAM tccs3                 7.200000 SPECIAL
+NSIG_FAM tccp3                15.00000  SPECIAL
+NSIG_FAM target3              15.00000  SPECIAL
 #
 # Collimators
 # name                                                opening/fam mat.     length[m]    angle[deg]     offset[m]    
@@ -92,9 +96,18 @@ tctph.6r1.b2                                                tcth1 Iner      1.00
 tctpv.6r1.b2                                                tctv1 Iner      1.000000     90.000000      0.000000 
 tctpxh.4r1.b2                                               tcth1 Iner      1.000000      0.000000      0.000000   
 tctpxv.4r1.b2                                               tctv1 Iner      1.000000     90.000000      0.000000  
+tccs.5r3.b2                                                 tccs3 Si        0.004000     90.000000      0.000000
+tccp.4l3.b2                                                 tccp3 Si        0.070000     90.000000      0.000000
+target.4l3.b2                                               target3 Iner    0.005000     90.000000      0.000000
 #
 # Additional Collimator Settings
 SETTINGS
 ONESIDED tcdqa.a4l6.b2                                    1
 ONESIDED tcdqa.c4l6.b2                                    1
-ONESIDED tcdqa.b4l6.b2                                    1         
+ONESIDED tcdqa.b4l6.b2                                    1     
+ONESIDED tccs.5r3.b2                                      1  
+ONESIDED tccp.4l3.b2                                      1  
+ONESIDED target.4l3.b2                                    1     
+#CRYSTAL tccs.5r3.b2 80.00 2.0e-3 35.0e-3 0.0 0.0 0.0 1
+#CRYSTAL tccp.4l3.b2 10.00 2.0e-3 4.0e-3 0.0 0.0 0.0 1
+#TARGET target.4l3.b2 2.0e-3 4.0e-3

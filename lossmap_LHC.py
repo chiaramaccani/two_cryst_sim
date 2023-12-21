@@ -4,11 +4,88 @@ from pathlib import Path
 import sys
 import os
 import yaml
+import pandas as pd
 
 import xobjects as xo
 import xtrack as xt
 import xpart as xp
 import xcoll as xc
+import scipy
+import io 
+
+
+
+
+# ---------------------------- LOADING FUNCTIONS ----------------------------
+
+
+def load_colldb_new(filename):
+    with open(filename, "r") as infile:
+        coll_data_string = ""
+        family_settings = {}
+        family_types = {}
+        onesided = {}
+        tilted = {}
+        bend = {}
+        xdim = {}
+        ydim = {}
+
+        for l_no, line in enumerate(infile):
+            if line.startswith("#"):
+                continue  # Comment
+            if len(line.strip()) == 0:
+                continue  # Empty line
+            sline = line.split()
+            if len(sline) < 6 or sline[0].lower() == "crystal" or sline[0].lower() == "target":
+                if sline[0].lower() == "nsig_fam":
+                    family_settings[sline[1]] = sline[2]
+                    family_types[sline[1]] = sline[3]
+                elif sline[0].lower() == "onesided":
+                    onesided[sline[1]] = int(sline[2])
+                elif sline[0].lower() == "tilted":
+                    tilted[sline[1]] = [float(sline[2]), float(sline[3])]
+                elif sline[0].lower() == "crystal":
+                    bend[sline[1]] = float(sline[2])
+                    xdim[sline[1]] = float(sline[3])
+                    ydim[sline[1]] = float(sline[4])
+                elif sline[0].lower() == "target":
+                    xdim[sline[1]] = float(sline[2])
+                    ydim[sline[1]] = float(sline[3])
+                elif sline[0].lower() == "settings":
+                    pass  # Acknowledge and ignore this line
+                else:
+                    raise ValueError(f"Unknown setting {line}")
+            else:
+                coll_data_string += line
+
+    names = ["name", "opening", "material", "length", "angle", "offset"]
+
+    df = pd.read_csv(io.StringIO(coll_data_string), delim_whitespace=True,
+                     index_col=False, skip_blank_lines=True, names=names)
+
+    df["angle"] = df["angle"] 
+    df["name"] = df["name"].str.lower() # Make the names lowercase for easy processing
+    df["nsigma"] = df["opening"].apply(lambda s: float(family_settings.get(s, s)))
+    df["type"] = df["opening"].apply(lambda s: family_types.get(s, "UNKNOWN"))
+    df["side"] = df["name"].apply(lambda s: onesided.get(s, 0))
+    df["bend"] = df["name"].apply(lambda s: bend.get(s, 0))
+    df["xdim"] = df["name"].apply(lambda s: xdim.get(s, 0))
+    df["ydim"] = df["name"].apply(lambda s: ydim.get(s, 0))
+    df["tilt_left"] = df["name"].apply(lambda s: np.deg2rad(tilted.get(s, [0, 0])[0]))
+    df["tilt_right"] = df["name"].apply(lambda s: np.deg2rad(tilted.get(s, [0, 0])[1]))
+    df = df.set_index("name").T
+
+    # Ensure the collimators marked as one-sided or tilted are actually defined
+    defined_set = set(df.columns) # The data fram was transposed so columns are names
+    onesided_set = set(onesided.keys())
+    tilted_set = set(tilted.keys())
+    if not onesided_set.issubset(defined_set):
+        different = onesided_set - defined_set
+        raise SystemExit('One-sided collimators not defined: {}'.format(", ".join(different)))
+    if not tilted_set.issubset(defined_set):
+        different = tilted_set - defined_set
+        raise SystemExit('Tilted collimators not defined: {}'.format(",".join(different)))
+    return df.T
 
 
 def find_axis_intercepts(x_coords, y_coords):
@@ -102,10 +179,11 @@ def find_bad_offset_apertures(line):
 
 
 
+# ---------------------------- MAIN ----------------------------
+
+
 def main():
 
-
-    
     config_file = sys.argv[1]
     
     with open(config_file, 'r') as stream:
@@ -118,8 +196,12 @@ def main():
 
     coll_file = os.path.expandvars(file_dict['collimators'])
     print(coll_file)
-    with open(coll_file, 'r') as stream:
-        coll_dict = yaml.safe_load(stream)['collimators']['b'+config_dict['run']['beam']]
+
+    if coll_file.endswith('.yaml'):
+        with open(coll_file, 'r') as stream:
+            coll_dict = yaml.safe_load(stream)['collimators']['b'+config_dict['run']['beam']]
+    if coll_file.endswith('.data'):
+        coll_dict = load_colldb_new(coll_file)
 
 
     context = xo.ContextCpu(omp_num_threads='auto')
@@ -156,7 +238,7 @@ def main():
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
-    TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
+    #TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
     TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
 
 
@@ -164,15 +246,15 @@ def main():
     line.insert_element(at_s=TCCS_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='tccs.5r3.b2_aper')
     line.insert_element(at_s=TCCP_loc, element=xt.Marker(), name='tccp.4l3.b2')
     line.insert_element(at_s=TCCP_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='tccp.4l3.b2_aper')
-    line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name='target.4l3.b2')
-    line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='target.4l3.b2_aper')
+    #line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name='target.4l3.b2')
+    #line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='target.4l3.b2_aper')
 
 
     TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
     TARGET_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
     dx = 1e-11
-    line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
-    line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
+    #line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
+    #line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
 
 
     bad_aper = find_bad_offset_apertures(line)
@@ -182,8 +264,6 @@ def main():
         line.element_dict[name] = xt.Marker()
         print(name, line.get_s_position(name), line.element_dict[name])
 
-
-
     # Aperture model check
     print('\nAperture model check on imported model:')
     df_imported = line.check_aperture()
@@ -191,9 +271,19 @@ def main():
 
 
     # Initialise collmanager
-    coll_manager = xc.CollimatorManager.from_yaml(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False)
-
-    #print(coll_manager.collimator_names)
+    if coll_file.endswith('.yaml'):
+        coll_manager = xc.CollimatorManager.from_yaml(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False)
+    elif coll_file.endswith('.data'):
+        coll_manager = xc.CollimatorManager.from_SixTrack(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False, nemitt_x = 2.5e-6,  nemitt_y = 2.5e-6)
+        # switch on cavities
+        speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c
+        harmonic_number = 35640
+        voltage = 12e6/len(line.get_elements_of_type(xt.Cavity)[1])
+        frequency = harmonic_number * speed /line.get_length()
+        for side in ['l', 'r']:
+            for cell in ['a','b','c','d']:
+                line[f'acsca.{cell}5{side}4.b2'].voltage = voltage
+                line[f'acsca.{cell}5{side}4.b2'].frequency = frequency
 
     # Install collimators into line
     if engine == 'everest':
