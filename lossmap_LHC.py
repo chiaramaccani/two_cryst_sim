@@ -5,6 +5,7 @@ import sys
 import os
 import yaml
 import pandas as pd
+import pickle
 
 import xobjects as xo
 import xtrack as xt
@@ -189,25 +190,9 @@ def main():
     with open(config_file, 'r') as stream:
         config_dict = yaml.safe_load(stream)
 
-
-
+    # Configure run parameters
     run_dict = config_dict['run']
-    file_dict = config_dict['input_files']
 
-    coll_file = os.path.expandvars(file_dict['collimators'])
-    print(coll_file)
-
-    if coll_file.endswith('.yaml'):
-        with open(coll_file, 'r') as stream:
-            coll_dict = yaml.safe_load(stream)['collimators']['b'+config_dict['run']['beam']]
-    if coll_file.endswith('.data'):
-        coll_dict = load_colldb_new(coll_file)
-
-
-    context = xo.ContextCpu(omp_num_threads='auto')
-
-    # On a modern CPU, we get ~5000 particle*turns/s
-    # So this script should take around half an hour
     beam          = run_dict['beam']
     plane         = run_dict['plane']
 
@@ -218,8 +203,27 @@ def main():
     TTCS_align_angle_step = run_dict['TTCS_align_angle_step']
 
     mode = run_dict['mode']
+    print('\nMode: ', mode, '\n')
 
 
+    # Setup input files
+    file_dict = config_dict['input_files']
+
+    coll_file = os.path.expandvars(file_dict['collimators'])
+    line_file = os.path.expandvars(file_dict[f'line_b{beam}'])
+    
+    print('Input files:\n', line_file, '\n', coll_file, '\n')
+
+    if coll_file.endswith('.yaml'):
+        with open(coll_file, 'r') as stream:
+            coll_dict = yaml.safe_load(stream)['collimators']['b'+config_dict['run']['beam']]
+    if coll_file.endswith('.data'):
+        coll_dict = load_colldb_new(coll_file).to_dict('index')
+
+    context = xo.ContextCpu(omp_num_threads='auto')
+
+
+    # Define output path
     path_out = Path.cwd() / 'Outputdata'
 
     if not path_out.exists():
@@ -227,7 +231,7 @@ def main():
 
 
     # Load from json
-    line = xt.Line.from_json(os.path.expandvars(file_dict[f'line_b{beam}']))
+    line = xt.Line.from_json(line_file)
 
     end_s = line.get_length()
 
@@ -238,7 +242,7 @@ def main():
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
-    #TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
+    TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
     TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
 
 
@@ -246,15 +250,15 @@ def main():
     line.insert_element(at_s=TCCS_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='tccs.5r3.b2_aper')
     line.insert_element(at_s=TCCP_loc, element=xt.Marker(), name='tccp.4l3.b2')
     line.insert_element(at_s=TCCP_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='tccp.4l3.b2_aper')
-    #line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name='target.4l3.b2')
-    #line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='target.4l3.b2_aper')
+    line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name='target.4l3.b2')
+    line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='target.4l3.b2_aper')
 
 
     TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
     TARGET_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
     dx = 1e-11
-    #line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
-    #line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
+    line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
+    line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
 
 
     bad_aper = find_bad_offset_apertures(line)
@@ -274,7 +278,7 @@ def main():
     if coll_file.endswith('.yaml'):
         coll_manager = xc.CollimatorManager.from_yaml(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False)
     elif coll_file.endswith('.data'):
-        coll_manager = xc.CollimatorManager.from_SixTrack(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False, nemitt_x = 2.5e-6,  nemitt_y = 2.5e-6)
+        coll_manager = xc.CollimatorManager.from_SixTrack(coll_file, line=line, _context=context, ignore_crystals=False, nemitt_x = 2.5e-6,  nemitt_y = 2.5e-6)
         # switch on cavities
         speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c
         harmonic_number = 35640
@@ -291,7 +295,7 @@ def main():
 
         if mode == 'cry_black_absorbers':
             black_absorbers = ['target.4l3.b2', 'tccs.5r3.b2']
-        elif mode == 'angular_scan': 
+        elif mode == 'angular_scan' or mode == 'target_absorber': 
             black_absorbers = ['target.4l3.b2',]
         else: 
             black_absorbers = []
@@ -319,11 +323,11 @@ def main():
 
 
     if mode == 'angular_scan':
-        print("\nTTCS aligned to beam: ", line[TTCS_name].align_angle)
+        print("\nTCCS aligned to beam: ", line[TCCS_name].align_angle)
         #line[TTCS_name].align_angle = TTCS_align_angle_step
 
-        line[TTCS_name].align_angle = line[TTCS_name].align_angle + TTCS_align_angle_step
-        print("TTCS align angle incremented by step: ", line[TTCS_name].align_angle)
+        line[TCCS_name].align_angle = line[TCCS_name].align_angle + TTCS_align_angle_step
+        print("TCCS align angle incremented by step: ", line[TCCS_name].align_angle)
 
 
     # Aperture model check
@@ -360,10 +364,34 @@ def main():
     summary = coll_manager.summary(part) #, file=Path(path_out,f'coll_summary_B{beam}{plane}.out')
     print(summary)
 
-    if mode == 'cry_black_absorbers':
+    if mode == 'cry_black_absorbers' or mode == 'target_absorber':
         df_part = part.to_pandas()
-        df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='df', mode='w') 
+        drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0', 'beta0', 'mass0']
+        float_variables = ['s', 'zeta', 'x', 'px', 'y', 'py', 'delta', 'gamma0', 'p0c']
+        int_variables = ['at_turn', 'particle_id', 'at_element', 'start_tracking_at_element', 'state', 'parent_particle_id']
+        df_part.drop(drop_list, axis=1, inplace=True)
+        df_part[float_variables] = df_part[float_variables].astype('float32')
+        df_part[int_variables] = df_part[int_variables].astype('int32')
+        df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='particles', format='table', mode='a',
+                  complevel=9, complib='blosc')
 
+
+    if mode == 'monitors':
+        TCCS_monitor_dict = TCCS_monitor.to_dict()
+        TARGET_monitor_dict = TARGET_monitor.to_dict()
+        with open(Path(path_out,f'test_TCCS_monitor_B{beam}{plane}_{mode}.pkl'), 'wb') as f:
+            pickle.dump(TCCS_monitor_dict, f)
+        with open(Path(path_out,f'test_TARGET_monitor_B{beam}{plane}_{mode}.pkl'), 'wb') as f:
+            pickle.dump(TARGET_monitor_dict, f)
+        #df_part = part.to_pandas()
+        #drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0', 'beta0', 'mass0']
+        #float_variables = ['s', 'zeta', 'x', 'px', 'y', 'py', 'delta', 'gamma0', 'p0c']
+        #int_variables = ['at_turn', 'particle_id', 'at_element', 'start_tracking_at_element', 'state', 'parent_particle_id']
+        #df_part.drop(drop_list, axis=1, inplace=True)
+        #df_part[float_variables] = df_part[float_variables].astype('float32')
+        #df_part[int_variables] = df_part[int_variables].astype('int32')
+        #df_part.to_hdf(Path(path_out,f'test_particles_B{beam}{plane}.h5'), key='particles', format='table', mode='a',
+        #         complevel=9, complib='blosc')
 
 if __name__ == "__main__":
     main()
