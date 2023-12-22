@@ -3034,24 +3034,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
+   "execution_count": null,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Compiling ContextCpu kernels...\n",
-      "Done compiling ContextCpu kernels.\n",
-      "Compiling ContextCpu kernels...\n",
-      "Done compiling ContextCpu kernels.\n",
-      "\n",
-      "Aperture model check after introducing collimators:\n",
-      "Done checking aperture.           \n",
-      "0 thin elements miss associated aperture (upstream):\n",
-      "[]\n",
-      "0 thick elements miss associated aperture (upstream or downstream):\n",
-      "[]\n",
       "Compiling ContextCpu kernels...\n",
       "Done compiling ContextCpu kernels.\n"
      ]
@@ -3079,41 +3068,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Compiling ContextCpu kernels...\n",
-      "Done compiling ContextCpu kernels.\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/cvmfs/sft.cern.ch/lcg/views/LCG_104a_swan/x86_64-centos7-gcc11-opt/lib/python3.9/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in minimum\n",
-      "  result = getattr(ufunc, method)(*inputs, **kwargs)\n",
-      "/cvmfs/sft.cern.ch/lcg/views/LCG_104a_swan/x86_64-centos7-gcc11-opt/lib/python3.9/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in minimum\n",
-      "  result = getattr(ufunc, method)(*inputs, **kwargs)\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\n",
-      "Aperture model check after introducing collimators:\n",
-      "Done checking aperture.           \n",
-      "0 thin elements miss associated aperture (upstream):\n",
-      "[]\n",
-      "0 thick elements miss associated aperture (upstream or downstream):\n",
-      "[]\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "# line.twiss(method='4d')\n",
     "\n",
@@ -3129,31 +3086,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Collimator tcp.d6r7.b2 is diverging.\n",
-      "Compiling ContextCpu kernels...\n",
-      "Done compiling ContextCpu kernels.\n",
-      "Done tracking in 0.2s.\n",
-      "Empty DataFrame\n",
-      "Columns: [collname, nabs, length, s, type]\n",
-      "Index: []\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/eos/home-i04/c/cmaccani/pythondev/xcoll/xcoll/manager.py:760: FutureWarning: elementwise comparison failed; returning scalar instead, but in the future will perform elementwise comparison\n",
-      "  nabs         = [coll_weights[coll_losses==nn].sum() for nn in self.collimator_names]\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "plane = \"V\"\n",
     "beam = 2\n",

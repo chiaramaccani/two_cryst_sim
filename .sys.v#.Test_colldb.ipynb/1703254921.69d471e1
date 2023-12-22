@@ -3129,7 +3129,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
+   "execution_count": null,
    "metadata": {},
    "outputs": [
     {
@@ -3138,19 +3138,7 @@
      "text": [
       "Collimator tcp.d6r7.b2 is diverging.\n",
       "Compiling ContextCpu kernels...\n",
-      "Done compiling ContextCpu kernels.\n",
-      "Done tracking in 0.2s.\n",
-      "Empty DataFrame\n",
-      "Columns: [collname, nabs, length, s, type]\n",
-      "Index: []\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/eos/home-i04/c/cmaccani/pythondev/xcoll/xcoll/manager.py:760: FutureWarning: elementwise comparison failed; returning scalar instead, but in the future will perform elementwise comparison\n",
-      "  nabs         = [coll_weights[coll_losses==nn].sum() for nn in self.collimator_names]\n"
+      "Done compiling ContextCpu kernels.\n"
      ]
     }
    ],

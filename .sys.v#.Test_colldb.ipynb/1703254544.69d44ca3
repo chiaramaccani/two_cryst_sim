@@ -9,8 +9,6 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Warning: Packages pyspark or cern.nxcals are not installed. Data retrieval from NXCALS is not possible.\n",
-      " If you are on SWAN and did not expect this warning, then restart and load the 'NXCals Pro' software stack.\n",
       "No pytransport functionality\n",
       "No pytransport functionality\n"
      ]
@@ -3094,9 +3092,9 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "/cvmfs/sft.cern.ch/lcg/views/LCG_104a_swan/x86_64-centos7-gcc11-opt/lib/python3.9/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in minimum\n",
+      "/cvmfs/sft.cern.ch/lcg/views/LCG_104a/x86_64-el9-gcc11-opt/lib/python3.9/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in minimum\n",
       "  result = getattr(ufunc, method)(*inputs, **kwargs)\n",
-      "/cvmfs/sft.cern.ch/lcg/views/LCG_104a_swan/x86_64-centos7-gcc11-opt/lib/python3.9/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in minimum\n",
+      "/cvmfs/sft.cern.ch/lcg/views/LCG_104a/x86_64-el9-gcc11-opt/lib/python3.9/site-packages/pandas/core/arraylike.py:402: RuntimeWarning: invalid value encountered in minimum\n",
       "  result = getattr(ufunc, method)(*inputs, **kwargs)\n"
      ]
     },
@@ -3129,7 +3127,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
+   "execution_count": 21,
    "metadata": {},
    "outputs": [
     {
@@ -3137,20 +3135,10 @@
      "output_type": "stream",
      "text": [
       "Collimator tcp.d6r7.b2 is diverging.\n",
-      "Compiling ContextCpu kernels...\n",
-      "Done compiling ContextCpu kernels.\n",
-      "Done tracking in 0.2s.\n",
+      "Done tracking in 0.0s.\n",
       "Empty DataFrame\n",
       "Columns: [collname, nabs, length, s, type]\n",
       "Index: []\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/eos/home-i04/c/cmaccani/pythondev/xcoll/xcoll/manager.py:760: FutureWarning: elementwise comparison failed; returning scalar instead, but in the future will perform elementwise comparison\n",
-      "  nabs         = [coll_weights[coll_losses==nn].sum() for nn in self.collimator_names]\n"
      ]
     }
    ],
@@ -3259,9 +3247,9 @@
    "lastKernelId": null
   },
   "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
+   "display_name": "LCG view 104 + venv",
+   "language": "python-custom",
+   "name": "lcg-view"
   },
   "language_info": {
    "codemirror_mode": {
