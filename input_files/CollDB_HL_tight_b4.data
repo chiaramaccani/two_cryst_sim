@@ -108,6 +108,6 @@ ONESIDED tcdqa.b4l6.b2                                    1
 ONESIDED tccs.5r3.b2                                      1  
 ONESIDED tccp.4l3.b2                                      1  
 ONESIDED target.4l3.b2                                    1     
-#CRYSTAL tccs.5r3.b2 80.00 2.0e-3 35.0e-3 0.0 0.0 0.0 1
-#CRYSTAL tccp.4l3.b2 10.00 2.0e-3 4.0e-3 0.0 0.0 0.0 1
-#TARGET target.4l3.b2 2.0e-3 4.0e-3
+CRYSTAL tccs.5r3.b2 80.00 2.0e-3 35.0e-3 0.0 0.0 0.0 1
+CRYSTAL tccp.4l3.b2 10.00 2.0e-3 4.0e-3 0.0 0.0 0.0 1
+TARGET target.4l3.b2 2.0e-3 4.0e-3
