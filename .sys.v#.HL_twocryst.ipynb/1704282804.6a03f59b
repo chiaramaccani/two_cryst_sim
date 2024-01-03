@@ -2,10 +2,21 @@
  "cells": [
   {
    "cell_type": "code",
-   "execution_count": 210,
+   "execution_count": 3,
    "id": "33b12567",
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Warning: Packages pyspark or cern.nxcals are not installed. Data retrieval from NXCALS is not possible.\n",
+      " If you are on SWAN and did not expect this warning, then restart and load the 'NXCals Pro' software stack.\n",
+      "No pytransport functionality\n",
+      "No pytransport functionality\n"
+     ]
+    }
+   ],
    "source": [
     "import json\n",
     "import os\n",
@@ -39,13 +50,14 @@
     "\n",
     "import pickle \n",
     "import h5py\n",
-    "import io"
+    "import io\n",
+    "import scipy"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 223,
-   "id": "4b56472d",
+   "execution_count": 4,
+   "id": "ef58df89",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -54,12 +66,13 @@
     "    def __init__(self, run, # 'HL' or 'Run3'\n",
     "                 line_file_name, # = 'config_sim.yaml',\n",
     "                 coll_file_name, # = 'config_sim.yaml'\n",
-    "                 TCCS_name = 'tccs.5r3.b2'\n",
-    "                 TCCP_name = 'tccp.4l3.b2'\n",
+    "                 TCCS_name = 'tccs.5r3.b2',\n",
+    "                 TCCP_name = 'tccp.4l3.b2',\n",
     "                 TARGET_name = 'target.4l3.b2',\n",
     "                 TCCS_loc_b1 =  6773.7,\n",
     "                 TCCP_loc_b1 = 6653.3,\n",
     "                 beam = 2, plane = 'V', engine = 'everest', sigma_TCCS = None, sigma_TCCP = None,\n",
+    "                 job_num_part = 100000, job_num_turns = 200, \n",
     "              ):\n",
     "\n",
     "        self.run = run\n",
@@ -68,17 +81,26 @@
     "        \n",
     "        self.TCCS_name = TCCS_name\n",
     "        self.TCCP_name = TCCP_name\n",
-    "        self.TARGET_name = TARGET_name,\n",
-    "        self.TCCS_loc_b1 =  6773.7,\n",
-    "        self.TCCP_loc_b1 = 6653.3,\n",
-    "        self.TCCS_loc = None,\n",
-    "        self.TCCP_loc = None,\n",
+    "        self.TARGET_name = TARGET_name\n",
+    "        self.TCLA_name = 'tcla.a5l3.b2'\n",
+    "        self.TCCS_loc_b1 =  6773.7\n",
+    "        self.TCCP_loc_b1 = 6653.3\n",
+    "        self.TCCS_loc = None\n",
+    "        self.TCCP_loc = None\n",
+    "        self.TARGET_loc = None\n",
+    "        self.TCLA_loc = None\n",
     "        \n",
     "        self.beam = beam\n",
+    "        self.plane = plane\n",
+    "        self.job_num_part = job_num_part\n",
+    "        self.job_num_turns = job_num_turns\n",
+    "        self.engine = engine\n",
     "        self.plane = plane\n",
     "        self.sigma_TCCS = sigma_TCCS\n",
     "        self.sigma_TCCP = sigma_TCCP\n",
     "        self.coll_dict = None\n",
+    "        self.end_s = None\n",
+    "        self.line = None\n",
     "        \n",
     "    def load_colldb_new(self, filename):\n",
     "        with open(filename, \"r\") as infile:\n",
@@ -219,7 +241,7 @@
     "                y_min = ap_dict['min_y']\n",
     "                y_max = ap_dict['max_y']\n",
     "            elif cname == 'LimitPolygon':\n",
-    "                x_intercepts, y_intercepts = find_axis_intercepts(ap_dict['x_vertices'],\n",
+    "                x_intercepts, y_intercepts = self.find_axis_intercepts(ap_dict['x_vertices'],\n",
     "                                                                ap_dict['y_vertices'])\n",
     "                x_min = min(x_intercepts)\n",
     "                x_max = max(x_intercepts)\n",
@@ -258,15 +280,94 @@
     "        context = xo.ContextCpu(omp_num_threads='auto')\n",
     "        self.coll_dict = coll_dict\n",
     "        \n",
-    "        line = xt.Line.from_json(line_file)\n",
+    "        # Load Line in Xtrack\n",
+    "        line = xt.Line.from_json(self.line_file)\n",
     "        self.end_s = line.get_length()\n",
+    "        \n",
+    "        self.TCCS_loc = self.end_s - self.TCCS_loc_b1 #6775\n",
+    "        self.TCCP_loc = self.end_s - self.TCCP_loc_b1 #6655\n",
+    "        self.TARGET_loc = self.end_s - (self.TCCP_loc_b1 + coll_dict[self.TCCP_name][\"length\"]/2 + coll_dict[self.TARGET_name][\"length\"]/2)\n",
+    "        self.TCLA_loc = line.get_s_position()[line.element_names.index(self.TCLA_name)]\n",
+    "\n",
+    "        line.insert_element(at_s=self.TCCS_loc, element=xt.Marker(), name=self.TCCS_name)\n",
+    "        line.insert_element(at_s=self.TCCS_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name=self.TCCS_name+'_aper')\n",
+    "        line.insert_element(at_s=self.TARGET_loc, element=xt.Marker(), name=self.TARGET_name)\n",
+    "        line.insert_element(at_s=self.TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name=self.TARGET_name+'_aper')\n",
+    "        line.insert_element(at_s=self.TCCP_loc, element=xt.Marker(), name=self.TCCP_name)\n",
+    "        line.insert_element(at_s=self.TCCP_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name=self.TCCP_name+'_aper')\n",
+    "\n",
+    "        TCCS_monitor = xt.ParticlesMonitor(num_particles=self.job_num_part, start_at_turn=0, stop_at_turn=self.job_num_turns)\n",
+    "        TARGET_monitor = xt.ParticlesMonitor(num_particles=self.job_num_part, start_at_turn=0, stop_at_turn=self.job_num_turns)\n",
+    "        dx = 1e-11\n",
+    "        line.insert_element(at_s = self.TCCS_loc - coll_dict[self.TCCS_name][\"length\"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')\n",
+    "        line.insert_element(at_s = self.TARGET_loc - coll_dict[self.TARGET_name][\"length\"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')\n",
+    "\n",
+    "\n",
+    "        bad_aper = self.find_bad_offset_apertures(line)\n",
+    "        print('Bad apertures : ', bad_aper)\n",
+    "        print('Replace bad apertures with Marker')\n",
+    "        for name in bad_aper.keys():\n",
+    "            line.element_dict[name] = xt.Marker()\n",
+    "            print(name, line.get_s_position(name), line.element_dict[name])\n",
+    "\n",
+    "        \"\"\"# Aperture model check\n",
+    "        print('\\nAperture model check on imported model:')\n",
+    "        df_imported = line.check_aperture()\n",
+    "        assert not np.any(df_imported.has_aperture_problem)\"\"\"\n",
+    "\n",
+    "\n",
+    "        # Initialise collmanager\n",
+    "        if self.coll_file.endswith('.yaml'):\n",
+    "            coll_manager = xc.CollimatorManager.from_yaml(self.coll_file, line=line, beam=self.beam, _context=context, ignore_crystals=False)\n",
+    "        elif self.coll_file.endswith('.data'):\n",
+    "            coll_manager = xc.CollimatorManager.from_SixTrack(self.coll_file, line=line, _context=context, ignore_crystals=False, nemitt_x = 2.5e-6,  nemitt_y = 2.5e-6)\n",
+    "            # switch on cavities\n",
+    "            speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c\n",
+    "            harmonic_number = 35640\n",
+    "            voltage = 12e6/len(line.get_elements_of_type(xt.Cavity)[1])\n",
+    "            frequency = harmonic_number * speed /line.get_length()\n",
+    "            for side in ['l', 'r']:\n",
+    "                for cell in ['a','b','c','d']:\n",
+    "                    line[f'acsca.{cell}5{side}4.b2'].voltage = voltage\n",
+    "                    line[f'acsca.{cell}5{side}4.b2'].frequency = frequency\n",
+    "\n",
+    "        # Install collimators into line\n",
+    "        if self.engine == 'everest':\n",
+    "            coll_names = coll_manager.collimator_names\n",
+    "            black_absorbers = [self.TARGET_name,]\n",
+    "\n",
+    "            everest_colls = [name for name in coll_names if name not in black_absorbers]\n",
+    "            coll_manager.install_everest_collimators(names=everest_colls,verbose=True)\n",
+    "            coll_manager.install_black_absorbers(names = black_absorbers, verbose=True)\n",
+    "        else:\n",
+    "            raise ValueError(f\"Unknown scattering engine {self.engine}!\")\n",
+    "        \n",
+    "        # Aperture model check\n",
+    "        print('\\nAperture model check after introducing collimators:')\n",
+    "        df_with_coll = line.check_aperture()\n",
+    "        assert not np.any(df_with_coll.has_aperture_problem)\n",
+    "      \n",
+    "        # Build the tracker\n",
+    "        coll_manager.build_tracker()\n",
+    "\n",
+    "        # Set the collimator openings based on the colldb,\n",
+    "        # or manually override with the option gaps={collname: gap}\n",
+    "        coll_manager.set_openings()\n",
+    "\n",
+    "        \"\"\"# Aperture model check\n",
+    "        print('\\nAperture model check after introducing collimators:')\n",
+    "        df_with_coll = line.check_aperture()\n",
+    "        assert not np.any(df_with_coll.has_aperture_problem)\"\"\"\n",
+    "        \n",
+    "        self.line = line\n",
+    "            \n",
     "        return"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 224,
-   "id": "aee78460",
+   "execution_count": 5,
+   "id": "13a9b300",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -276,8 +377,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 225,
-   "id": "7e0858eb",
+   "execution_count": null,
+   "id": "7f556f7a",
    "metadata": {},
    "outputs": [
     {
@@ -287,7 +388,8 @@
       "Input files:\n",
       " /eos/user/c/cmaccani/xsuite_sim/two_cryst_sim/input_files/HL_IR7_rematched/b4_sequence_patched.json \n",
       " /eos/user/c/cmaccani/xsuite_sim/two_cryst_sim/input_files/CollDB_HL_tight_b4.data \n",
-      "\n"
+      "\n",
+      "Loading line from dict: 97%  \r"
      ]
     }
    ],
@@ -297,33 +399,10 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 226,
-   "id": "576a998c",
+   "execution_count": null,
+   "id": "6bb094ad",
    "metadata": {},
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "{'family': 'tccs3',\n",
-       " 'material': 'Si',\n",
-       " 'length': 0.004,\n",
-       " 'angle': 90.0,\n",
-       " 'offset': 0.0,\n",
-       " 'nsigma': 8.7,\n",
-       " 'type': 'SPECIAL',\n",
-       " 'side': 1,\n",
-       " 'bend': 80.0,\n",
-       " 'xdim': 0.002,\n",
-       " 'ydim': 0.035,\n",
-       " 'tilt_left': 0.0,\n",
-       " 'tilt_right': 0.0}"
-      ]
-     },
-     "execution_count": 226,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "outputs": [],
    "source": [
     "line_test.coll_dict[ 'tccs.5r3.b2']"
    ]
@@ -331,7 +410,7 @@
   {
    "cell_type": "code",
    "execution_count": 170,
-   "id": "692d8d3b",
+   "id": "53215478",
    "metadata": {},
    "outputs": [
     {
@@ -1015,6 +1094,10 @@
   }
  ],
  "metadata": {
+  "@webio": {
+   "lastCommId": null,
+   "lastKernelId": null
+  },
   "kernelspec": {
    "display_name": "Python 3",
    "language": "python",
