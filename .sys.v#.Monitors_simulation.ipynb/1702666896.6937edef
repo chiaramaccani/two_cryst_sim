@@ -14,8 +14,6 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Warning: Packages pyspark or cern.nxcals are not installed. Data retrieval from NXCALS is not possible.\n",
-      " If you are on SWAN and did not expect this warning, then restart and load the 'NXCals Pro' software stack.\n",
       "No pytransport functionality\n",
       "No pytransport functionality\n"
      ]
@@ -57,7 +55,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "633cd7f0",
    "metadata": {},
    "source": [
     "# LOAD LINE"
@@ -66,7 +63,6 @@
   {
    "cell_type": "code",
    "execution_count": 2,
-   "id": "34561618",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -169,7 +165,6 @@
   {
    "cell_type": "code",
    "execution_count": 3,
-   "id": "d95bfad5",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -357,7 +352,6 @@
   {
    "cell_type": "code",
    "execution_count": 6,
-   "id": "6b41b291",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -371,7 +365,6 @@
   {
    "cell_type": "code",
    "execution_count": 7,
-   "id": "29d77aba",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -397,7 +390,6 @@
   {
    "cell_type": "code",
    "execution_count": 6,
-   "id": "26845d8b",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -411,7 +403,6 @@
   {
    "cell_type": "code",
    "execution_count": 33,
-   "id": "5c971a9c",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -436,7 +427,6 @@
   {
    "cell_type": "code",
    "execution_count": 26,
-   "id": "34cab95c",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -461,7 +451,6 @@
   {
    "cell_type": "code",
    "execution_count": 5,
-   "id": "66c47a76",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -487,7 +476,6 @@
   {
    "cell_type": "code",
    "execution_count": 42,
-   "id": "e9c26d95",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -512,7 +500,6 @@
   {
    "cell_type": "code",
    "execution_count": 43,
-   "id": "69b0aed0",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -537,7 +524,6 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "000a6a4b",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -549,7 +535,6 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c66676cd",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -561,7 +546,6 @@
   {
    "cell_type": "code",
    "execution_count": 44,
-   "id": "5e9ef27f",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -586,7 +570,6 @@
   {
    "cell_type": "code",
    "execution_count": 45,
-   "id": "48c1cd1f",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -609,7 +592,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "c73091a5",
    "metadata": {},
    "source": [
     "### MULTITURN ANALYSIS"
@@ -618,7 +600,6 @@
   {
    "cell_type": "code",
    "execution_count": 46,
-   "id": "4664fdb3",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -706,7 +687,6 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "77a067ba",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -717,7 +697,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "15363aa4",
    "metadata": {},
    "source": [
     "#### Class"
@@ -726,7 +705,6 @@
   {
    "cell_type": "code",
    "execution_count": 8,
-   "id": "ccfc4966",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -888,7 +866,6 @@
   {
    "cell_type": "code",
    "execution_count": 9,
-   "id": "4cdf6cc7",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -903,7 +880,6 @@
   {
    "cell_type": "code",
    "execution_count": 9,
-   "id": "506dfd6b",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -917,7 +893,6 @@
   {
    "cell_type": "code",
    "execution_count": 16,
-   "id": "44d56be4",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -932,7 +907,6 @@
   {
    "cell_type": "code",
    "execution_count": 17,
-   "id": "24db1ff4",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -1441,7 +1415,6 @@
   {
    "cell_type": "code",
    "execution_count": 19,
-   "id": "cca508f8",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -1950,7 +1923,6 @@
   {
    "cell_type": "code",
    "execution_count": 20,
-   "id": "9282882a",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -1977,7 +1949,6 @@
   {
    "cell_type": "code",
    "execution_count": 21,
-   "id": "d5e8cedd",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -2004,7 +1975,6 @@
   {
    "cell_type": "code",
    "execution_count": 23,
-   "id": "71411b4a",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -2031,7 +2001,6 @@
   {
    "cell_type": "code",
    "execution_count": 63,
-   "id": "a8542050",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -2056,7 +2025,6 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8f0017ae",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -2072,9 +2040,9 @@
    "lastKernelId": null
   },
   "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
+   "display_name": "LCG view 104 + venv",
+   "language": "python-custom",
+   "name": "lcg-view"
   },
   "language_info": {
    "codemirror_mode": {
@@ -2083,7 +2051,7 @@
    },
    "file_extension": ".py",
    "mimetype": "text/x-python",
-   "name": "python",
+   "name": "python-custom",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
    "version": "3.9.12"
