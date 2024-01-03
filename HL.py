@@ -132,7 +132,7 @@ class LineData():
 
         df["angle"] = df["angle"] 
         df["name"] = df["name"].str.lower() # Make the names lowercase for easy processing
-        df["nsigma"] = df["opening"].apply(lambda s: float(family_settings.get(s, s)))
+        df["gap"] = df["opening"].apply(lambda s: float(family_settings.get(s, s)))
         df["type"] = df["opening"].apply(lambda s: family_types.get(s, "UNKNOWN"))
         df["side"] = df["name"].apply(lambda s: onesided.get(s, 0))
         df["bend"] = df["name"].apply(lambda s: bend.get(s, 0))
