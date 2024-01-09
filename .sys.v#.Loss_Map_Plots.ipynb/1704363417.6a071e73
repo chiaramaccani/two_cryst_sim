@@ -50,7 +50,7 @@
   {
    "cell_type": "code",
    "execution_count": 2,
-   "id": "e9a636c4",
+   "id": "4315dc95",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -188,14 +188,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": 11,
    "id": "49dc9b99",
    "metadata": {},
    "outputs": [
     {
      "data": {
       "application/vnd.jupyter.widget-view+json": {
-       "model_id": "772f7b69197a494e9857f02f3e650cf7",
+       "model_id": "36b0fbaa6caa4f059fbbeccbd09e221a",
        "version_major": 2,
        "version_minor": 0
       },
@@ -209,7 +209,7 @@
     {
      "data": {
       "application/vnd.jupyter.widget-view+json": {
-       "model_id": "f4b07984816348afa4f4651788295923",
+       "model_id": "239629bf0f1d43be8de385f3f2bb1121",
        "version_major": 2,
        "version_minor": 0
       },
@@ -230,7 +230,7 @@
        "              'marker': {'color': 'red', 'line': {'color': 'red', 'width': 1.5}},\n",
        "              'name': 'Warm',\n",
        "              'type': 'bar',\n",
-       "              'uid': '51f510b3-7496-4bdc-9d3c-dd31145f035c',\n",
+       "              'uid': '0f107248-bc03-4b13-828f-361ceebca67c',\n",
        "              'width': 0.8,\n",
        "              'x': array([ 3181.55,  6520.65,  6521.45,  6521.55,  6521.75,  6521.85,  6521.95,\n",
        "                           6522.85,  6523.45,  6524.15,  6527.05,  6527.75,  6527.95,  6529.75,\n",
@@ -278,7 +278,7 @@
        "              'marker': {'color': 'blue', 'line': {'color': 'blue', 'width': 1.5}},\n",
        "              'name': 'Cold',\n",
        "              'type': 'bar',\n",
-       "              'uid': 'd6e689c1-fadf-4e54-8e33-c9f389221d1c',\n",
+       "              'uid': 'a1b2417a-6723-4899-b353-be8c1bf9e253',\n",
        "              'width': 0.8,\n",
        "              'x': array([ 3191.35,  6960.05,  6962.45, ..., 20404.25, 20532.85, 23710.35]),\n",
        "              'xaxis': 'x2',\n",
@@ -302,7 +302,7 @@
        "              'marker': {'color': 'black', 'line': {'color': 'black', 'width': 1.5}},\n",
        "              'name': 'Collimator',\n",
        "              'type': 'bar',\n",
-       "              'uid': '56a8d19c-f0b9-490d-94bf-920847b40cc3',\n",
+       "              'uid': '09757339-074f-49dd-b155-9bf8cfbb7052',\n",
        "              'width': 0.8,\n",
        "              'x': array([ 3225.42358362,  3227.42358287,  6459.7427983 ,  6461.7427983 ,\n",
        "                           6463.7427983 ,  6503.23729629,  6562.46479629,  6566.46479629,\n",
@@ -330,7 +330,7 @@
        "                          3.55688599e-07, 1.03742508e-04, 6.17712533e-05, 2.01556873e-06,\n",
        "                          2.37125733e-06]),\n",
        "              'yaxis': 'y2'},\n",
-       "             {'base': array([-1.0, 0.0, -2.0, ..., 0.0, -2.0, -1.0], dtype=object),\n",
+       "             {'base': array([-1.0, -2.0, 0.0, ..., -2.0, 0.0, -1.0], dtype=object),\n",
        "              'hovertemplate': '%{hovertext}<br>S=%{x:.2f} m<extra></extra>',\n",
        "              'hovertext': array(['TAS.1R1', 'MQXA.1R1', 'MQXB.A2R1', ..., 'MQXB.A2L1', 'MQXA.1L1',\n",
        "                                  'TAS.1L1'], dtype=object),\n",
@@ -341,7 +341,7 @@
        "                                  'width': 0.5}},\n",
        "              'showlegend': False,\n",
        "              'type': 'bar',\n",
-       "              'uid': '76f508cd-d272-454e-9b34-f33072aec65b',\n",
+       "              'uid': 'e3f09c49-bbd2-4978-a70e-afccfde6447c',\n",
        "              'width': array([1.8 , 6.37, 5.5 , ..., 5.5 , 6.37, 1.8 ]),\n",
        "              'x': array([1.99500000e+01, 2.61500000e+01, 3.48000000e+01, ..., 2.66240832e+04,\n",
        "                          2.66327332e+04, 2.66389042e+04]),\n",
@@ -352,8 +352,8 @@
        "              'mode': 'lines',\n",
        "              'showlegend': False,\n",
        "              'type': 'scatter',\n",
-       "              'uid': 'e38bd6a9-4288-48b7-8c04-4457a23bd26c',\n",
-       "              'x': [20.85, 26639.80419999891],\n",
+       "              'uid': 'b1c9608e-9097-4a5d-b469-e6289df030f8',\n",
+       "              'x': [20.85, 26639.8042],\n",
        "              'xaxis': 'x',\n",
        "              'y': [0, 0],\n",
        "              'yaxis': 'y'}],\n",
@@ -394,13 +394,13 @@
        "})"
       ]
      },
-     "execution_count": 12,
+     "execution_count": 11,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
-    "lm.plot_lossmap_interactive(ThisLM, norm='total')  #, layout=\"./input_files/layout_flat_top_b2.tfs\""
+    "lm.plot_lossmap_interactive(ThisLM, norm='total', layout=\"./input_files/layout_flat_top_b2.tfs\")  #"
    ]
   },
   {

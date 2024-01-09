@@ -1,7 +1,6 @@
 import json
 import os
 import subprocess
-import sys
 
 import numpy as np
 from pathlib import Path
@@ -371,24 +370,14 @@ class LineData():
         
         
         
+        
+line_test0 = LineData(run='HL', line_file_name = 'input_files/HL_IR7_rematched/b4_sequence_patched.json', 
+                     coll_file_name = 'input_files/CollDB_HL_tight_b4.data')
+line_test1 = LineData(run='HL', line_file_name = 'input_files/HL_IR7_IR3_rematched/b4_sequence_patched.json', 
+                     coll_file_name = 'input_files/CollDB_HL_tight_b4.data')
+line_test2 = LineData(run='Run3', line_file_name = 'input_files/flat_top_b2.json', 
+                     coll_file_name = 'input_files/flat_top.yaml')
 
-
-
-def main():
-    
-    line_test = LineData(run=sys.argv[1], line_file_name = sys.argv[2], 
-                     coll_file_name = sys.argv[3])
-    line_test.compute_crystals()
-
-if __name__ == '__main__':
-
-    main()
-    
-    # echo HL_IR7_rematched >> HL_out.out
-    # python HL.py HL input_files/HL_IR7_rematched/b4_sequence_patched.json input_files/CollDB_HL_tight_b4.data >> HL_out.out
-    
-    # echo HL_IR3_IR7_rematched >> HL_out.out
-    # python HL.py HL input_files/HL_IR7_IR3_rematched/b4_sequence_patched.json input_files/CollDB_HL_tight_b4.data >> HL_out.out
-    
-    # echo Run3 >> HL_out.out
-    # python HL.py Run3 input_files/flat_top_b2.json input_files/flat_top.yaml >> HL_out.out
+line_test0.compute_crystals()
+line_test1.compute_crystals()
+line_test2.compute_crystals()

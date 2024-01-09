@@ -375,59 +375,21 @@ def main():
 
     if mode == 'cry_black_absorbers' or mode == 'target_absorber':
         df_part = part.to_pandas()
-        drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0', 'beta0', 'mass0', 'start_tracking_at_element', 's']
-        float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta', 'gamma0', 'p0c']
-        int_variables = ['at_turn', 'particle_id', 'at_element', 'state', 'parent_particle_id']
+        drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0', 'beta0', 'mass0']
+        float_variables = ['s', 'zeta', 'x', 'px', 'y', 'py', 'delta', 'gamma0', 'p0c']
+        int_variables = ['at_turn', 'particle_id', 'at_element', 'start_tracking_at_element', 'state', 'parent_particle_id']
         df_part.drop(drop_list, axis=1, inplace=True)
         df_part[float_variables] = df_part[float_variables].astype('float32')
         df_part[int_variables] = df_part[int_variables].astype('int32')
         df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='particles', format='table', mode='a',
                   complevel=9, complib='blosc')
         
-        
-        TCCS_monitor_dict = TCCS_monitor.to_dict()
-        TARGET_monitor_dict = TARGET_monitor.to_dict()
-        
-        df = pd.DataFrame(TCCS_monitor_dict['data'])
-        variables = np.concatenate((float_variables,int_variables)).remove('at_element')
-        var_dict = {}
+     
 
-        for var in variables:
-            new_arr = np.array(df[var])
-            new_arr = new_arr.reshape((num_particles, num_turns))
-            var_dict[var] = new_arr   
-        del df
-        
-        ydim_TCCS = coll_dict[ TCCS_name]['xdim']
-        xdim_TCCS =  coll_dict[ TCCS_name]['ydim']
-        jaw_L_TCCS = line.elements[idx_TCCS].jaw_L
-
-        abs_y_low_TCCS = jaw_L_TCCS
-        abs_y_up_TCCS = jaw_L_TCCS + ydim_TCCS
-        abs_x_low_TCCS = -xdim_TCCS/2
-        abs_x_up_TCCS = xdim_TCCS/2
-        
-        impact_part_dict = {}
-        for key in var_dict.keys():
-            impact_part_dict[key] = []
-
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > abs_x_low_TCCS and var_dict['x'][part, turn] < abs_x_up_TCCS and var_dict['y'][part, turn]> abs_y_low_TCCS and var_dict['y'][part, turn] < abs_y_up_TCCS:
-                    for key in var_dict.keys():
-                        impact_part_dict[key].append(var_dict[key][part, turn])
-        impact_part_df = pd.DataFrame(impact_part_dict) 
-        
-        impact_part_df.rename(columns={'state': 'this_state'}, inplace=True)
-        impact_part_df.rename(columns={'at_turn': 'this_turn'}, inplace=True)
-        impact_part_df = pd.merge(impact_part_df, df_part[['at_element', 'state', 'at_turn', 'particle_id']], on='particle_id', how='left')
-
-        impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
-                  complevel=9, complib='blosc')
-        
 
     if mode == 'monitors':
         TCCS_monitor_dict = TCCS_monitor.to_dict()
+        print(TCCS_monitor_dict['data']['particle_id'])
         TARGET_monitor_dict = TARGET_monitor.to_dict()
         with open(Path(path_out,f'test_TCCS_monitor_B{beam}{plane}_{mode}.pkl'), 'wb') as f:
             pickle.dump(TCCS_monitor_dict, f)

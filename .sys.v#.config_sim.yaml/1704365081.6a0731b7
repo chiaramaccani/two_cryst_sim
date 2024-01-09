@@ -24,8 +24,8 @@ jobsubmission:
 
 input_files:
   #line_b1: ${HOME_TWOCRYST}/input_files/flat_top_b1.json
-  line_b2: ${HOME_TWOCRYST}/input_files/flat_top_b2.json     
-  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/flat_top_b2.json     
+  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_IR3_rematched/b4_sequence_patched.json
-  collimators: ${HOME_TWOCRYST}/input_files/flat_top.yaml
-  #collimators: ${HOME_TWOCRYST}/input_files/CollDB_HL_tight_b4.data
+  #collimators: ${HOME_TWOCRYST}/input_files/flat_top.yaml
+  collimators: ${HOME_TWOCRYST}/input_files/CollDB_HL_tight_b4.data

@@ -4,8 +4,8 @@
 run: 
   beam: '2'
   plane: 'V'
-  turns: 10 #200
-  nparticles: 100 #100000 #1000
+  turns: 200 #200
+  nparticles: 100000 #100000 #1000
   engine: 'everest'
   seed: 12345
   TTCS_align_angle_step: 0
@@ -24,8 +24,8 @@ jobsubmission:
 
 input_files:
   #line_b1: ${HOME_TWOCRYST}/input_files/flat_top_b1.json
-  line_b2: ${HOME_TWOCRYST}/input_files/flat_top_b2.json     
-  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/flat_top_b2.json     
+  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_IR3_rematched/b4_sequence_patched.json
-  collimators: ${HOME_TWOCRYST}/input_files/flat_top.yaml
-  #collimators: ${HOME_TWOCRYST}/input_files/CollDB_HL_tight_b4.data
+  #collimators: ${HOME_TWOCRYST}/input_files/flat_top.yaml
+  collimators: ${HOME_TWOCRYST}/input_files/CollDB_HL_tight_b4.data
