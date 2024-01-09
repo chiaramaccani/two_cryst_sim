@@ -421,6 +421,11 @@ def main():
         impact_part_df.rename(columns={'state': 'this_state'}, inplace=True)
         impact_part_df.rename(columns={'at_turn': 'this_turn'}, inplace=True)
         impact_part_df = pd.merge(impact_part_df, df_part[['at_element', 'state', 'at_turn', 'particle_id']], on='particle_id', how='left')
+        
+        impact_part_df[float_variables] = impact_part_df[float_variables].astype('float32')
+        impact_part_df[int_variables] = impact_part_df[int_variables].astype('int32')
+        impact_part_df['this_turn'] = impact_part_df['this_turn'].astype('int32')
+        impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')
 
         impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
                   complevel=9, complib='blosc')
