@@ -199,11 +199,13 @@ def main():
     num_turns     = run_dict['turns']
     num_particles = run_dict['nparticles']
     engine        = run_dict['engine']
+    
+    seed          = run_dict['seed']
 
     TTCS_align_angle_step = run_dict['TTCS_align_angle_step']
 
     mode = run_dict['mode']
-    print('\nMode: ', mode, '\n')
+    print('\nMode: ', mode, '\n', 'Seed: ', seed, '\n')
 
 
     # Setup input files
@@ -301,8 +303,8 @@ def main():
             black_absorbers = []
 
         everest_colls = [name for name in coll_names if name not in black_absorbers]
-        coll_manager.install_everest_collimators(names=everest_colls,verbose=True)
-        coll_manager.install_black_absorbers(names = black_absorbers, verbose=True)
+        coll_manager.install_everest_collimators(names=everest_colls,verbose=True, seed=seed)
+        coll_manager.install_black_absorbers(names = black_absorbers, verbose=True, seed=seed)
     else:
         raise ValueError(f"Unknown scattering engine {engine}!")
 
@@ -340,7 +342,7 @@ def main():
     idx_TARGET = line.element_names.index(TARGET_name)
     idx_TCCP = line.element_names.index(TCCP_name)
 
-    print(f"\nParticleAnalysis(element_type=\'crystal\', n_sigma={coll_dict[ TCCS_name]['gap']}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bend={ coll_dict[ TCCS_name]['bend']}, align_angle={ line.elements[idx_TCCS].align_angle}, jaw_L={line.elements[idx_TCCS].jaw_L}), line_idx={ idx_TCCS}")
+    print(f"\nParticleAnalysis(element_type=\'crystal\', n_sigma={coll_dict[ TCCS_name]['gap']}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bend={ coll_dict[ TCCS_name]['bend']}, align_angle={ line.elements[idx_TCCS].align_angle}, jaw_L={line.elements[idx_TCCS].jaw_L}, line_idx={ idx_TCCS})")
     print(f"ParticleAnalysis(element_type=\'target\', n_sigma={ coll_dict[TARGET_name]['gap']}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']}, jaw_L={ line.elements[ idx_TARGET].jaw_L}, line_idx={ idx_TARGET})")
     print(f"ParticleAnalysis(element_type=\'crystal\', n_sigma={ coll_dict[TCCP_name]['gap']}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bend={ coll_dict[ TCCP_name]['bend']}, jaw_L={ line.elements[ idx_TCCP].jaw_L}, line_idx={idx_TCCP})")
 
@@ -389,7 +391,8 @@ def main():
         TARGET_monitor_dict = TARGET_monitor.to_dict()
         
         df = pd.DataFrame(TCCS_monitor_dict['data'])
-        variables = np.concatenate((float_variables,int_variables)).remove('at_element')
+        variables = float_variables + int_variables
+        variables.remove('at_element')
         var_dict = {}
 
         for var in variables:
