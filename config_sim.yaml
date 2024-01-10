@@ -13,7 +13,7 @@ run:
 
 jobsubmission:
   working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR3_IR7rem_TCCS_7.2_
-  num_jobs: 1 #5 100
+  num_jobs: 100 #5 100
   run_local: False
   dryrun: False
   jobflavour: 'workday'  #'workday' #'espresso' testmatch
