@@ -41,7 +41,6 @@
   {
    "cell_type": "code",
    "execution_count": 2,
-   "id": "a9538b21",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -535,7 +534,6 @@
   {
    "cell_type": "code",
    "execution_count": 10,
-   "id": "1cebbf89",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -561,7 +559,6 @@
   {
    "cell_type": "code",
    "execution_count": 11,
-   "id": "40ed65ee",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -829,7 +826,6 @@
   {
    "cell_type": "code",
    "execution_count": 60,
-   "id": "d4897784",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -853,7 +849,6 @@
   {
    "cell_type": "code",
    "execution_count": 61,
-   "id": "f5f9da27",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -875,7 +870,6 @@
   {
    "cell_type": "code",
    "execution_count": 45,
-   "id": "a21e0bf6",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -905,7 +899,6 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "84343b3b",
    "metadata": {
     "vscode": {
      "languageId": "python"
@@ -921,9 +914,9 @@
    "lastKernelId": null
   },
   "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
+   "display_name": "LCG view 104 + venv",
+   "language": "python-custom",
+   "name": "lcg-view"
   },
   "language_info": {
    "codemirror_mode": {
@@ -932,7 +925,7 @@
    },
    "file_extension": ".py",
    "mimetype": "text/x-python",
-   "name": "python",
+   "name": "python-custom",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
    "version": "3.9.12"

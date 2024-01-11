@@ -31,25 +31,11 @@ NSIG_FAM tcxrp                 0.000000 UNKNOWN
 NSIG_FAM tcryo               999.00000 TERTIARY
 # Twocryst setup in IR3
 NSIG_FAM tccs3                 7.200000 SPECIAL
-<<<<<<< HEAD
-NSIG_FAM tccp3                32.20000  SPECIAL     
-NSIG_FAM target3              32.20000  SPECIAL    
-=======
-NSIG_FAM tccp3                44.00000  SPECIAL     
-NSIG_FAM target3              44.00000  SPECIAL    
->>>>>>> 9f5b62ed77c2c2683822be23b5de253a8cf820e5
+NSIG_FAM tccp3                42.60000  SPECIAL     
+NSIG_FAM target3              42.60000  SPECIAL    
 #
-# IR3 IR7 rem  
-# 7.200000    44.000000
-# 7.700000    44.300000
-# 8.200000    44.600000
-# 8.700000    44.900000
-#
-# IR7 rem      
-# 7.200000    33.600000
-# 7.700000    33.900000
-# 8.200000    34.300000
-# 8.700000    34.600000
+# IR3 IR7 rem  42.60000
+# IR7 rem      32.20000
 #
 # Collimators
 # name                                                opening/fam mat.     length[m]    angle[deg]     offset[m]    

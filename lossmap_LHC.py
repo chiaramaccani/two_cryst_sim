@@ -387,9 +387,11 @@ def main():
                   complevel=9, complib='blosc')
         
         
+        epsilon = 2e10-3
         TCCS_monitor_dict = TCCS_monitor.to_dict()
         TARGET_monitor_dict = TARGET_monitor.to_dict()
         
+        # SAVE IMPACTS ON TCCS
         df = pd.DataFrame(TCCS_monitor_dict['data'])
         variables = float_variables + int_variables
         variables.remove('at_element')
@@ -401,8 +403,8 @@ def main():
             var_dict[var] = new_arr   
         del df
         
-        ydim_TCCS = coll_dict[ TCCS_name]['xdim']
-        xdim_TCCS =  coll_dict[ TCCS_name]['ydim']
+        ydim_TCCS = coll_dict[TCCS_name]['xdim']
+        xdim_TCCS =  coll_dict[TCCS_name]['ydim']
         jaw_L_TCCS = line.elements[idx_TCCS].jaw_L
 
         abs_y_low_TCCS = jaw_L_TCCS
@@ -416,7 +418,7 @@ def main():
 
         for part in range(num_particles):
             for turn in range(num_turns):
-                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > abs_x_low_TCCS and var_dict['x'][part, turn] < abs_x_up_TCCS and var_dict['y'][part, turn]> abs_y_low_TCCS and var_dict['y'][part, turn] < abs_y_up_TCCS:
+                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low_TCCS - epsilon) and var_dict['x'][part, turn] < (abs_x_up_TCCS + epsilon) and var_dict['y'][part, turn]> (abs_y_low_TCCS - epsilon) and var_dict['y'][part, turn] < (abs_y_up_TCCS + epsilon):
                     for key in var_dict.keys():
                         impact_part_dict[key].append(var_dict[key][part, turn])
         impact_part_df = pd.DataFrame(impact_part_dict) 
@@ -431,6 +433,49 @@ def main():
         impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')
 
         impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
+                  complevel=9, complib='blosc')
+        
+        # SAVE IMPACTS ON TARGET
+        df = pd.DataFrame(TARGET_monitor_dict['data'])
+        var_dict = {}
+
+        for var in variables:
+            new_arr = np.array(df[var])
+            new_arr = new_arr.reshape((num_particles, num_turns))
+            var_dict[var] = new_arr   
+        del df
+        
+        ydim_TARGET = coll_dict[TARGET_name]['xdim']
+        xdim_TARGET =  coll_dict[TARGET_name]['ydim']
+        jaw_L_TARGET = line.elements[idx_TARGET].jaw_L
+
+        abs_y_low_TARGET = jaw_L_TARGET
+        abs_y_up_TARGET = jaw_L_TARGET + ydim_TARGET
+        abs_x_low_TARGET = -xdim_TARGET/2
+        abs_x_up_TARGET = xdim_TARGET/2
+        
+        impact_part_dict = {}
+        for key in var_dict.keys():
+            impact_part_dict[key] = []
+
+        
+        for part in range(num_particles):
+            for turn in range(num_turns):
+                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low_TARGET - epsilon) and var_dict['x'][part, turn] < (abs_x_up_TARGET + epsilon) and var_dict['y'][part, turn] > (abs_y_low_TARGET - epsilon) and var_dict['y'][part, turn] < (abs_y_up_TARGET + epsilon):
+                    for key in var_dict.keys():
+                        impact_part_dict[key].append(var_dict[key][part, turn])
+        impact_part_df = pd.DataFrame(impact_part_dict) 
+        
+        impact_part_df.rename(columns={'state': 'this_state'}, inplace=True)
+        impact_part_df.rename(columns={'at_turn': 'this_turn'}, inplace=True)
+        impact_part_df = pd.merge(impact_part_df, df_part[['at_element', 'state', 'at_turn', 'particle_id']], on='particle_id', how='left')
+        
+        impact_part_df[float_variables] = impact_part_df[float_variables].astype('float32')
+        impact_part_df[int_variables] = impact_part_df[int_variables].astype('int32')
+        impact_part_df['this_turn'] = impact_part_df['this_turn'].astype('int32')
+        impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')
+
+        impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',
                   complevel=9, complib='blosc')
         
 
