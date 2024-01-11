@@ -433,7 +433,7 @@
   {
    "cell_type": "code",
    "execution_count": 322,
-   "id": "181b98db",
+   "id": "300af4b5",
    "metadata": {},
    "outputs": [
     {
@@ -501,7 +501,7 @@
   {
    "cell_type": "code",
    "execution_count": 301,
-   "id": "c60939fb",
+   "id": "7d16dc74",
    "metadata": {},
    "outputs": [
     {
@@ -803,7 +803,7 @@
   {
    "cell_type": "code",
    "execution_count": 273,
-   "id": "5c1907b7",
+   "id": "5e72f64d",
    "metadata": {},
    "outputs": [
     {
@@ -1103,7 +1103,7 @@
   {
    "cell_type": "code",
    "execution_count": 274,
-   "id": "5f055c52",
+   "id": "c04999d5",
    "metadata": {},
    "outputs": [
     {
@@ -1403,7 +1403,7 @@
   {
    "cell_type": "code",
    "execution_count": 272,
-   "id": "a3f454ea",
+   "id": "2fd72c38",
    "metadata": {},
    "outputs": [
     {
@@ -2061,7 +2061,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "48e9072a",
+   "id": "1fdb57a4",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -2069,7 +2069,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b5a6b0cc",
+   "id": "78c27e17",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -2077,7 +2077,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "012ed519",
+   "id": "1e9dc66e",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -2085,7 +2085,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "54265665",
+   "id": "abcd74bd",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -2093,7 +2093,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "3986ce32",
+   "id": "2681a9e4",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -2119,10 +2119,9 @@
     "        for key in var_dict.keys():\n",
     "            impact_part_dict[key] = []\n",
     "\n",
-    "        \n",
     "        for part in range(num_particles):\n",
     "            for turn in range(num_turns):\n",
-    "                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low_TARGET - epsilon) and var_dict['x'][part, turn] < (abs_x_up_TARGET + epsilon) and var_dict['y'][part, turn]> (abs_y_low_TARGET - epsilon) and var_dict['y'][part, turn] < (abs_y_up_TARGET + epsilon):\n",
+    "                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > abs_x_low_TARGET and var_dict['x'][part, turn] < abs_x_up_TARGET and var_dict['y'][part, turn]> abs_y_low_TARGET and var_dict['y'][part, turn] < abs_y_up_TARGET:\n",
     "                    for key in var_dict.keys():\n",
     "                        impact_part_dict[key].append(var_dict[key][part, turn])\n",
     "        impact_part_df = pd.DataFrame(impact_part_dict) \n",
@@ -2136,7 +2135,7 @@
     "        impact_part_df['this_turn'] = impact_part_df['this_turn'].astype('int32')\n",
     "        impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')\n",
     "\n",
-    "        impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',\n",
+    "        impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',\n",
     "                  complevel=9, complib='blosc')"
    ]
   }

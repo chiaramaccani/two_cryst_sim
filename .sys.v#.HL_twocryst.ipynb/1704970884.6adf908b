@@ -433,7 +433,7 @@
   {
    "cell_type": "code",
    "execution_count": 322,
-   "id": "181b98db",
+   "id": "690a03e1",
    "metadata": {},
    "outputs": [
     {
@@ -501,7 +501,7 @@
   {
    "cell_type": "code",
    "execution_count": 301,
-   "id": "c60939fb",
+   "id": "d03afdc7",
    "metadata": {},
    "outputs": [
     {
@@ -803,7 +803,7 @@
   {
    "cell_type": "code",
    "execution_count": 273,
-   "id": "5c1907b7",
+   "id": "39620a3e",
    "metadata": {},
    "outputs": [
     {
@@ -1103,7 +1103,7 @@
   {
    "cell_type": "code",
    "execution_count": 274,
-   "id": "5f055c52",
+   "id": "fe3cedc1",
    "metadata": {},
    "outputs": [
     {
@@ -1403,7 +1403,7 @@
   {
    "cell_type": "code",
    "execution_count": 272,
-   "id": "a3f454ea",
+   "id": "487be44d",
    "metadata": {},
    "outputs": [
     {
@@ -2061,7 +2061,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "48e9072a",
+   "id": "6c0cb247",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -2069,7 +2069,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b5a6b0cc",
+   "id": "6ecc4fbc",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -2077,7 +2077,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "012ed519",
+   "id": "75e5723d",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -2085,7 +2085,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "54265665",
+   "id": "7498c62b",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -2093,11 +2093,13 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "3986ce32",
+   "id": "9f4496ec",
    "metadata": {},
    "outputs": [],
    "source": [
     "        df = pd.DataFrame(TARGET_monitor_dict['data'])\n",
+    "        variables = float_variables + int_variables\n",
+    "        variables.remove('at_element')\n",
     "        var_dict = {}\n",
     "\n",
     "        for var in variables:\n",
@@ -2106,23 +2108,22 @@
     "            var_dict[var] = new_arr   \n",
     "        del df\n",
     "        \n",
-    "        ydim_TARGET = coll_dict[TARGET_name]['xdim']\n",
-    "        xdim_TARGET =  coll_dict[TARGET_name]['ydim']\n",
-    "        jaw_L_TARGET = line.elements[idx_TARGET].jaw_L\n",
+    "        ydim_TCCS = coll_dict[TCCS_name]['xdim']\n",
+    "        xdim_TCCS =  coll_dict[TCCS_name]['ydim']\n",
+    "        jaw_L_TCCS = line.elements[idx_TCCS].jaw_L\n",
     "\n",
-    "        abs_y_low_TARGET = jaw_L_TARGET\n",
-    "        abs_y_up_TARGET = jaw_L_TARGET + ydim_TARGET\n",
-    "        abs_x_low_TARGET = -xdim_TARGET/2\n",
-    "        abs_x_up_TARGET = xdim_TARGET/2\n",
+    "        abs_y_low_TCCS = jaw_L_TCCS\n",
+    "        abs_y_up_TCCS = jaw_L_TCCS + ydim_TCCS\n",
+    "        abs_x_low_TCCS = -xdim_TCCS/2\n",
+    "        abs_x_up_TCCS = xdim_TCCS/2\n",
     "        \n",
     "        impact_part_dict = {}\n",
     "        for key in var_dict.keys():\n",
     "            impact_part_dict[key] = []\n",
     "\n",
-    "        \n",
     "        for part in range(num_particles):\n",
     "            for turn in range(num_turns):\n",
-    "                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low_TARGET - epsilon) and var_dict['x'][part, turn] < (abs_x_up_TARGET + epsilon) and var_dict['y'][part, turn]> (abs_y_low_TARGET - epsilon) and var_dict['y'][part, turn] < (abs_y_up_TARGET + epsilon):\n",
+    "                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > abs_x_low_TCCS and var_dict['x'][part, turn] < abs_x_up_TCCS and var_dict['y'][part, turn]> abs_y_low_TCCS and var_dict['y'][part, turn] < abs_y_up_TCCS:\n",
     "                    for key in var_dict.keys():\n",
     "                        impact_part_dict[key].append(var_dict[key][part, turn])\n",
     "        impact_part_df = pd.DataFrame(impact_part_dict) \n",
@@ -2136,7 +2137,7 @@
     "        impact_part_df['this_turn'] = impact_part_df['this_turn'].astype('int32')\n",
     "        impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')\n",
     "\n",
-    "        impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',\n",
+    "        impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',\n",
     "                  complevel=9, complib='blosc')"
    ]
   }

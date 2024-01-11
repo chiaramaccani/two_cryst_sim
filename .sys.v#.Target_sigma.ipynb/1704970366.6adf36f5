@@ -706,107 +706,6 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 48,
-   "id": "8e1f8967",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Done loading line from dict.           \n",
-      "Bad apertures :  {}\n",
-      "Replace bad apertures with Marker\n",
-      "Found suitable prebuilt kernel `default_bb3d`.\n",
-      "\n",
-      "Energy: 7000.00 GeV \t TCCS sigma setting: 7.7\n",
-      "\n",
-      "Upper: 38.53 sigma, 11.84 mm\n",
-      "Central: 37.19 sigma, 11.43 mm\n",
-      "Lower: 35.85 sigma, 11.02 mm\n",
-      "\n",
-      "Dimesion of the 5 sigma channelled spot (upper-lower): 0.82 mm   \tCrystal height: 2 mm\n",
-      "Center the spot in the crystal: [10.43,12.43] mm\n",
-      "Jaw sigma in order to center: 33.9\n"
-     ]
-    }
-   ],
-   "source": [
-    "run_cry_tracking(line_name = line_name_HL_IR7, normalized_emittance = normalized_emittance_HL, ax_plot = False, coll_name = coll_name_HL, n_sigma = 7.7)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 49,
-   "id": "eb13352a",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Done loading line from dict.           \n",
-      "Bad apertures :  {}\n",
-      "Replace bad apertures with Marker\n",
-      "Found suitable prebuilt kernel `default_bb3d`.\n",
-      "\n",
-      "Energy: 7000.00 GeV \t TCCS sigma setting: 8.2\n",
-      "\n",
-      "Upper: 38.85 sigma, 11.94 mm\n",
-      "Central: 37.51 sigma, 11.53 mm\n",
-      "Lower: 36.17 sigma, 11.12 mm\n",
-      "\n",
-      "Dimesion of the 5 sigma channelled spot (upper-lower): 0.82 mm   \tCrystal height: 2 mm\n",
-      "Center the spot in the crystal: [10.53,12.53] mm\n",
-      "Jaw sigma in order to center: 34.3\n"
-     ]
-    }
-   ],
-   "source": [
-    "run_cry_tracking(line_name = line_name_HL_IR7, normalized_emittance = normalized_emittance_HL, ax_plot = False, coll_name = coll_name_HL, n_sigma = 8.2)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 50,
-   "id": "dd59d4e0",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Done loading line from dict.           \n",
-      "Bad apertures :  {}\n",
-      "Replace bad apertures with Marker\n",
-      "Found suitable prebuilt kernel `default_bb3d`.\n",
-      "\n",
-      "Energy: 7000.00 GeV \t TCCS sigma setting: 8.7\n",
-      "\n",
-      "Upper: 39.17 sigma, 12.04 mm\n",
-      "Central: 37.83 sigma, 11.63 mm\n",
-      "Lower: 36.49 sigma, 11.21 mm\n",
-      "\n",
-      "Dimesion of the 5 sigma channelled spot (upper-lower): 0.82 mm   \tCrystal height: 2 mm\n",
-      "Center the spot in the crystal: [10.63,12.63] mm\n",
-      "Jaw sigma in order to center: 34.6\n"
-     ]
-    }
-   ],
-   "source": [
-    "run_cry_tracking(line_name = line_name_HL_IR7, normalized_emittance = normalized_emittance_HL, ax_plot = False, coll_name = coll_name_HL, n_sigma = 8.7)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "1da48781",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "code",
    "execution_count": 42,
    "id": "9cfaf8be",
    "metadata": {
@@ -823,7 +722,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 43,
+   "execution_count": null,
    "id": "707a83ab",
    "metadata": {
     "vscode": {
@@ -838,17 +737,7 @@
       "Done loading line from dict.           \n",
       "Bad apertures :  {}\n",
       "Replace bad apertures with Marker\n",
-      "Found suitable prebuilt kernel `default_bb3d`.\n",
-      "\n",
-      "Energy: 7000.00 GeV \t TCCS sigma setting: 7.2\n",
-      "\n",
-      "Upper: 50.26 sigma, 11.34 mm\n",
-      "Central: 48.44 sigma, 10.93 mm\n",
-      "Lower: 46.62 sigma, 10.52 mm\n",
-      "\n",
-      "Dimesion of the 5 sigma channelled spot (upper-lower): 0.82 mm   \tCrystal height: 2 mm\n",
-      "Center the spot in the crystal: [9.93,11.93] mm\n",
-      "Jaw sigma in order to center: 44.0\n"
+      "Found suitable prebuilt kernel `default_bb3d`.\n"
      ]
     }
    ],
@@ -858,124 +747,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 51,
-   "id": "af868fbc",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Done loading line from dict.           \n",
-      "Bad apertures :  {}\n",
-      "Replace bad apertures with Marker\n",
-      "Found suitable prebuilt kernel `default_bb3d`.\n",
-      "\n",
-      "Energy: 7000.00 GeV \t TCCS sigma setting: 7.7\n",
-      "\n",
-      "Upper: 50.57 sigma, 11.41 mm\n",
-      "Central: 48.75 sigma, 11.00 mm\n",
-      "Lower: 46.93 sigma, 10.59 mm\n",
-      "\n",
-      "Dimesion of the 5 sigma channelled spot (upper-lower): 0.82 mm   \tCrystal height: 2 mm\n",
-      "Center the spot in the crystal: [10.00,12.00] mm\n",
-      "Jaw sigma in order to center: 44.3\n"
-     ]
-    }
-   ],
-   "source": [
-    "run_cry_tracking(line_name = line_name_HL_IR7_IR3, normalized_emittance = normalized_emittance_HL, ax_plot = False, coll_name = coll_name_HL,  n_sigma = 7.7)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 52,
-   "id": "6f95db97",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Done loading line from dict.           \n",
-      "Bad apertures :  {}\n",
-      "Replace bad apertures with Marker\n",
-      "Found suitable prebuilt kernel `default_bb3d`.\n",
-      "\n",
-      "Energy: 7000.00 GeV \t TCCS sigma setting: 8.2\n",
-      "\n",
-      "Upper: 50.88 sigma, 11.48 mm\n",
-      "Central: 49.06 sigma, 11.07 mm\n",
-      "Lower: 47.24 sigma, 10.66 mm\n",
-      "\n",
-      "Dimesion of the 5 sigma channelled spot (upper-lower): 0.82 mm   \tCrystal height: 2 mm\n",
-      "Center the spot in the crystal: [10.07,12.07] mm\n",
-      "Jaw sigma in order to center: 44.6\n"
-     ]
-    }
-   ],
-   "source": [
-    "run_cry_tracking(line_name = line_name_HL_IR7_IR3, normalized_emittance = normalized_emittance_HL, ax_plot = False, coll_name = coll_name_HL,  n_sigma = 8.2)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 53,
-   "id": "70cf1051",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Done loading line from dict.           \n",
-      "Bad apertures :  {}\n",
-      "Replace bad apertures with Marker\n",
-      "Found suitable prebuilt kernel `default_bb3d`.\n",
-      "\n",
-      "Energy: 7000.00 GeV \t TCCS sigma setting: 8.7\n",
-      "\n",
-      "Upper: 51.20 sigma, 11.55 mm\n",
-      "Central: 49.37 sigma, 11.14 mm\n",
-      "Lower: 47.55 sigma, 10.73 mm\n",
-      "\n",
-      "Dimesion of the 5 sigma channelled spot (upper-lower): 0.82 mm   \tCrystal height: 2 mm\n",
-      "Center the spot in the crystal: [10.14,12.14] mm\n",
-      "Jaw sigma in order to center: 44.9\n"
-     ]
-    }
-   ],
-   "source": [
-    "run_cry_tracking(line_name = line_name_HL_IR7_IR3, normalized_emittance = normalized_emittance_HL, ax_plot = False, coll_name = coll_name_HL,  n_sigma = 8.7)"
-   ]
-  },
-  {
-   "cell_type": "code",
    "execution_count": null,
-   "id": "fdcaab53",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "df6e2286",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "ba5d0d39",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 44,
    "id": "e9aa49c8",
    "metadata": {
     "vscode": {
@@ -991,39 +763,16 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 47,
+   "execution_count": null,
    "id": "e6133ab5",
    "metadata": {
     "vscode": {
      "languageId": "python"
     }
    },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Done loading line from dict.           \n",
-      "Bad apertures :  {'tctph.4r8.a.b2_aper': (-0.04, 0.04, -0.04, 0.04, 0.16672558295218318, -0.0), 'vmabc.4l2.b.b2_aper': (-0.0315, 0.0315, -0.0315, 0.0315, -0.18383135991897473, -0.0)}\n",
-      "Replace bad apertures with Marker\n",
-      "tctph.4r8.a.b2_aper 3461.1485832278486 Marker(_dummy=0)\n",
-      "vmabc.4l2.b.b2_aper 23206.82195866583 Marker(_dummy=0)\n",
-      "Found suitable prebuilt kernel `default_bb3d`.\n",
-      "\n",
-      "Energy: 6800.00 GeV \t TCCS sigma setting: 5\n",
-      "\n",
-      "Upper: 31.18 sigma, 11.53 mm\n",
-      "Central: 30.05 sigma, 11.11 mm\n",
-      "Lower: 28.91 sigma, 10.69 mm\n",
-      "\n",
-      "Dimesion of the 5 sigma channelled spot (upper-lower): 0.84 mm   \tCrystal height: 2 mm\n",
-      "Center the spot in the crystal: [10.11,12.11] mm\n",
-      "Jaw sigma in order to center: 27.3\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
-    "run_cry_tracking(line_name = line_name_RUN3, normalized_emittance = normalized_emittance_RUN3, ax_plot = False, coll_name = coll_name_RUN3, n_sigma=5)"
+    "run_cry_tracking(line_name = line_name_RUN3, normalized_emittance = normalized_emittance_RUN3, ax_plot = True, coll_name = coll_name_RUN3)"
    ]
   },
   {
