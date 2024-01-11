@@ -12,7 +12,7 @@ run:
   mode: 'target_absorber'   #angular_scan    cry_black_absorbers   monitors  xsuite  simple_model target_absorber
 
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR3_IR7rem_TCCS_7.2_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_TCCS_7.2_
   num_jobs: 100 #5 100
   run_local: False
   dryrun: False
@@ -25,7 +25,7 @@ jobsubmission:
 input_files:
   #line_b1: ${HOME_TWOCRYST}/input_files/flat_top_b1.json
   #line_b2: ${HOME_TWOCRYST}/input_files/flat_top_b2.json     
-  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
-  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_IR3_rematched/b4_sequence_patched.json
+  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_IR3_rematched/b4_sequence_patched.json
   #collimators: ${HOME_TWOCRYST}/input_files/flat_top.yaml
   collimators: ${HOME_TWOCRYST}/input_files/CollDB_HL_tight_b4.data

@@ -303,8 +303,8 @@ def main():
             black_absorbers = []
 
         everest_colls = [name for name in coll_names if name not in black_absorbers]
-        coll_manager.install_everest_collimators(names=everest_colls,verbose=True, seed=seed)
-        coll_manager.install_black_absorbers(names = black_absorbers, verbose=True, seed=seed)
+        coll_manager.install_everest_collimators(names=everest_colls,verbose=True)
+        coll_manager.install_black_absorbers(names = black_absorbers, verbose=True)
     else:
         raise ValueError(f"Unknown scattering engine {engine}!")
 
