@@ -435,7 +435,7 @@ def main():
         impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
                   complevel=9, complib='blosc')
         
-        """# SAVE IMPACTS ON TARGET
+        # SAVE IMPACTS ON TARGET
         df = pd.DataFrame(TARGET_monitor_dict['data'])
         var_dict = {}
 
@@ -476,7 +476,7 @@ def main():
         impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')
 
         impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',
-                  complevel=9, complib='blosc')"""
+                  complevel=9, complib='blosc')
         
 
     if mode == 'monitors':
