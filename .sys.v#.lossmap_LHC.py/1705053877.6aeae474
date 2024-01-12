@@ -376,8 +376,6 @@ def main():
     print(summary)
 
     if mode == 'cry_black_absorbers' or mode == 'target_absorber':
-        
-        print("... Saving impacts on particle data\n")
         df_part = part.to_pandas()
         drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0', 'beta0', 'mass0', 'start_tracking_at_element', 's']
         float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta', 'gamma0', 'p0c']
@@ -394,7 +392,6 @@ def main():
         TARGET_monitor_dict = TARGET_monitor.to_dict()
         
         # SAVE IMPACTS ON TCCS
-        print("... Saving impacts on TCCS\n")
         df = pd.DataFrame(TCCS_monitor_dict['data'])
         variables = float_variables + int_variables
         variables.remove('at_element')
@@ -438,8 +435,7 @@ def main():
         impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
                   complevel=9, complib='blosc')
         
-        # SAVE IMPACTS ON TARGET
-        print("... Saving impacts on TARGET\n")
+        """# SAVE IMPACTS ON TARGET
         df = pd.DataFrame(TARGET_monitor_dict['data'])
         var_dict = {}
 
@@ -480,11 +476,10 @@ def main():
         impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')
 
         impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',
-                  complevel=9, complib='blosc')
+                  complevel=9, complib='blosc')"""
         
 
     if mode == 'monitors':
-        print("... Saving full data of MONITORS\n")
         TCCS_monitor_dict = TCCS_monitor.to_dict()
         TARGET_monitor_dict = TARGET_monitor.to_dict()
         with open(Path(path_out,f'test_TCCS_monitor_B{beam}{plane}_{mode}.pkl'), 'wb') as f:
