@@ -30,9 +30,9 @@ NSIG_FAM tclp                 16.400000 TERTIARY
 NSIG_FAM tcxrp                 0.000000 UNKNOWN
 NSIG_FAM tcryo               999.00000 TERTIARY
 # Twocryst setup in IR3
-NSIG_FAM tccs3                 7.200000 SPECIAL
-NSIG_FAM tccp3                44.00000  SPECIAL     
-NSIG_FAM target3              44.00000  SPECIAL    
+NSIG_FAM tccs3                 8.700000 SPECIAL
+NSIG_FAM tccp3                34.60000  SPECIAL     
+NSIG_FAM target3              34.60000  SPECIAL    
 #
 # IR3 IR7 rem  
 # 7.200000    44.000000

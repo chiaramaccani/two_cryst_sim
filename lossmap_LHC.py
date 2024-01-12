@@ -387,7 +387,7 @@ def main():
                   complevel=9, complib='blosc')
         
         
-        epsilon = 2e10-3
+        epsilon = 2e10-4
         TCCS_monitor_dict = TCCS_monitor.to_dict()
         TARGET_monitor_dict = TARGET_monitor.to_dict()
         
@@ -458,7 +458,7 @@ def main():
         for key in var_dict.keys():
             impact_part_dict[key] = []
 
-        
+        epsilon = 2.5e-3
         for part in range(num_particles):
             for turn in range(num_turns):
                 if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low_TARGET - epsilon) and var_dict['x'][part, turn] < (abs_x_up_TARGET + epsilon) and var_dict['y'][part, turn] > (abs_y_low_TARGET - epsilon) and var_dict['y'][part, turn] < (abs_y_up_TARGET + epsilon):
