@@ -12,7 +12,7 @@ run:
   mode: 'target_absorber'   #angular_scan    cry_black_absorbers   monitors  xsuite  simple_model target_absorber
 
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_TCCS_8.7_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7_IR3_rem_TCCS_7.2_
   num_jobs: 100 #5 100
   run_local: False
   dryrun: False

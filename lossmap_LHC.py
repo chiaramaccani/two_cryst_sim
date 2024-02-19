@@ -379,8 +379,8 @@ def main():
         
         #print("... Saving impacts on particle data\n")
         df_part = part.to_pandas()
-        drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0', 'beta0', 'mass0', 'start_tracking_at_element', 's']
-        float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta', 'gamma0', 'p0c']
+        drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0','gamma0','beta0', 'mass0', 'start_tracking_at_element', 's']
+        float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta', 'p0c']
         int_variables = ['at_turn', 'particle_id', 'at_element', 'state', 'parent_particle_id']
         df_part.drop(drop_list, axis=1, inplace=True)
         df_part[float_variables] = df_part[float_variables].astype('float32')
