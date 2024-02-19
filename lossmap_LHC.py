@@ -377,7 +377,7 @@ def main():
 
     if mode == 'cry_black_absorbers' or mode == 'target_absorber':
         
-        print("... Saving impacts on particle data\n")
+        #print("... Saving impacts on particle data\n")
         df_part = part.to_pandas()
         drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0', 'beta0', 'mass0', 'start_tracking_at_element', 's']
         float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta', 'gamma0', 'p0c']
@@ -385,11 +385,11 @@ def main():
         df_part.drop(drop_list, axis=1, inplace=True)
         df_part[float_variables] = df_part[float_variables].astype('float32')
         df_part[int_variables] = df_part[int_variables].astype('int32')
-        df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='particles', format='table', mode='a',
-                  complevel=9, complib='blosc')
+        #df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='particles', format='table', mode='a',
+        #          complevel=9, complib='blosc')
+    
         
-        
-        epsilon = 2e10-4
+        epsilon = 0 #2e10-4
         TCCS_monitor_dict = TCCS_monitor.to_dict()
         TARGET_monitor_dict = TARGET_monitor.to_dict()
         
