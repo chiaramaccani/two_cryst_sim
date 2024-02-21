@@ -14,7 +14,7 @@ lhc = xt.line.Line.from_json(path+"b4_sequence_noaper.json")
 #lhc = lhcs.lhcb2
 
 mt_cry1 = xt.Marker()
-s_position = lhc.get_length() - 6775
+s_position = lhc.get_length() - 6773.7
 lhc.insert_element('mt_cry1',element=mt_cry1, at_s=s_position)   
 lhc.build_tracker()   
 lhc.particle_ref = xt.Particles(mass0=xp.PROTON_MASS_EV, p0c=7000e9)
@@ -169,7 +169,7 @@ optphase = 158.521582158919/360
   
 opt = lhc.match(solve=False,
                 default_tol={None: 5e-8},
-                solver_options=dict(max_rel_penalty_increase=2.),
+                solver_options={"max_rel_penalty_increase": 2.}, 
                 #twiss_init='preserve_start',
                 #table_for_twiss_init=(tw),
                 #ele_start=('s.ds.l7.b2'),
@@ -186,6 +186,7 @@ opt = lhc.match(solve=False,
                     xt.TargetSet(dqx=10.0, dqy=12.0, tol=0.01, tag='chrom'),
                     #xt.Target(action=act_pa2, tar='muy_mod', value=optphase, tol=1e-3, tag='ph'),
                     FractionalPhase('muy', optphase, tol=1e-3, end='mt_cry1', start='tcp.d6r7.b2', tag='ph'),
+                    #FractionalPhase('muy', optphase, tol=1e-3, at_1='mt_cry1', at_0='tcp.d6r7.b2', tag='ph'),
                     xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.l4.b2', tag='ir4'),
                     #xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.r4.b2', tag='ir4'),
                     xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.l2.b2', tag='ir2'),
