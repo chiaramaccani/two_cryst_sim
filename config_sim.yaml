@@ -4,15 +4,15 @@
 run: 
   beam: '2'
   plane: 'V'
-  turns: 1 #200
-  nparticles: 10 #100000 #1000
+  turns: 10 #200
+  nparticles: 100 #100000 #1000
   engine: 'everest'
   seed: 12345
   TTCS_align_angle_step: 0
   mode: 'target_absorber'   #angular_scan    cry_black_absorbers   monitors  xsuite  simple_model target_absorber
 
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7_rem_TCCS_8.2_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_ph_rem_TCCS_7.2_
   num_jobs: 100 #5 100
   run_local: False
   dryrun: False
@@ -25,7 +25,8 @@ jobsubmission:
 input_files:
   #line_b1: ${HOME_TWOCRYST}/input_files/flat_top_b1.json
   #line_b2: ${HOME_TWOCRYST}/input_files/flat_top_b2.json     
-  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
+  line_b2: ${HOME_TWOCRYST}/input_files/HL_rematched_phase_avdance.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_IR3_rematched/b4_sequence_patched.json
   #collimators: ${HOME_TWOCRYST}/input_files/flat_top.yaml
   collimators: ${HOME_TWOCRYST}/input_files/CollDB_HL_tight_b4.data
