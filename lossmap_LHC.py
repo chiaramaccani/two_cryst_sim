@@ -202,7 +202,9 @@ def main():
     
     seed          = run_dict['seed']
 
-    TTCS_align_angle_step = run_dict['TTCS_align_angle_step']
+    TCCS_align_angle_step = float(run_dict['TCCS_align_angle_step'])
+
+    normalized_emittance = run_dict['normalized_emittance']
 
     mode = run_dict['mode']
     print('\nMode: ', mode, '\n', 'Seed: ', seed, '\n')
@@ -280,7 +282,7 @@ def main():
     if coll_file.endswith('.yaml'):
         coll_manager = xc.CollimatorManager.from_yaml(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False)
     elif coll_file.endswith('.data'):
-        coll_manager = xc.CollimatorManager.from_SixTrack(coll_file, line=line, _context=context, ignore_crystals=False, nemitt_x = 2.5e-6,  nemitt_y = 2.5e-6)
+        coll_manager = xc.CollimatorManager.from_SixTrack(coll_file, line=line, _context=context, ignore_crystals=False, nemitt_x = normalized_emittance,  nemitt_y = normalized_emittance, beam=beam)
         # switch on cavities
         speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c
         harmonic_number = 35640
@@ -324,12 +326,12 @@ def main():
     coll_manager.set_openings()
 
 
-    if mode == 'angular_scan':
-        print("\nTCCS aligned to beam: ", line[TCCS_name].align_angle)
-        #line[TTCS_name].align_angle = TTCS_align_angle_step
-
-        line[TCCS_name].align_angle = line[TCCS_name].align_angle + TTCS_align_angle_step
-        print("TCCS align angle incremented by step: ", line[TCCS_name].align_angle)
+    #if mode == 'angular_scan':
+    print("\nTCCS aligned to beam: ", line[TCCS_name].align_angle)
+    #line[TTCS_name].align_angle = TTCS_align_angle_step
+    print("TCCS align angle incremented by step: ", TCCS_align_angle_step)
+    line[TCCS_name].align_angle = line[TCCS_name].align_angle + TCCS_align_angle_step
+    print("TCCS final alignment angle: ", line[TCCS_name].align_angle)
 
 
     # Aperture model check
@@ -342,9 +344,22 @@ def main():
     idx_TARGET = line.element_names.index(TARGET_name)
     idx_TCCP = line.element_names.index(TCCP_name)
 
-    print(f"\nParticleAnalysis(element_type=\'crystal\', n_sigma={coll_dict[ TCCS_name]['gap']}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bend={ coll_dict[ TCCS_name]['bend']}, align_angle={ line.elements[idx_TCCS].align_angle}, jaw_L={line.elements[idx_TCCS].jaw_L}, line_idx={ idx_TCCS})")
-    print(f"ParticleAnalysis(element_type=\'target\', n_sigma={ coll_dict[TARGET_name]['gap']}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']}, jaw_L={ line.elements[ idx_TARGET].jaw_L}, line_idx={ idx_TARGET})")
-    print(f"ParticleAnalysis(element_type=\'crystal\', n_sigma={ coll_dict[TCCP_name]['gap']}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bend={ coll_dict[ TCCP_name]['bend']}, jaw_L={ line.elements[ idx_TCCP].jaw_L}, line_idx={idx_TCCP})")
+    tw = line.twiss()
+    beta_y_TCCS = tw[:,TCCS_name]['bety'][0]
+    beta_y_TCCP = tw[:,TCCP_name]['bety'][0]
+    beta_y_TARGET = tw[:,TARGET_name]['bety'][0]
+    beta_rel = line.particle_ref._xobject.beta0[0]
+    gamma = line.particle_ref._xobject.gamma0[0]
+
+    emittance_phy = normalized_emittance/(beta_rel*gamma)
+
+    sigma_TCCS = np.sqrt(emittance_phy*beta_y_TCCS)
+    sigma_TCCP = np.sqrt(emittance_phy*beta_y_TCCP)
+    sigma_TARGET = np.sqrt(emittance_phy*beta_y_TARGET)
+
+    print(f"\nCrystalAnalysis(n_sigma={coll_dict[ TCCS_name]['gap']}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bend={ coll_dict[ TCCS_name]['bend']}, align_angle={ line.elements[idx_TCCS].align_angle}, jaw_L={line.elements[idx_TCCS].jaw_L}, line_idx={ idx_TCCS}, sigma={sigma_TCCS})")
+    print(f"TargetAnalysis(n_sigma={ coll_dict[TARGET_name]['gap']}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']}, jaw_L={ line.elements[ idx_TARGET].jaw_L}, line_idx={ idx_TARGET}, sigma={sigma_TARGET})")
+    print(f"CrystalAnalysis(n_sigma={ coll_dict[TCCP_name]['gap']}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bend={ coll_dict[ TCCP_name]['bend']}, jaw_L={ line.elements[ idx_TCCP].jaw_L}, line_idx={idx_TCCP}, sigma={sigma_TCCP})")
 
 
     # Generate initial pencil distribution on horizontal collimator
