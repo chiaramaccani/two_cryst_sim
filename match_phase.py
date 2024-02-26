@@ -6,6 +6,7 @@ import xtrack as xt
 import xpart as xp
 import xdeps as xd   
 import inspect
+import pickle
 
 path = '/afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/generate_xtrack/out/250muradXing20cmBetaNoTCLD-ORBITBUMP-TCPBETARETUNE-OFFSETAPERir7re12c6/'
 #path = '/afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/ir7_match/'
@@ -213,9 +214,13 @@ doMatch(opt)
 doMatch(opt)
 
 
-lhc.to_json('./input_files/HL_rematched_phase_avdance.json')
+lhc.to_json('./input_files/HL_IR7_phase_advance/HL_phase_noaper.json')
+knob_values = opt.get_knob_values()
+print(knob_values)
+name = 'knob2.pkl'
 
-
+with open('./input_files/HL_IR7_phase_advance/'+name, 'wb') as f:
+    pickle.dump(knob_values, f)
 
 
 

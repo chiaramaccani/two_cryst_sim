@@ -284,6 +284,8 @@ def main():
     elif coll_file.endswith('.data'):
         coll_manager = xc.CollimatorManager.from_SixTrack(coll_file, line=line, _context=context, ignore_crystals=False, nemitt_x = normalized_emittance,  nemitt_y = normalized_emittance, beam=beam)
         # switch on cavities
+        particle_ref_HL = xp.Particles(p0c=7000e9, q0=1, mass0=xp.PROTON_MASS_EV)
+        line.particle_ref = particle_ref_HL
         speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c
         harmonic_number = 35640
         voltage = 12e6/len(line.get_elements_of_type(xt.Cavity)[1])

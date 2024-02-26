@@ -4,11 +4,11 @@
 run: 
   beam: '2'
   plane: 'V'
-  turns: 200 #200
-  nparticles: 100000 #100000 #1000
+  turns: 100 #200
+  nparticles: 10 #100000 #1000
   engine: 'everest'
   seed: 12345
-  TCCS_align_angle_step: -1.1887686184543034e-06
+  TCCS_align_angle_step: 0 #-1.1887686184543034e-06
   mode: 'target_absorber'   #angular_scan    cry_black_absorbers   monitors  xsuite  simple_model target_absorber
   normalized_emittance: 2.5e-6
 
@@ -26,8 +26,9 @@ jobsubmission:
 input_files:
   #line_b1: ${HOME_TWOCRYST}/input_files/flat_top_b1.json
   #line_b2: ${HOME_TWOCRYST}/input_files/flat_top_b2.json     
-  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/HL_rematched_phase_avdance.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_rematched/b4_sequence.json
+  line_b2: /afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/generate_xtrack/out/250muradXing20cmBetaNoTCLD-ORBITBUMP-TCPBETARETUNE-OFFSETAPERir7re12c6/b4_sequence.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/HL_phase_advance_rematched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_IR3_rematched/b4_sequence_patched.json
   #collimators: ${HOME_TWOCRYST}/input_files/flat_top.yaml
   collimators: ${HOME_TWOCRYST}/input_files/CollDB_HL_tight_b4.data
