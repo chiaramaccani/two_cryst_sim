@@ -125,7 +125,7 @@ strDictIR4 = {
       
 lhc.vars.vary_default.update(strDictIR2) 
 lhc.vars.vary_default.update(strDictIR4)
-
+### lhc.vars['kqtf.b2'] = 1e-8  # set knob to certain value
 ##### initialize some twiss
 tw = lhc.twiss()
 
@@ -209,6 +209,7 @@ opt.enable_targets(tag='ir4')
 opt.enable_vary(tag='ir2')
 opt.enable_vary(tag='ir4')
 
+doMatch(opt)
 doMatch(opt)
 
 
