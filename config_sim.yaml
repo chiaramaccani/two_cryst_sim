@@ -8,12 +8,12 @@ run:
   nparticles: 100000 #100000 #1000
   engine: 'everest'
   seed: 12345
-  TCCS_align_angle_step: 0 #-1.1887686184543034e-06
+  TCCS_align_angle_step:  0 #-3.370066422017441e-06 #-1.1887686184543034e-06
   mode: 'target_absorber'   #angular_scan    cry_black_absorbers   monitors  xsuite  simple_model target_absorber
   normalized_emittance: 2.5e-6
 
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_phadv_TCCS_7.2_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_TCCS_7.2_tune_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
@@ -28,7 +28,8 @@ input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_IR3_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
-  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
+  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
   
 
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml
