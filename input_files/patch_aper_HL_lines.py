@@ -12,7 +12,7 @@ import xpart as xp
 
 #input_file  = Path(str(sys.argv[1]))
 beam        = 2  # int(sys.argv[2])
-line_name = os.path.expandvars("${HOME_TWOCRYST}/input_files/HL_IR7_IR3_rematched/b4_sequence.json")
+line_name = os.path.expandvars("${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence.json")
 input_file = Path(line_name)
 particle_ref_HL = xp.Particles(p0c=7000e9, q0=1, mass0=xp.PROTON_MASS_EV)
 

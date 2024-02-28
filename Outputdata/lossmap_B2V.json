@@ -1,24 +1,16 @@
 {
  "collimator": {
-  "s": [
-   20199.140373184753
-  ],
-  "name": [
-   "tcp.d6r7.b2"
-  ],
-  "length": [
-   0.6
-  ],
-  "n": [
-   1.0
-  ]
+  "s": [],
+  "name": [],
+  "length": [],
+  "n": []
  },
  "aperture": {
   "s": [],
   "name": [],
   "n": []
  },
- "machine_length": 26658.88317148575,
+ "machine_length": 26658.883171485748,
  "interpolation": 0.1,
  "reversed": true
 }

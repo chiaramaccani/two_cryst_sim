@@ -246,7 +246,7 @@ def main():
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
-    TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
+    TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2+0.0001)
     TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
 
 
@@ -284,8 +284,8 @@ def main():
     elif coll_file.endswith('.data'):
         coll_manager = xc.CollimatorManager.from_SixTrack(coll_file, line=line, _context=context, ignore_crystals=False, nemitt_x = normalized_emittance,  nemitt_y = normalized_emittance, beam=beam)
         # switch on cavities
-        particle_ref_HL = xp.Particles(p0c=7000e9, q0=1, mass0=xp.PROTON_MASS_EV)
-        line.particle_ref = particle_ref_HL
+        #particle_ref_HL = xp.Particles(p0c=7000e9, q0=1, mass0=xp.PROTON_MASS_EV)
+        #line.particle_ref = particle_ref_HL
         speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c
         harmonic_number = 35640
         voltage = 12e6/len(line.get_elements_of_type(xt.Cavity)[1])
@@ -361,7 +361,7 @@ def main():
 
     print(f"\nCrystalAnalysis(n_sigma={coll_dict[ TCCS_name]['gap']}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bend={ coll_dict[ TCCS_name]['bend']}, align_angle={ line.elements[idx_TCCS].align_angle}, jaw_L={line.elements[idx_TCCS].jaw_L}, line_idx={ idx_TCCS}, sigma={sigma_TCCS})")
     print(f"TargetAnalysis(n_sigma={ coll_dict[TARGET_name]['gap']}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']}, jaw_L={ line.elements[ idx_TARGET].jaw_L}, line_idx={ idx_TARGET}, sigma={sigma_TARGET})")
-    print(f"CrystalAnalysis(n_sigma={ coll_dict[TCCP_name]['gap']}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bend={ coll_dict[ TCCP_name]['bend']}, jaw_L={ line.elements[ idx_TCCP].jaw_L}, line_idx={idx_TCCP}, sigma={sigma_TCCP})")
+    print(f"CrystalAnalysis(n_sigma={ coll_dict[TCCP_name]['gap']}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bend={ coll_dict[ TCCP_name]['bend']}, jaw_L={ line.elements[ idx_TCCP].jaw_L}, line_idx={idx_TCCP}, sigma={sigma_TCCP})\n")
 
 
     # Generate initial pencil distribution on horizontal collimator
@@ -411,7 +411,7 @@ def main():
         TARGET_monitor_dict = TARGET_monitor.to_dict()
         
         # SAVE IMPACTS ON TCCS
-        print("... Saving impacts on TCCS\n")
+        print("\n... Saving impacts on TCCS\n")
         df = pd.DataFrame(TCCS_monitor_dict['data'])
         variables = float_variables + int_variables
         variables.remove('at_element')
