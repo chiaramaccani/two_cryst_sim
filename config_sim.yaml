@@ -2,18 +2,27 @@
 ---
 
 run: 
+
+  engine: 'everest'
+  seed: 12345 
+
   beam: '2'
   plane: 'V'
   turns: 200 #200
   nparticles: 100000 #100000 #1000
-  engine: 'everest'
-  seed: 12345
-  TCCS_align_angle_step:  0 #-3.370066422017441e-06 #-1.1887686184543034e-06
-  mode: 'target_absorber'   #angular_scan    cry_black_absorbers   monitors  xsuite  simple_model target_absorber
   normalized_emittance: 2.5e-6
+ 
+  TCCS_align_angle_step:  -2.0 #-3.370066422017441e-06 #-1.1887686184543034e-06
+  TCCS_gap: 7.2
+  TARGET_gap: 99
+  TCCP_gap: 99
 
+  save_list: ['losses', 'TCCS_impacts', 'TARGET_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts']        
+  mode: 'target_absorber'   #                                                
+
+  
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_TCCS_7.2_tune_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_TCCS_7.2_tune_scan__-2.0_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
@@ -23,14 +32,33 @@ jobsubmission:
 
 
 input_files:
-  #line_b1: ${HOME_TWOCRYST}/input_files/Run3_flat_top/flat_top_b1.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/Run3_flat_top/flat_top_b2.json     
+  line_b2: ${HOME_TWOCRYST}/input_files/Run3_flat_top/flat_top_b2.json     
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_IR3_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
-  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
   
 
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml
   collimators: ${HOME_TWOCRYST}/input_files/colldbs/CollDB_HL_tight_b4.data
+
+
+
+
+
+
+
+#
+# IR3 IR7 rem  
+# 7.200000    44.000000
+# 7.700000    44.300000
+# 8.200000    44.600000
+# 8.700000    44.900000
+#
+# IR7 rem      
+# 7.200000    33.600000
+# 7.700000    33.900000
+# 8.200000    34.300000
+# 8.700000    34.600000
+#

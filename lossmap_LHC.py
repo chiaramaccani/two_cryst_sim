@@ -14,6 +14,9 @@ import xcoll as xc
 import scipy
 import io 
 
+from IPython import embed
+
+
 
 
 
@@ -209,6 +212,7 @@ def main():
     mode = run_dict['mode']
     print('\nMode: ', mode, '\n', 'Seed: ', seed, '\n')
 
+    save_list = run_dict['save_list']
 
     # Setup input files
     file_dict = config_dict['input_files']
@@ -224,8 +228,13 @@ def main():
     if coll_file.endswith('.data'):
         coll_dict = load_colldb_new(coll_file).to_dict('index')
 
-    context = xo.ContextCpu(omp_num_threads='auto')
+    TCCS_gap = float(run_dict['TCCS_gap'])
+    TCCP_gap = float(run_dict['TCCP_gap'])
+    TARGET_gap = float(run_dict['TCCP_gap'])
 
+    print('\nTwocryst gaps: \tTCCS: ', TCCS_gap,'\t TARGET: ', TARGET_gap , '\tTCCP:' ,TCCP_gap , '\n')
+
+    context = xo.ContextCpu(omp_num_threads='auto')
 
     # Define output path
     path_out = Path.cwd() / 'Outputdata'
@@ -233,6 +242,9 @@ def main():
     if not path_out.exists():
         os.makedirs(path_out)
 
+
+
+    # ---------------------------- SETUP LINE ----------------------------
 
     # Load from json
     line = xt.Line.from_json(line_file)
@@ -242,27 +254,35 @@ def main():
     TCCS_name = 'tccs.5r3.b2'
     TCCP_name = 'tccp.4l3.b2'
     TARGET_name = 'target.4l3.b2'
-    TCLA_name = 'tcla.a5l3.b2'
+    PIXEL_name = 'pixel.detector'
+
+    d_pix = 1 # [m]
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
     TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2+0.0001)
-    TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
+    PIXEL_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_pix)
 
 
-    line.insert_element(at_s=TCCS_loc, element=xt.Marker(), name='tccs.5r3.b2')
-    line.insert_element(at_s=TCCS_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='tccs.5r3.b2_aper')
-    line.insert_element(at_s=TCCP_loc, element=xt.Marker(), name='tccp.4l3.b2')
-    line.insert_element(at_s=TCCP_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='tccp.4l3.b2_aper')
-    line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name='target.4l3.b2')
-    line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name='target.4l3.b2_aper')
+    line.insert_element(at_s=TCCS_loc, element=xt.Marker(), name=TCCS_name)
+    line.insert_element(at_s=TCCS_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name=TCCS_name+'_aper')
+    line.insert_element(at_s=TCCP_loc, element=xt.Marker(), name=TCCP_name)
+    line.insert_element(at_s=TCCP_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name=TCCP_name+'_aper')
+    line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name=TARGET_name)
+    line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name= TARGET_name + '_aper')
+    line.insert_element(at_s=PIXEL_loc, element=xt.Marker(), name=PIXEL_name)
+    line.insert_element(at_s=PIXEL_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name= PIXEL_name + '_aper')
 
 
     TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
     TARGET_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+    PIXEL_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
     dx = 1e-11
     line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
     line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
+    line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
+
+    #embed()
 
 
     bad_aper = find_bad_offset_apertures(line)
@@ -284,8 +304,6 @@ def main():
     elif coll_file.endswith('.data'):
         coll_manager = xc.CollimatorManager.from_SixTrack(coll_file, line=line, _context=context, ignore_crystals=False, nemitt_x = normalized_emittance,  nemitt_y = normalized_emittance, beam=beam)
         # switch on cavities
-        #particle_ref_HL = xp.Particles(p0c=7000e9, q0=1, mass0=xp.PROTON_MASS_EV)
-        #line.particle_ref = particle_ref_HL
         speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c
         harmonic_number = 35640
         voltage = 12e6/len(line.get_elements_of_type(xt.Cavity)[1])
@@ -299,14 +317,13 @@ def main():
     if engine == 'everest':
         coll_names = coll_manager.collimator_names
 
-        if mode == 'cry_black_absorbers':
-            black_absorbers = ['target.4l3.b2', 'tccs.5r3.b2']
-        elif mode == 'angular_scan' or mode == 'target_absorber': 
-            black_absorbers = ['target.4l3.b2',]
+        if mode == 'target_absorber': 
+            black_absorbers = [TARGET_name,]
         else: 
             black_absorbers = []
 
         everest_colls = [name for name in coll_names if name not in black_absorbers]
+
         coll_manager.install_everest_collimators(names=everest_colls,verbose=True)
         coll_manager.install_black_absorbers(names = black_absorbers, verbose=True)
     else:
@@ -320,15 +337,15 @@ def main():
 
         
     # Build the tracker
+    #coll_manager.build_tracker()
     coll_manager.build_tracker()
-
 
     # Set the collimator openings based on the colldb,
     # or manually override with the option gaps={collname: gap}
-    coll_manager.set_openings()
+    #coll_manager.set_openings()
+    coll_manager.set_openings(gaps = {TCCS_name: TCCS_gap, TCCP_name: TCCP_gap, TARGET_name: TARGET_gap})
 
 
-    #if mode == 'angular_scan':
     print("\nTCCS aligned to beam: ", line[TCCS_name].align_angle)
     #line[TTCS_name].align_angle = TTCS_align_angle_step
     print("TCCS align angle incremented by step: ", TCCS_align_angle_step)
@@ -345,11 +362,15 @@ def main():
     idx_TCCS = line.element_names.index(TCCS_name)
     idx_TARGET = line.element_names.index(TARGET_name)
     idx_TCCP = line.element_names.index(TCCP_name)
+    idx_PIXEL = line.element_names.index(PIXEL_name)
+
+    print(f"\nLine index of TCCS: {idx_TCCS}, TARGET: {idx_TARGET}, TCCP: {idx_TCCP}")
 
     tw = line.twiss()
     beta_y_TCCS = tw[:,TCCS_name]['bety'][0]
     beta_y_TCCP = tw[:,TCCP_name]['bety'][0]
     beta_y_TARGET = tw[:,TARGET_name]['bety'][0]
+    beta_y_PIXEL = tw[:,PIXEL_name]['bety'][0]
     beta_rel = line.particle_ref._xobject.beta0[0]
     gamma = line.particle_ref._xobject.gamma0[0]
 
@@ -358,11 +379,15 @@ def main():
     sigma_TCCS = np.sqrt(emittance_phy*beta_y_TCCS)
     sigma_TCCP = np.sqrt(emittance_phy*beta_y_TCCP)
     sigma_TARGET = np.sqrt(emittance_phy*beta_y_TARGET)
+    sigma_PIXEL = np.sqrt(emittance_phy*beta_y_PIXEL)
 
-    print(f"\nCrystalAnalysis(n_sigma={coll_dict[ TCCS_name]['gap']}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bend={ coll_dict[ TCCS_name]['bend']}, align_angle={ line.elements[idx_TCCS].align_angle}, jaw_L={line.elements[idx_TCCS].jaw_L}, line_idx={ idx_TCCS}, sigma={sigma_TCCS})")
-    print(f"TargetAnalysis(n_sigma={ coll_dict[TARGET_name]['gap']}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']}, jaw_L={ line.elements[ idx_TARGET].jaw_L}, line_idx={ idx_TARGET}, sigma={sigma_TARGET})")
-    print(f"CrystalAnalysis(n_sigma={ coll_dict[TCCP_name]['gap']}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bend={ coll_dict[ TCCP_name]['bend']}, jaw_L={ line.elements[ idx_TCCP].jaw_L}, line_idx={idx_TCCP}, sigma={sigma_TCCP})\n")
+    print(f"\nTCCS:   CrystalAnalysis(n_sigma={line.elements[idx_TCCS].jaw_L/sigma_TCCS}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bend={ coll_dict[ TCCS_name]['bend']}, align_angle={ line.elements[idx_TCCS].align_angle}, sigma={sigma_TCCS})")
+    print(f"TARGET: TargetAnalysis(n_sigma={line.elements[idx_TARGET].jaw_L/sigma_TARGET}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']}, sigma={sigma_TARGET})")
+    print(f"TCCP:   CrystalAnalysis(n_sigma={line.elements[idx_TCCP].jaw_L/sigma_TCCP}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bend={ coll_dict[ TCCP_name]['bend']}, sigma={sigma_TCCP}")
+    print(f"PIXEL:  TargetAnalysis(n_sigma={line.elements[idx_TCCP].jaw_L/sigma_TCCP}, length={0}, ydim={0}, xdim={0}, sigma={sigma_PIXEL})\n")
 
+
+    # ---------------------------- TRACKING ----------------------------
 
     # Generate initial pencil distribution on horizontal collimator
     tcp  = f"tcp.{'c' if plane=='H' else 'd'}6{'l' if beam=='1' else 'r'}7.b{beam}"
@@ -382,36 +407,43 @@ def main():
     coll_manager.disable_scattering()
     print(f"Done tracking in {line.time_last_track:.1f}s.")
 
+    print('Jaws L     TCCS:', line.elements[idx_TCCS].jaw_L, '   TCCP: ', line.elements[idx_TCCP].jaw_L, '   TARGET:', line.elements[idx_TARGET].jaw_L)
 
-    # Save lossmap to json, which can be loaded, combined (for more statistics),
-    # and plotted with the 'lossmaps' package
-    _ = coll_manager.lossmap(part, file=Path(path_out,f'lossmap_B{beam}{plane}.json'))
+
+    # ---------------------------- LOSSMAPS ----------------------------    
+
+    if 'losses' in save_list:
+        # Save lossmap to json, which can be loaded, combined (for more statistics),
+        # and plotted with the 'lossmaps' package
+        _ = coll_manager.lossmap(part, file=Path(path_out,f'lossmap_B{beam}{plane}.json'))
 
 
     # Save a summary of the collimator losses to a text file
     summary = coll_manager.summary(part) #, file=Path(path_out,f'coll_summary_B{beam}{plane}.out')
     print(summary)
 
-    if mode == 'cry_black_absorbers' or mode == 'target_absorber':
-        
-        #print("... Saving impacts on particle data\n")
-        df_part = part.to_pandas()
-        drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0','gamma0','beta0', 'mass0', 'start_tracking_at_element', 's']
-        float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta', 'p0c']
-        int_variables = ['at_turn', 'particle_id', 'at_element', 'state', 'parent_particle_id']
-        df_part.drop(drop_list, axis=1, inplace=True)
-        df_part[float_variables] = df_part[float_variables].astype('float32')
-        df_part[int_variables] = df_part[int_variables].astype('int32')
-        #df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='particles', format='table', mode='a',
-        #          complevel=9, complib='blosc')
-    
-        
-        epsilon = 0 #2e10-4
-        TCCS_monitor_dict = TCCS_monitor.to_dict()
-        TARGET_monitor_dict = TARGET_monitor.to_dict()
-        
+
+
+    # ---------------------------- SAVE DATA ----------------------------
+    #print("... Saving impacts on particle data\n")
+    df_part = part.to_pandas()
+    drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0','gamma0','beta0', 'mass0', 'start_tracking_at_element', 's']
+    float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta', 'p0c']
+    int_variables = ['at_turn', 'particle_id', 'at_element', 'state', 'parent_particle_id']
+    df_part.drop(drop_list, axis=1, inplace=True)
+    df_part[float_variables] = df_part[float_variables].astype('float32')
+    df_part[int_variables] = df_part[int_variables].astype('int32')
+    #df_part.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='particles', format='table', mode='a',
+    #          complevel=9, complib='blosc')
+
+
+
+
+    if 'TCCS_impacts' in save_list:
         # SAVE IMPACTS ON TCCS
         print("\n... Saving impacts on TCCS\n")
+        epsilon = 0 #2e10-4
+        TCCS_monitor_dict = TCCS_monitor.to_dict()
         df = pd.DataFrame(TCCS_monitor_dict['data'])
         variables = float_variables + int_variables
         variables.remove('at_element')
@@ -453,11 +485,69 @@ def main():
         impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')
 
         impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
-                  complevel=9, complib='blosc')
-        
+                complevel=9, complib='blosc')
+
+
+
+
+
+    ydim_TARGET = coll_dict[TARGET_name]['xdim']
+    xdim_TARGET =  coll_dict[TARGET_name]['ydim']
+    jaw_L_TARGET = line.elements[idx_TARGET].jaw_L
+
+    abs_y_low_TARGET = jaw_L_TARGET
+    abs_y_up_TARGET = jaw_L_TARGET + ydim_TARGET
+    abs_x_low_TARGET = -xdim_TARGET/2
+    abs_x_up_TARGET = xdim_TARGET/2
+
+    if 'TARGET_impacts' in save_list:
+
         # SAVE IMPACTS ON TARGET
         print("... Saving impacts on TARGET\n")
+
+        epsilon = 2.5e-3
+        TARGET_monitor_dict = TARGET_monitor.to_dict()
         df = pd.DataFrame(TARGET_monitor_dict['data'])
+        var_dict = {}
+
+        for var in variables:
+            new_arr = np.array(df[var])
+            new_arr = new_arr.reshape((num_particles, num_turns))
+            var_dict[var] = new_arr   
+        del df
+        
+        impact_part_dict = {}
+        for key in var_dict.keys():
+            impact_part_dict[key] = []
+
+        
+        for part in range(num_particles):
+            for turn in range(num_turns):
+                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low_TARGET - epsilon) and var_dict['x'][part, turn] < (abs_x_up_TARGET + epsilon) and var_dict['y'][part, turn] > (abs_y_low_TARGET - epsilon) and var_dict['y'][part, turn] < (abs_y_up_TARGET + epsilon):
+                    for key in var_dict.keys():
+                        impact_part_dict[key].append(var_dict[key][part, turn])
+        impact_part_df = pd.DataFrame(impact_part_dict) 
+        
+        impact_part_df.rename(columns={'state': 'this_state'}, inplace=True)
+        impact_part_df.rename(columns={'at_turn': 'this_turn'}, inplace=True)
+        impact_part_df = pd.merge(impact_part_df, df_part[['at_element', 'state', 'at_turn', 'particle_id']], on='particle_id', how='left')
+        
+        impact_part_df[float_variables] = impact_part_df[float_variables].astype('float32')
+        impact_part_df[int_variables] = impact_part_df[int_variables].astype('int32')
+        impact_part_df['this_turn'] = impact_part_df['this_turn'].astype('int32')
+        impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')
+
+        impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',
+                complevel=9, complib='blosc')
+
+
+    if 'PIXEL_impacts' in save_list:
+
+        # SAVE IMPACTS ON PIXEL
+        print("... Saving impacts on PIXEL\n")
+
+        PIXEL_monitor_dict = PIXEL_monitor.to_dict()
+        df = pd.DataFrame(PIXEL_monitor_dict['data'])
         var_dict = {}
 
         for var in variables:
@@ -479,7 +569,7 @@ def main():
         for key in var_dict.keys():
             impact_part_dict[key] = []
 
-        epsilon = 2.5e-3
+        epsilon = 3.5e-3
         for part in range(num_particles):
             for turn in range(num_turns):
                 if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low_TARGET - epsilon) and var_dict['x'][part, turn] < (abs_x_up_TARGET + epsilon) and var_dict['y'][part, turn] > (abs_y_low_TARGET - epsilon) and var_dict['y'][part, turn] < (abs_y_up_TARGET + epsilon):
@@ -497,26 +587,9 @@ def main():
         impact_part_df['this_state'] = impact_part_df['this_state'].astype('int32')
 
         impact_part_df.to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',
-                  complevel=9, complib='blosc')
+                complevel=9, complib='blosc')
         
 
-    if mode == 'monitors':
-        print("... Saving full data of MONITORS\n")
-        TCCS_monitor_dict = TCCS_monitor.to_dict()
-        TARGET_monitor_dict = TARGET_monitor.to_dict()
-        with open(Path(path_out,f'test_TCCS_monitor_B{beam}{plane}_{mode}.pkl'), 'wb') as f:
-            pickle.dump(TCCS_monitor_dict, f)
-        with open(Path(path_out,f'test_TARGET_monitor_B{beam}{plane}_{mode}.pkl'), 'wb') as f:
-            pickle.dump(TARGET_monitor_dict, f)
-        #df_part = part.to_pandas()
-        #drop_list = ['chi', 'charge_ratio', 'pdg_id', 'rvv', 'rpp', '_rng_s1', '_rng_s2', '_rng_s3', '_rng_s4', 'weight', 'ptau', 'q0', 'beta0', 'mass0']
-        #float_variables = ['s', 'zeta', 'x', 'px', 'y', 'py', 'delta', 'gamma0', 'p0c']
-        #int_variables = ['at_turn', 'particle_id', 'at_element', 'start_tracking_at_element', 'state', 'parent_particle_id']
-        #df_part.drop(drop_list, axis=1, inplace=True)
-        #df_part[float_variables] = df_part[float_variables].astype('float32')
-        #df_part[int_variables] = df_part[int_variables].astype('int32')
-        #df_part.to_hdf(Path(path_out,f'test_particles_B{beam}{plane}.h5'), key='particles', format='table', mode='a',
-        #         complevel=9, complib='blosc')
 
 if __name__ == "__main__":
     main()
