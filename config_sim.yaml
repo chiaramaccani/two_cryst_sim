@@ -12,17 +12,18 @@ run:
   nparticles: 100000 #100000 #1000
   normalized_emittance: 2.5e-6
  
-  TCCS_align_angle_step:  -2.0 #-3.370066422017441e-06 #-1.1887686184543034e-06
+  TCCS_align_angle_step:  0  #-3.370066422017441e-06 #-1.1887686184543034e-06
   TCCS_gap: 7.2
-  TARGET_gap: 99
-  TCCP_gap: 99
+  TARGET_gap:  33.6 #33.6
+  TCCP_gap: 33.6 #33.6
+  PIXEL_gap: 33.6
 
-  save_list: ['losses', 'TCCS_impacts', 'TARGET_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts']        
-  mode: 'target_absorber'   #                                                
+  save_list: ['losses', 'TCCS_impacts', 'TARGET_impacts', 'TCP_generated'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated']        
+  mode: 'target_absorber'   #            'target_absorber'                                     
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_TCCS_7.2_tune_scan__-2.0_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_TCCS_7.2_phase_TCP_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
@@ -32,11 +33,11 @@ jobsubmission:
 
 
 input_files:
-  line_b2: ${HOME_TWOCRYST}/input_files/Run3_flat_top/flat_top_b2.json     
+  #line_b2: ${HOME_TWOCRYST}/input_files/Run3_flat_top/flat_top_b2.json     
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_IR3_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
+  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
   
 
