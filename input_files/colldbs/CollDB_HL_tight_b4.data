@@ -98,7 +98,7 @@ tctpxh.4r1.b2                                               tcth1 Iner      1.00
 tctpxv.4r1.b2                                               tctv1 Iner      1.000000     90.000000      0.000000  
 tccs.5r3.b2                                                 tccs3 Si        0.004000     90.000000      0.000000
 tccp.4l3.b2                                                 tccp3 Si       0.070000     90.000000      0.000000
-target.4l3.b2                                               target3 Iner    0.005000     90.000000      0.000000
+#target.4l3.b2                                               target3 Iner    0.005000     90.000000      0.000000
 #
 # Additional Collimator Settings
 SETTINGS
@@ -110,4 +110,4 @@ ONESIDED tccp.4l3.b2                                      1
 ONESIDED target.4l3.b2                                    1     
 CRYSTAL tccs.5r3.b2 80.00 2.0e-3 35.0e-3 0.0 0.0 0.0 1
 CRYSTAL tccp.4l3.b2 10.00 2.0e-3 4.0e-3 0.0 0.0 0.0 1
-TARGET target.4l3.b2 2.0e-3 4.0e-3
+#TARGET target.4l3.b2 2.0e-3 4.0e-3

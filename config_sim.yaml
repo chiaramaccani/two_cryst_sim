@@ -10,20 +10,21 @@ run:
   plane: 'V'
   turns: 200 #200
   nparticles: 100000 #100000 #1000
-  normalized_emittance: 2.5e-6
+  normalized_emittance: 3.5e-6 
+  turn_on_cavities: True # True False 
  
   TCCS_align_angle_step:  0  #-3.370066422017441e-06 #-1.1887686184543034e-06
-  TCCS_gap: 7.2
-  TARGET_gap:  33.6 #33.6
+  TCCS_gap: 7.2 #7.2
+  TARGET_gap: 33.6 #33.6
   TCCP_gap: 33.6 #33.6
-  PIXEL_gap: 33.6
+  PIXEL_gap: 33.6  #33.6
 
-  save_list: ['losses', 'TCCS_impacts', 'TARGET_impacts', 'TCP_generated'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated']        
+  save_list: ['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated']        
   mode: 'target_absorber'   #            'target_absorber'                                     
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7rem_TCCS_7.2_phase_TCP_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_IR7_tune_new_version_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
@@ -37,12 +38,13 @@ input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_IR3_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
-  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
+  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
   
 
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml
-  collimators: ${HOME_TWOCRYST}/input_files/colldbs/CollDB_HL_tight_b4.data
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/HL_tight_twocryst.yaml
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/CollDB_HL_tight_b4.data
 
 
 
