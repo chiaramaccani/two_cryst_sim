@@ -114,7 +114,7 @@ def find_bad_offset_apertures(line):
 
 import TWOCRYST_analysis as twa
 
-load_particles = True
+"""load_particles = True
 df_key = "TCP_generated"    
 file = 'TCP_generated.h5'
 
@@ -127,7 +127,16 @@ if load_particles:
     TCP.save_particles_data(file_name = file, output_path = default_path + folder,  df_key=df_key)
     start_values = TCP.data
 else:
-    start_values = pd.read_hdf(default_path + folder + file, key=df_key)
+    start_values = pd.read_hdf(default_path + folder + file, key=df_key)"""
+
+
+p0c = 7e12
+x =  0.0001
+y = 0.0001
+px =  0.0001
+py = 0.0001
+zeta = 0.0001
+delta = 0.0001
 
 
 config_file = os.path.expandvars('$HOME_TWOCRYST/config_sim.yaml')
@@ -142,7 +151,7 @@ beam          = run_dict['beam']
 plane         = run_dict['plane']
 
 num_turns     = 1 #run_dict['turns'] 
-num_particles = len(start_values)
+num_particles = 1#len(start_values)
 engine        = run_dict['engine']
 
 seed          = run_dict['seed']
@@ -308,9 +317,13 @@ df_with_coll = line.check_aperture()
 assert not np.any(df_with_coll.has_aperture_problem)
 
 
-part = xp.Particles(p0c = start_values['p0c'].values[0], x = start_values['x'].values, y = start_values['y'].values, 
+"""part = xp.Particles(p0c = start_values['p0c'].values[0], x = start_values['x'].values, y = start_values['y'].values, 
                     px = start_values['px'].values, py = start_values['py'].values, 
-                    zeta = start_values['zeta'].values, delta = start_values['delta'].values)
+                    zeta = start_values['zeta'].values, delta = start_values['delta'].values)"""
+
+part = xp.Particles(p0c = p0c, x = x, y = y, 
+                    px = px, py = py, 
+                    zeta = zeta, delta = delta)
 
 idx = line.element_names.index(TCP_monitor)
 part.at_element = idx

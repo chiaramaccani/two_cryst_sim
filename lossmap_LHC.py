@@ -468,7 +468,7 @@ def main():
         jaw_L_TCCS = line.elements[idx_TCCS].jaw_L
         
         impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS, 
-                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+                epsilon = 0, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
