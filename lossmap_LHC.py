@@ -467,10 +467,27 @@ def main():
         xdim_TCCS =  coll_dict[TCCS_name]['ydim']
         jaw_L_TCCS = line.elements[idx_TCCS].jaw_L
         
-        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS, 
+        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS+ line.elements[idx_TCCS].ref_y, 
                 epsilon = 0, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
+            complevel=9, complib='blosc')
+
+
+    if 'TCCP_impacts' in save_list:
+        # SAVE IMPACTS ON TCCP
+        print("... Saving impacts on TCCP\n")
+
+        TCCP_monitor_dict = TCCP_monitor.to_dict()
+        
+        ydim_TCCP = coll_dict[TCCP_name]['xdim']
+        xdim_TCCP =  coll_dict[TCCP_name]['ydim']
+        jaw_L_TCCP = line.elements[idx_TCCP].jaw_L
+        
+        impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP + line.elements[idx_TCCP].ref_y, 
+                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCP_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
         
 
@@ -485,7 +502,7 @@ def main():
         xdim_TARGET =  coll_dict[TARGET_name]['ydim']
         jaw_L_TARGET = line.elements[idx_TARGET].jaw_L        
 
-        impact_part_df = get_df_to_save(TARGET_monitor_dict, df_part, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = jaw_L_TARGET,
+        impact_part_df = get_df_to_save(TARGET_monitor_dict, df_part, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = jaw_L_TARGET + line.elements[idx_TARGET].ref_y,
                 epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',
