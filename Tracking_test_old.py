@@ -191,6 +191,23 @@ line1_file = '${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patc
 
 # -------------------------------------------------------------------------------
 
+#import TWOCRYST_analysis as twa
+
+"""load_particles = True
+df_key = "TCP_generated"    
+file = 'TCP_generated.h5'
+
+default_path = "/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/"
+folder = 'TEST_prova__target_absorber_20240305-1759/'
+
+if load_particles:
+    TCP = twa.TargetAnalysis(n_sigma=5.916079783099615, length=0.6, ydim=0.025, xdim=0.025, sigma=0.00015657954897267004)
+    TCP.load_particles(folder, df_key=df_key)   
+    TCP.save_particles_data(file_name = file, output_path = default_path + folder,  df_key=df_key)
+    start_values = TCP.data
+else:
+    start_values = pd.read_hdf(default_path + folder + file, key=df_key)"""
+
 
 
 
@@ -358,87 +375,176 @@ def setup_line(line_name, coll_dict=coll_dict, beam = 2, plane = 'V', num_partic
     return line, coll_manager
 
 
+"""part = xp.Particles(p0c = start_values['p0c'].values[0], x = start_values['x'].values, y = start_values['y'].values, 
+                    px = start_values['px'].values, py = start_values['py'].values, 
+                    zeta = start_values['zeta'].values, delta = start_values['delta'].values)
+p0c = 7e12
+x =  0.0001
+y = 0.0001
+px =  0.0001
+py = 0.0001
+zeta = 0.0001
+delta = 0.0001
+
+part = xp.Particles(p0c = p0c, x = x, y = y, 
+                    px = px, py = py, 
+                    zeta = zeta, delta = delta)
+
+"""      
 
 
-
-
-
-# ---------------------------- LOAD PARTICLES ----------------------------
-
-
-
-n_job = 0 # TO SET 
-
-#load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'
-load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'
-input_path  = Path(load_input_path, f'Job.{n_job}/Outputdata/particles_B{beam}{plane}.h5')
-print('Particles read from: ', input_path)
-
-df_part = pd.read_hdf(input_path, key='initial_particles')
-dct_part = df_part.to_dict(orient='list')
-size_vars = (
-    (xo.Int64, '_capacity'),
-    (xo.Int64, '_num_active_particles'),
-    (xo.Int64, '_num_lost_particles'),
-    (xo.Int64, 'start_tracking_at_element'),
-)
-scalar_vars = (
-        (xo.Float64, 'q0'),
-        (xo.Float64, 'mass0'),
-        (xo.Float64, 't_sim'),
-    )
-for tt, nn in scalar_vars + size_vars:
-    if nn in dct_part.keys() and not np.isscalar(dct_part[nn]):
-            dct_part[nn] = dct_part[nn][0]
-part = xp.Particles.from_dict(dct_part, load_rng_state=True)
-
-
-
-# ---------------------------- SELECT PARTICLES ----------------------------
-part_id = 0 # TO SET
-part = part.filter(part.particle_id==part_id)
-
-
-
-
-
-# ---------------------------- DECIDE LINES TO TRACK ----------------------------
-
-line0, coll_manager0 = setup_line(line0_file, coll_dict)
+line0, coll_manager0 = setup_line(line0_file)
 #line1, coll_manager1 = setup_line(line1_file)
 
+tcp  = f"tcp.{'c' if plane=='H' else 'd'}6{'l' if beam=='1' else 'r'}7.b{beam}"
+part = coll_manager0.generate_pencil_on_collimator(tcp, num_particles=1e6, impact_parameter=2e-6)
 
-# ---------------------------- GET SOME  INFRMATION ----------------------------
-
-idx_TCP = line0.element_names.index(TCP_name)
+idx_TCP = line0.element_names.index(tcp)
 idx_TARGET = line0.element_names.index(TARGET_name)
-idx_TCCS = line0.element_names.index(TCCS_name)
-
-
-# ---------------------------- TRACKING ----------------------------
-def save_y_traj(line, part, idx_start, idx_stop, num_turns=1):
-    s, y={}, {}
-    for i in range(idx_start,idx_stop):
-        line.track(part, ele_start=i, ele_stop=i+1, num_turns=num_turns)
-        s[line.element_names[i]] = part.s[0]
-        y[line.element_names[i]] = part.y[0]
-    return s, y
-
-
-part_gen = part.copy()
-idx = line0.element_names.index(TCP_name)
+part_before_TCP = part.copy()
 
 embed()
 
 
-part.at_element = idx
-part.start_tracking_at_element = idx
 
 
 
+
+
+tw0 = line0.twiss()
+tw1 = line1.twiss()
 
 coll_manager0.enable_scattering()
-line0.track(part, ele_stop=idx+1)
+coll_manager1.enable_scattering()
+
+#line.element_dict['tcp.d6r7.b2'].track(part)
+
+
+line0.track(part, num_turns=1, ele_stop='ip6')
+jxT,jyT = calcAction(part,tw0,'tcp.d6r7.b2')
+m1 = jyT>7.2
+part_ip6 = part.filter(m1)
+part_TCCS_10 = part_ip6.copy() # for tracking without rematched phase
+part_TCCS_11 = part_ip6.copy() # for tracking with rematched phase
+line0.track(part_TCCS_10, num_turns=1, ele_start='ip6', ele_stop=TCCS_name)
+line1.track(part_TCCS_11, num_turns=1, ele_start='ip6', ele_stop=TCCS_name)
+
+idx_TCCS = line0.element_names.index(TCCS_name)
+ele2 = line0.element_names[idx_TCCS+2]
+
+part_afterTCCS_20 = part_TCCS_10.copy()
+part_afterTCCS_21 = part_TCCS_11.copy()
+line0.track(part_afterTCCS_20, num_turns=1, ele_start=TCCS_name, ele_stop=ele2)
+line1.track(part_afterTCCS_21, num_turns=1, ele_start=TCCS_name, ele_stop=ele2)
+part_TARGET_30 = part_afterTCCS_20.copy()
+part_TARGET_31 = part_afterTCCS_21.copy()
+line0.track(part_TARGET_30, num_turns=1, ele_start=ele2, ele_stop=TARGET_name)
+line1.track(part_TARGET_31, num_turns=1, ele_start=ele2, ele_stop=TARGET_name)
+#part40 = part10.copy()
+#line0.track(part40, num_turns=1, ele_start='ip6', ele_stop='ip5')
+
+jaw_L_TARGET = line0.elements[idx_TARGET].jaw_L 
+jaw_L_TCCS = line0.elements[idx_TCCS].jaw_L 
+
+ydim_TCCS = coll_dict[TCCS_name]['xdim']
+xdim_TCCS =  coll_dict[TCCS_name]['ydim']
+
+       
+ydim_TARGET = coll_dict[TARGET_name]['xdim']
+xdim_TARGET =  coll_dict[TARGET_name]['ydim']    
+
+
+"""hit_TCCS_0 = part_TCCS_10.filter((part_TCCS_10.y > line0.elements[idx_TCCS].jaw_L ) & (part_TCCS_10.y < line0.elements[idx_TCCS].jaw_L + ydim_TCCS) & (part_TCCS_10.x > -xdim_TCCS/2) & (part_TCCS_10.x < xdim_TCCS/2) & (part_TCCS_10.state == 1) )
+hit_TCCS_1 = part_TCCS_11.filter((part_TCCS_11.y > line1.elements[idx_TCCS].jaw_L) & (part_TCCS_11.y < line1.elements[idx_TCCS].jaw_L + ydim_TCCS) & (part_TCCS_11.x > -xdim_TCCS/2) & (part_TCCS_11.x < xdim_TCCS/2) & (part_TCCS_11.state == 1) )
+print(len(hit_TCCS_0.y))
+print(len(hit_TCCS_1.y))
+
+
+hit_TARGET_0 = part_TARGET_30.filter((part_TARGET_30.y > line0.elements[idx_TARGET].jaw_L ) & (part_TARGET_30.y < line0.elements[idx_TARGET].jaw_L + ydim_TARGET) & (part_TARGET_30.x > -xdim_TARGET/2) & (part_TARGET_30.x < xdim_TARGET/2) & (part_TARGET_30.state == 1) )
+hit_TARGET_1 = part_TARGET_31.filter((part_TARGET_31.y > line1.elements[idx_TARGET].jaw_L) & (part_TARGET_31.y < line1.elements[idx_TARGET].jaw_L + ydim_TARGET) & (part_TARGET_31.x > -xdim_TARGET/2) & (part_TARGET_31.x < xdim_TARGET/2) & (part_TARGET_31.state == 1) )
+print(len(hit_TARGET_0.y))
+print(len(hit_TARGET_1.y))"""
+
+
+
+hit_TCCS_0 = part_TCCS_10.filter((part_TCCS_10.y > (line0.elements[idx_TCCS].jaw_L + line0.elements[idx_TCCS].ref_y)) & (part_TCCS_10.y < (line0.elements[idx_TCCS].jaw_L + line0.elements[idx_TCCS].ref_y + ydim_TCCS)) & (part_TCCS_10.x > -xdim_TCCS/2) & (part_TCCS_10.x < xdim_TCCS/2) & (part_TCCS_10.state == 1))
+hit_TCCS_1 = part_TCCS_11.filter((part_TCCS_11.y > (line1.elements[idx_TCCS].jaw_L + line1.elements[idx_TCCS].ref_y)) & (part_TCCS_11.y < (line1.elements[idx_TCCS].jaw_L + line1.elements[idx_TCCS].ref_y + ydim_TCCS)) & (part_TCCS_11.x > -xdim_TCCS/2) & (part_TCCS_11.x < xdim_TCCS/2) & (part_TCCS_11.state == 1))
+print(len(hit_TCCS_0.y))
+print(len(hit_TCCS_1.y))
+
+
+hit_TARGET_0 = part_TARGET_30.filter((part_TARGET_30.y > (line0.elements[idx_TARGET].jaw_L + line0.elements[idx_TARGET].ref_y)) & (part_TARGET_30.y < (line0.elements[idx_TARGET].jaw_L + line0.elements[idx_TARGET].ref_y + ydim_TARGET)) & (part_TARGET_30.x > -xdim_TARGET/2) & (part_TARGET_30.x < xdim_TARGET/2) & (part_TARGET_30.state == 1) )
+hit_TARGET_1 = part_TARGET_31.filter((part_TARGET_31.y > (line1.elements[idx_TARGET].jaw_L + line1.elements[idx_TARGET].ref_y)) & (part_TARGET_31.y < (line1.elements[idx_TARGET].jaw_L + line1.elements[idx_TARGET].ref_y + ydim_TARGET)) & (part_TARGET_31.x > -xdim_TARGET/2) & (part_TARGET_31.x < xdim_TARGET/2) & (part_TARGET_31.state == 1) )
+print(len(hit_TARGET_0.y))
+print(len(hit_TARGET_1.y))
+
+
+
+
+
+
+jx0,jy0 = calcAction(part_before_TCP,tw0,'tcp.d6r7.b2')
+jx1,jy1 = calcAction(part_ip6,tw0,'ip6')
+jx2,jy2 = calcAction(part_TCCS_10,tw0,TCCS_name)
+jx3,jy3 = calcAction(part_afterTCCS_20,tw0,ele2)
+jx4,jy4 = calcAction(part_TARGET_30,tw0,TARGET_name)
+
+print(np.mean(jy0))
+print(np.mean(jy1[:-np.sum(part_ip6.state<0)]))
+print(np.mean(jy2[:-np.sum(part_TCCS_10.state<0)]))
+print(np.mean(jy3[:-np.sum(part_afterTCCS_20.state<0)]))
+print(np.mean(jy4[:-np.sum(part_TARGET_30.state<0)]))
+
+
+
+
+TARGET_monitor0 = line0.element_dict['TARGET_monitor']
+TARGET_monitor_dict0 = TARGET_monitor0.to_dict()
+
+TCCS_monitor0 = line0.element_dict['TCCS_monitor']
+TCCS_monitor_dict0 = TCCS_monitor0.to_dict()
+        
+"""TARGET_imp_0 = get_df_to_save(TARGET_monitor_dict0, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = line0.elements[idx_TARGET].jaw_L ,
+        epsilon = 0, num_particles=num_particles, num_turns=1)
+
+
+TCCS_imp_0 = get_df_to_save(TCCS_monitor_dict0, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = line0.elements[idx_TCCS].jaw_L , 
+                epsilon = 0, num_particles=num_particles, num_turns=num_turns)"""
+
+TARGET_imp_0 = get_df_to_save(TARGET_monitor_dict0, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = line0.elements[idx_TARGET].jaw_L + line0.elements[idx_TARGET].ref_y,
+        epsilon = 0, num_particles=num_particles, num_turns=1)
+
+
+TCCS_imp_0 = get_df_to_save(TCCS_monitor_dict0, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = line0.elements[idx_TCCS].jaw_L + line0.elements[idx_TCCS].ref_y, 
+                epsilon = 0, num_particles=num_particles, num_turns=num_turns)
+
+
+
+
+TARGET_monitor1 = line1.element_dict['TARGET_monitor']
+TARGET_monitor_dict1 = TARGET_monitor1.to_dict()
+
+TCCS_monitor1 = line1.element_dict['TCCS_monitor']
+TCCS_monitor_dict1 = TCCS_monitor1.to_dict()
+        
+TARGET_imp_1 = get_df_to_save(TARGET_monitor_dict1, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = line1.elements[idx_TARGET].jaw_L + line1.elements[idx_TARGET].ref_y,
+        epsilon = 0, num_particles=num_particles, num_turns=1)
+
+
+TCCS_imp_1 = get_df_to_save(TCCS_monitor_dict1, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = line1.elements[idx_TCCS].jaw_L + line1.elements[idx_TCCS].ref_y, 
+                epsilon = 0, num_particles=num_particles, num_turns=1)
+
+"""TARGET_imp_1 = get_df_to_save(TARGET_monitor_dict1, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = line1.elements[idx_TARGET].jaw_L ,
+        epsilon = 0, num_particles=num_particles, num_turns=1)
+
+
+TCCS_imp_1 = get_df_to_save(TCCS_monitor_dict1, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = line1.elements[idx_TCCS].jaw_L , 
+                epsilon = 0, num_particles=num_particles, num_turns=1)"""
+
+print(len(hit_TCCS_0.y) == len(TCCS_imp_0.y))
+print(len(hit_TCCS_1.y) == len(TCCS_imp_1.y))
+print(len(hit_TARGET_0.y) == len(TARGET_imp_0.y))
+print(len(hit_TARGET_1.y) == len(TARGET_imp_1.y))
 
 
 embed()

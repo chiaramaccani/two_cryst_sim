@@ -4,7 +4,7 @@
 run: 
 
   engine: 'everest'
-  seed: 12345 
+  seed: 1
 
   beam: '2'
   plane: 'V'
@@ -20,11 +20,13 @@ run:
   PIXEL_gap: 33.6  #33.6
 
   save_list: ['losses', 'TCCS_impacts', 'TARGET_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated']        
-  mode: ''   #            'target_absorber'                                     
+  target_mode: ''   #            'target_absorber' 
+  input_mode: 'load'  # load  generate
+  load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'                                    
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_phase_def_
+  working_directory: ${HOME_TWOCRYST}/Condor/HL_IR7_phase_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False

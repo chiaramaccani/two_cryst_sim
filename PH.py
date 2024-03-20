@@ -305,3 +305,99 @@ def print_funct(line, tw,  ref_mode = True):
         print(f"TCCP\nCrystalAnalysis(n_sigma={line.elements[idx_TCCP].jaw_L/sigma_TCCP}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bending_radius={ coll_dict[ TCCP_name]['bending_radius']}, align_angle={line.elements[idx_TCCP].align_angle}, sigma={sigma_TCCP})")
         print(f"TCP\nTargetAnalysis(n_sigma={line.elements[idx_TCP].jaw_L/sigma_TCP}, length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025}, sigma={sigma_TCP})")
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+part_before_TCP = part.copy()
+df = part.to_pandas()
+df.to_hdf('./Outputdata/test_part.h5', key='particles', format='table', mode='a',
+             complevel=9, complib='blosc')
+part_from_pdhdf = xp.Particles.from_pandas(pd.read_hdf('./Outputdata/test_part.h5'))
+
+idx = line0.element_names.index(tcp)
+part_from_pdhdf.at_element = idx
+part_from_pdhdf.start_tracking_at_element = idx
+
+line0.track(part, ele_stop=idx+1)
+line0.track(part_from_pdhdf, ele_stop=idx+1)
+
+part_from_pdhdf = part_from_pdhdf.filter(part_from_pdhdf.particle_id == 0)
+part = part.filter(part.particle_id == 0)
+s0, s1={}, {}
+y0, y1 = {}, {}
+for i in range(idx+1, idx_TARGET):
+    line0.track(part_from_pdhdf, ele_start=i, ele_stop=i+1)
+    s1[line0.element_names[i]] = part_from_pdhdf.s[0]
+    y1[line0.element_names[i]] = part_from_pdhdf.y[0]
+
+for i in range(idx+1, idx_TARGET):
+    line0.track(part, ele_start=i, ele_stop=i+1)
+    s0[line0.element_names[i]] = part.s[0]
+    y0[line0.element_names[i]] = part.y[0]
+
+idx_TARGET = line0.element_names.index(TARGET_name)
+idx_TCCS = line0.element_names.index(TCCS_name)
+
+
+#print(line1.elements[idx_TCCS].jaw_L - min(not_common_before_TCCS.y))
+
+
+def plot_traj(s_part, y_part, line):
+    import matplotlib.pyplot as plt
+    
+    if not hasattr(s_part, '__iter__') or isinstance(s_part, list):
+        if any(isinstance(subvar, list) for subvar in s_part):
+            pass
+        else:
+            s_part = [s_part]
+            y_part = [y_part]
+    for s, y in zip(s_part,y_part):
+        plt.plot(s,y)
+    plt.vlines(line.get_s_elements()[idx_TCCS], -0.015, 0.015, color='k', linestyles='--')
+    plt.vlines(line.get_s_elements()[idx_TARGET], -0.015, 0.015,color='k', linestyles='--')
+    plt.vlines(line.get_s_elements()[idx_TCP], -0.015, 0.015,color='k', linestyles='--')
+    plt.hlines(line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y, line.get_s_elements()[idx_TCCS], line.get_s_elements()[idx_TARGET], color='b', linestyles='--')
+    plt.show()
+
+
+
+    def save_y_traj(line, part, idx_start, idx_stop):
+        s, y= [], []
+        for i in range(idx_start,idx_stop):
+            line.track(part, ele_start=i, ele_stop=i+1)
+            s.append(part.s[0])
+            y.append(part.y[0])
+        return s, y
+    
+    def save_y_multiturn(line, part, idx_start, num_turns):
+        ss, yy = [], []
+        s, y= [],[]
+        final_idx = len(line.element_names)
+        for i in range(idx_start,final_idx):
+            line.track(part, ele_start=i, ele_stop=i+1, num_turns=num_turns)
+            s.append(part.s[0])
+            y.append(part.y[0])
+        ss.append(s)
+        yy.append(y)
+        t = 1
+        while t < num_turns:
+            for i in range(0, idx_stop):
+                s, y= [],[]
+                line.track(part, ele_start=i, ele_stop=i+1, num_turns=num_turns)
+                s.append(part.s[0])
+                y.append(part.y[0])
+            ss.append(s)
+            yy.append(y)
+        return ss, yy
