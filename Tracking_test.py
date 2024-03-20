@@ -185,8 +185,6 @@ def get_df_to_save(dict, num_particles, num_turns, epsilon = 0, start = False, x
     return impact_part_df
 
 
-line0_file = '${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json'
-line1_file = '${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json'
 
 
 # -------------------------------------------------------------------------------
@@ -366,43 +364,45 @@ def setup_line(line_name, coll_dict=coll_dict, beam = 2, plane = 'V', num_partic
 # ---------------------------- LOAD PARTICLES ----------------------------
 
 
+def select_particle(n_job = 0, part_id = 0, return_both = True):
 
-n_job = 0 # TO SET 
+    #load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'
+    load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'
+    input_path  = Path(load_input_path, f'Job.{n_job}/Outputdata/particles_B{beam}{plane}.h5')
+    print('Particles read from: ', input_path)
 
-#load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'
-load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'
-input_path  = Path(load_input_path, f'Job.{n_job}/Outputdata/particles_B{beam}{plane}.h5')
-print('Particles read from: ', input_path)
-
-df_part = pd.read_hdf(input_path, key='initial_particles')
-dct_part = df_part.to_dict(orient='list')
-size_vars = (
-    (xo.Int64, '_capacity'),
-    (xo.Int64, '_num_active_particles'),
-    (xo.Int64, '_num_lost_particles'),
-    (xo.Int64, 'start_tracking_at_element'),
-)
-scalar_vars = (
-        (xo.Float64, 'q0'),
-        (xo.Float64, 'mass0'),
-        (xo.Float64, 't_sim'),
+    df_part = pd.read_hdf(input_path, key='initial_particles')
+    dct_part = df_part.to_dict(orient='list')
+    size_vars = (
+        (xo.Int64, '_capacity'),
+        (xo.Int64, '_num_active_particles'),
+        (xo.Int64, '_num_lost_particles'),
+        (xo.Int64, 'start_tracking_at_element'),
     )
-for tt, nn in scalar_vars + size_vars:
-    if nn in dct_part.keys() and not np.isscalar(dct_part[nn]):
-            dct_part[nn] = dct_part[nn][0]
-part = xp.Particles.from_dict(dct_part, load_rng_state=True)
+    scalar_vars = (
+            (xo.Float64, 'q0'),
+            (xo.Float64, 'mass0'),
+            (xo.Float64, 't_sim'),
+        )
+    for tt, nn in scalar_vars + size_vars:
+        if nn in dct_part.keys() and not np.isscalar(dct_part[nn]):
+                dct_part[nn] = dct_part[nn][0]
+    part = xp.Particles.from_dict(dct_part, load_rng_state=True)
+
+    p = part.filter(part.particle_id==part_id)
+
+    if return_both:
+        return p, part
+    else:
+        return p
 
 
 
-# ---------------------------- SELECT PARTICLES ----------------------------
-part_id = 0 # TO SET
-part = part.filter(part.particle_id==part_id)
-
-
-
-
+part, part_job = select_particle(n_job = 0, part_id = 0, return_both = True)
 
 # ---------------------------- DECIDE LINES TO TRACK ----------------------------
+line0_file = '${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json'
+line1_file = '${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json'
 
 line0, coll_manager0 = setup_line(line0_file, coll_dict)
 #line1, coll_manager1 = setup_line(line1_file)
@@ -416,29 +416,75 @@ idx_TCCS = line0.element_names.index(TCCS_name)
 
 
 # ---------------------------- TRACKING ----------------------------
-def save_y_traj(line, part, idx_start, idx_stop, num_turns=1):
-    s, y={}, {}
-    for i in range(idx_start,idx_stop):
-        line.track(part, ele_start=i, ele_stop=i+1, num_turns=num_turns)
-        s[line.element_names[i]] = part.s[0]
-        y[line.element_names[i]] = part.y[0]
-    return s, y
-
-
 part_gen = part.copy()
 idx = line0.element_names.index(TCP_name)
 
-embed()
 
 
-part.at_element = idx
-part.start_tracking_at_element = idx
+def plot_traj(s_part, y_part, line):
+    import matplotlib.pyplot as plt
+    
+    if not hasattr(s_part, '__iter__') or isinstance(s_part, list):
+        if any(isinstance(subvar, list) for subvar in s_part):
+            pass
+        else:
+            s_part = [s_part]
+            y_part = [y_part]
+    for s, y in zip(s_part,y_part):
+        plt.plot(s,y)
+    plt.vlines(line.get_s_elements()[idx_TCCS], -0.015, 0.015, color='k', linestyles='--')
+    plt.vlines(line.get_s_elements()[idx_TARGET], -0.015, 0.015,color='k', linestyles='--')
+    plt.vlines(line.get_s_elements()[idx_TCP], -0.015, 0.015,color='k', linestyles='--')
+    
+    plt.hlines(line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y, line.get_s_elements()[idx_TCCS], line.get_s_elements()[idx_TARGET], color='b', linestyles='--')
+    ips = ['ip1', 'ip2', 'ip3', 'ip4', 'ip5', 'ip6', 'ip7', 'ip8']
+    for ip in ips:
+        plt.vlines( line.get_s_position()[ line.element_names.index(ip)], -0.015, 0.015,color='r', linestyles='--', alpha=0.3)
+        plt.text(line.get_s_position()[line.element_names.index(ip)], 0.02, ip)
+
+    plt.show()
 
 
+
+def save_y_traj(line, part, idx_start, idx_stop):
+    s, y= [], []
+    for i in range(idx_start,idx_stop):
+        line.track(part, ele_start=i, ele_stop=i+1)
+        s.append(part.s[0])
+        y.append(part.y[0])
+    return s, y
+
+def save_y_multiturn(line, part, idx_start, num_turns):
+
+    def save_y_traj(line, part, idx_start, idx_stop):
+        s, y= [], []
+        for i in range(idx_start,idx_stop):
+            line.track(part, ele_start=i, ele_stop=i+1)
+            s.append(part.s[0])
+            y.append(part.y[0])
+        return s, y
+
+    ss, yy = [], []
+    s, y= [],[]
+    final_idx = len(line.element_names)
+    s, y = save_y_traj(line, part, idx_start, final_idx)
+    ss.append(s[:-1])
+    yy.append(y[: -1])
+    t = 1
+    while t < num_turns:
+        s, y = save_y_traj(line, part, 0, final_idx)
+        ss.append(s[:-1])
+        yy.append(y[:-1])
+        t = t+1
+    return ss, yy
+
+def track_turns(line, part, num_turns, idx_start = None):
+    if idx_start is not None:
+        line.track(part, num_turns=num_turns, ele_start=idx_start)
+    else:
+        line.track(part, num_turns=num_turns)
 
 
 coll_manager0.enable_scattering()
-line0.track(part, ele_stop=idx+1)
-
 
 embed()

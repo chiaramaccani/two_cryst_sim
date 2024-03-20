@@ -368,10 +368,26 @@ def plot_traj(s_part, y_part, line):
     plt.vlines(line.get_s_elements()[idx_TCCS], -0.015, 0.015, color='k', linestyles='--')
     plt.vlines(line.get_s_elements()[idx_TARGET], -0.015, 0.015,color='k', linestyles='--')
     plt.vlines(line.get_s_elements()[idx_TCP], -0.015, 0.015,color='k', linestyles='--')
+    
     plt.hlines(line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y, line.get_s_elements()[idx_TCCS], line.get_s_elements()[idx_TARGET], color='b', linestyles='--')
+    ips = ['ip1', 'ip2', 'ip3', 'ip4', 'ip5', 'ip6', 'ip7', 'ip8']
+    for ip in ips:
+        plt.vlines( line.get_s_position()[ line.element_names.index(ip)], -0.015, 0.015,color='r', linestyles='--', alpha=0.3)
+        plt.text(line.get_s_position()[line.element_names.index(ip)], 0.02, ip)
+
     plt.show()
 
 
+
+def save_y_traj(line, part, idx_start, idx_stop):
+    s, y= [], []
+    for i in range(idx_start,idx_stop):
+        line.track(part, ele_start=i, ele_stop=i+1)
+        s.append(part.s[0])
+        y.append(part.y[0])
+    return s, y
+
+def save_y_multiturn(line, part, idx_start, num_turns):
 
     def save_y_traj(line, part, idx_start, idx_stop):
         s, y= [], []
@@ -380,24 +396,65 @@ def plot_traj(s_part, y_part, line):
             s.append(part.s[0])
             y.append(part.y[0])
         return s, y
+
+    ss, yy = [], []
+    s, y= [],[]
+    final_idx = len(line.element_names)
+    s, y = save_y_traj(line, part, idx_start, final_idx)
+    ss.append(s[:-1])
+    yy.append(y[: -1])
+    t = 1
+    while t < num_turns:
+        s, y = save_y_traj(line, part, 0, final_idx)
+        ss.append(s[:-1])
+        yy.append(y[:-1])
+        t = t+1
+    return ss, yy
+
+def track_turns(line, part, num_turns, idx_start = None):
+    if idx_start is not None:
+        line.track(part, num_turns=num_turns, ele_start=idx_start)
+    else:
+        line.track(part, num_turns=num_turns)
+
+
+ss, yy = save_y_multiturn(line0, part5, idx_TCP, 3)
+
+
+
+
+tw = line0.twiss()
+
+
+
+def filter_aperture_rotations(df, line):    
+    aperture_offsets = []
+    for name, element in line.element_dict.items():
+        if '_tilt_entry' in name and element.__class__.__name__.startswith('SRotation'):
+            aper_name = name.split('_tilt')[0]
+            aperture_offsets.append(aper_name)#[aper_name] = (element.s)
+
+    return df[~df['name'].str.contains('|'.join(aperture_offsets), case=False)]
+
+
+
+index = next((i for i, x in enumerate(list) if x > 13150), None)
+index_2 = next((i for i, x in enumerate(list) if x > 13500), None)
+
+for i in range(index, index_2):
+  if df.iloc[i].x - df.iloc[i-1].x  > 0.01:
+    print(i-1, line0.element_names[i-1])
+
+
+
+
+
+
+
+
+
+# --------------------- PLOT LINES
     
-    def save_y_multiturn(line, part, idx_start, num_turns):
-        ss, yy = [], []
-        s, y= [],[]
-        final_idx = len(line.element_names)
-        for i in range(idx_start,final_idx):
-            line.track(part, ele_start=i, ele_stop=i+1, num_turns=num_turns)
-            s.append(part.s[0])
-            y.append(part.y[0])
-        ss.append(s)
-        yy.append(y)
-        t = 1
-        while t < num_turns:
-            for i in range(0, idx_stop):
-                s, y= [],[]
-                line.track(part, ele_start=i, ele_stop=i+1, num_turns=num_turns)
-                s.append(part.s[0])
-                y.append(part.y[0])
-            ss.append(s)
-            yy.append(y)
-        return ss, yy
+line
+
+

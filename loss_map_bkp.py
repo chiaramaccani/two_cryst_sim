@@ -12,9 +12,7 @@ import xtrack as xt
 import xpart as xp
 import xcoll as xc
 import scipy
-import gc
 import io 
-#import psutil
 
 from IPython import embed
 
@@ -203,11 +201,9 @@ def main():
 
     normalized_emittance = run_dict['normalized_emittance']
 
-    target_mode = run_dict['target_mode']
-    input_mode = run_dict['input_mode']
-    load_input_path = run_dict['load_input_path']
+    mode = run_dict['target_mode']
     turn_on_cavities = bool(run_dict['turn_on_cavities'])
-    print('\nTarget mode: ', target_mode, '\t', 'input mode: ', input_mode, '\t',  'Seed: ', seed, '\tCavities on: ', turn_on_cavities ,  '\n')
+    print('\nMode: ', mode, '\t', 'Seed: ', seed, '\tCavities on: ', turn_on_cavities ,  '\n')
 
     save_list = run_dict['save_list']
 
@@ -276,32 +272,18 @@ def main():
     line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name= TARGET_name + '_aper')
     line.insert_element(at_s=PIXEL_loc, element=xt.Marker(), name=PIXEL_name)
     
-    if 'TCCS_impacts' in save_list:
-        TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
-        print('\n... TCCS monitor inserted')
-
-    if 'TARGET_impacts' in save_list:
-        TARGET_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
-        print('\n... TARGET monitor inserted')
-
-    if 'TCCP_impacts' in save_list:
-        TCCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = TCCP_loc - coll_dict[TCCP_name]["length"]/2 - dx/2, element=TCCP_monitor, name='TCCP_monitor')
-        print('\n... TCCP monitor inserted')
-
-    if 'PIXEL_impacts' in save_list:
-        line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
-        PIXEL_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        print('\n... PIXEL monitor inserted')
-
-    if 'TCP_generated' in save_list:
-        line.insert_element(at_s = TCP_loc + coll_dict[TCP_name]["length"]/2 + 1e5*dx, element=TCP_monitor, name='TCP_monitor') 
-        TCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        print('\n... TCP monitor inserted')
-
     
+    TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+    TARGET_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+    TCCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+    PIXEL_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+    TCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+    #dx = 1e-11
+    line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
+    line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
+    line.insert_element(at_s = TCCP_loc - coll_dict[TCCP_name]["length"]/2 - dx/2, element=TCCP_monitor, name='TCCP_monitor')
+    line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
+    line.insert_element(at_s = TCP_loc + coll_dict[TCP_name]["length"]/2 + 1e5*dx, element=TCP_monitor, name='TCP_monitor') 
     
     bad_aper = find_bad_offset_apertures(line)
     print('Bad apertures : ', bad_aper)
@@ -334,7 +316,7 @@ def main():
     if engine == 'everest':
         coll_names = coll_manager.collimator_names
 
-        if target_mode == 'target_absorber': 
+        if mode == 'target_absorber': 
             black_absorbers = [TARGET_name,]
         else: 
             black_absorbers = []
@@ -407,53 +389,17 @@ def main():
 
 
     # ---------------------------- TRACKING ----------------------------
+
     # Generate initial pencil distribution on horizontal collimator
     tcp  = f"tcp.{'c' if plane=='H' else 'd'}6{'l' if beam=='1' else 'r'}7.b{beam}"
+    part = coll_manager.generate_pencil_on_collimator(tcp, num_particles=num_particles)
+
+
+    # Optimise the line
+    #line.optimize_for_tracking()
     idx = line.element_names.index(tcp)
-
-    if input_mode == 'generate':
-        print("\n... Generating initial particles\n")
-        part = coll_manager.generate_pencil_on_collimator(tcp, num_particles=num_particles)
-        #process=psutil.Process(os.getpid())
-        #print(process.memory_info().rss)
-        
-        
-    elif input_mode == 'load':
-        print("\n... Loading initial particles\n")
-        n_job = seed - 1
-        input_path  = Path(load_input_path, f'Job.{n_job}/Outputdata/particles_B{beam}{plane}.h5')
-        print('Particles read from: ', input_path)
-        df_part = pd.read_hdf(input_path, key='initial_particles')
-        dct_part = df_part.to_dict(orient='list')
-        size_vars = (
-            (xo.Int64, '_capacity'),
-            (xo.Int64, '_num_active_particles'),
-            (xo.Int64, '_num_lost_particles'),
-            (xo.Int64, 'start_tracking_at_element'),
-        )
-        scalar_vars = (
-             (xo.Float64, 'q0'),
-             (xo.Float64, 'mass0'),
-             (xo.Float64, 't_sim'),
-          )
-        for tt, nn in scalar_vars + size_vars:
-            if nn in dct_part.keys() and not np.isscalar(dct_part[nn]):
-                 dct_part[nn] = dct_part[nn][0]
-        part = xp.Particles.from_dict(dct_part, load_rng_state=True)
-        #process=psutil.Process(os.getpid())
-        #print(process.memory_info().rss)
-        del df_part, dct_part
-        gc.collect()
-        #print(process.memory_info().rss)
-
-    save_inital_particles = False
-    if save_inital_particles:
-        print("\n... Saving initial particles\n")
-        part.to_pandas().to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='initial_particles', format='table', mode='a',
-            complevel=9, complib='blosc')
-
-    part.at_element = idx 
-    part.start_tracking_at_element = idx 
+    part.at_element = idx
+    part.start_tracking_at_element = idx
 
 
     # Track
@@ -465,7 +411,6 @@ def main():
     # Printout useful informations
     print("\n----- Check information -----")
     print('JawL of TCCS:', line.elements[idx_TCCS].jaw_L, ', TCCP: ', line.elements[idx_TCCP].jaw_L, ',  TARGET:', line.elements[idx_TARGET].jaw_L, ',  PIXEL:', sigma_PIXEL*PIXEL_gap)
-    print('Absolute position of TCCS:', line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y, ', TCCP: ', line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y, ',  TARGET:', line.elements[idx_TARGET].jaw_L + line.elements[idx_TARGET].ref_y, ',  PIXEL:', sigma_PIXEL*PIXEL_gap)
     print(f"Line index of TCCS: {idx_TCCS}, TARGET: {idx_TARGET}, TCCP: {idx_TCCP}, PIXEL: {idx_PIXEL}, TCP: {idx_TCP}\n")
 
 
@@ -522,7 +467,7 @@ def main():
         xdim_TCCS =  coll_dict[TCCS_name]['ydim']
         jaw_L_TCCS = line.elements[idx_TCCS].jaw_L
         
-        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS + line.elements[idx_TCCS].ref_y, 
+        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS+ line.elements[idx_TCCS].ref_y, 
                 epsilon = 0, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
@@ -582,4 +527,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
