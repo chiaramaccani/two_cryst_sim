@@ -423,7 +423,14 @@ ss, yy = save_y_multiturn(line0, part5, idx_TCP, 3)
 
 
 
+# ----------------------------------------------
+
+
 tw = line0.twiss()
+df = tw.to_pandas()
+plot_traj(df.s.to_list(), df.x.to_list(), line0)
+
+
 
 
 
@@ -451,10 +458,12 @@ for i in range(index, index_2):
 
 
 
+# --------------------------------------------------
 
 
-# --------------------- PLOT LINES
-    
-line
+part, part_job = select_particle(n_job = 0, part_id = 63, return_both = True)
+track_turns(line0, part, 2, idx_TCP)
+s, y = save_y_traj(line0, part, 0, idx_TARGET)
+plot_traj(s,y,line0)
 
 

@@ -201,9 +201,11 @@ def main():
 
     normalized_emittance = run_dict['normalized_emittance']
 
-    mode = run_dict['target_mode']
+    target_mode = run_dict['target_mode']
+    input_mode = run_dict['input_mode']
+    load_input_path = run_dict['load_input_path']
     turn_on_cavities = bool(run_dict['turn_on_cavities'])
-    print('\nMode: ', mode, '\t', 'Seed: ', seed, '\tCavities on: ', turn_on_cavities ,  '\n')
+    print('\nTarget mode: ', target_mode, '\t', 'input mode: ', input_mode, '\t',  'Seed: ', seed, '\tCavities on: ', turn_on_cavities ,  '\n')
 
     save_list = run_dict['save_list']
 
@@ -316,7 +318,7 @@ def main():
     if engine == 'everest':
         coll_names = coll_manager.collimator_names
 
-        if mode == 'target_absorber': 
+        if target_mode == 'target_absorber': 
             black_absorbers = [TARGET_name,]
         else: 
             black_absorbers = []
@@ -333,7 +335,6 @@ def main():
     print('\nAperture model check after introducing collimators:')
     df_with_coll = line.check_aperture()
     assert not np.any(df_with_coll.has_aperture_problem)
-
         
     # Build the tracker
     #coll_manager.build_tracker()

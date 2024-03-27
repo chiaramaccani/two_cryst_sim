@@ -366,8 +366,8 @@ def setup_line(line_name, coll_dict=coll_dict, beam = 2, plane = 'V', num_partic
 
 def select_particle(n_job = 0, part_id = 0, return_both = True):
 
-    #load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'
-    load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'
+    load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'
+    #load_input_path = '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'
     input_path  = Path(load_input_path, f'Job.{n_job}/Outputdata/particles_B{beam}{plane}.h5')
     print('Particles read from: ', input_path)
 
@@ -398,7 +398,7 @@ def select_particle(n_job = 0, part_id = 0, return_both = True):
 
 
 
-part, part_job = select_particle(n_job = 0, part_id = 0, return_both = True)
+part, part_job = select_particle(n_job = 99, part_id = 81904, return_both = True)
 
 # ---------------------------- DECIDE LINES TO TRACK ----------------------------
 line0_file = '${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json'
@@ -437,6 +437,9 @@ def plot_traj(s_part, y_part, line):
     plt.vlines(line.get_s_elements()[idx_TCP], -0.015, 0.015,color='k', linestyles='--')
     
     plt.hlines(line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y, line.get_s_elements()[idx_TCCS], line.get_s_elements()[idx_TARGET], color='b', linestyles='--')
+    plt.hlines(line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y  + coll_dict[TCCS_name]['xdim'], line.get_s_elements()[idx_TCCS], line.get_s_elements()[idx_TARGET], color='b', linestyles='--')
+    plt.hlines(line.elements[idx_TARGET].jaw_L + line.elements[idx_TARGET].ref_y, line.get_s_elements()[idx_TCCS], line.get_s_elements()[idx_TARGET], color='b', linestyles='--')
+    plt.hlines(line.elements[idx_TARGET].jaw_L + line.elements[idx_TARGET].ref_y  + coll_dict[TARGET_name]['xdim'], line.get_s_elements()[idx_TCCS], line.get_s_elements()[idx_TARGET], color='b', linestyles='--')
     ips = ['ip1', 'ip2', 'ip3', 'ip4', 'ip5', 'ip6', 'ip7', 'ip8']
     for ip in ips:
         plt.vlines( line.get_s_position()[ line.element_names.index(ip)], -0.015, 0.015,color='r', linestyles='--', alpha=0.3)

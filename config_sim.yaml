@@ -13,7 +13,7 @@ run:
   normalized_emittance: 2.5e-6  #2.5e-6 #3.5e-6
   turn_on_cavities: True # True False 
  
-  TCCS_align_angle_step:  0  #-3.370066422017441e-06 #-1.1887686184543034e-06
+  TCCS_align_angle_step:  0  #-8.909885775156316e-06 #-8.909885775156316e-06  #-3.370066422017441e-06 #-1.1887686184543034e-06
   TCCS_gap: 7.2 #7.2
   TARGET_gap: 33.6 #33.6
   TCCP_gap: 33.6 #33.6
@@ -21,27 +21,46 @@ run:
 
   save_list: ['losses', 'TCCS_impacts', 'TARGET_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated']        
   target_mode: 'target_absorber'   #            'target_absorber' 
-  input_mode: 'load'  # load  generate
-  load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'                                    
+  input_mode: 'generate'  # load  generate
+  #load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'   
+  load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_tune_
+  working_directory: ${HOME_TWOCRYST}/Condor/OLD_IR7rem_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
   jobflavour: 'workday'  #'workday' #'espresso' testmatch
-  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"' }
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '5120M'}  #
   mask: ${HOME_TWOCRYST}/mask_condor_script.sh
 
 
 input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/Run3_flat_top/flat_top_b2.json     
-  #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_rematched/b4_sequence_patched.json
+  line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/bkp_HL/HL_IR7_IR3_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
-  line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
+
+  # --------- phase scan lines ---------
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_70.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_90.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_110.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_130.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_150.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_170.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_190.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_210.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_230.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_250.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_270.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_150.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_158.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_100.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_120.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_105.json'
   
 
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml

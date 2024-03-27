@@ -122,14 +122,13 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, epsilon = 0, start =
     variables = float_variables + int_variables
     variables.remove('at_element')
 
-    df = pd.DataFrame(dict['data'])
     var_dict = {}
 
     for var in variables:
-        new_arr = np.array(df[var])
-        new_arr = new_arr.reshape((num_particles, num_turns))
-        var_dict[var] = new_arr   
-    del df
+        var_dict[var] = dict['data'][var].reshape((num_particles, num_turns))   
+    del dict
+    gc.enable()
+    gc.collect()
 
     
     impact_part_dict = {}
@@ -159,8 +158,13 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, epsilon = 0, start =
                         for key in var_dict.keys():
                             impact_part_dict[key].append(var_dict[key][part, turn])
 
+    del var_dict
+    gc.collect()
 
-    impact_part_df = pd.DataFrame(impact_part_dict) 
+
+    impact_part_df = pd.DataFrame(impact_part_dict)
+    del impact_part_dict
+    gc.collect()
     
     impact_part_df.rename(columns={'state': 'this_state'}, inplace=True)
     impact_part_df.rename(columns={'at_turn': 'this_turn'}, inplace=True)
@@ -352,7 +356,6 @@ def main():
     df_with_coll = line.check_aperture()
     assert not np.any(df_with_coll.has_aperture_problem)
 
-        
     # Build the tracker
     #coll_manager.build_tracker()
     coll_manager.build_tracker()
@@ -410,10 +413,12 @@ def main():
     # Generate initial pencil distribution on horizontal collimator
     tcp  = f"tcp.{'c' if plane=='H' else 'd'}6{'l' if beam=='1' else 'r'}7.b{beam}"
     idx = line.element_names.index(tcp)
-
+    
     if input_mode == 'generate':
         print("\n... Generating initial particles\n")
         part = coll_manager.generate_pencil_on_collimator(tcp, num_particles=num_particles)
+        part.at_element = idx 
+        part.start_tracking_at_element = idx 
         #process=psutil.Process(os.getpid())
         #print(process.memory_info().rss)
         
@@ -445,6 +450,8 @@ def main():
         del df_part, dct_part
         gc.collect()
         #print(process.memory_info().rss)
+        part.at_element = idx + 2 
+        part.start_tracking_at_element = idx + 2
 
     save_inital_particles = False
     if save_inital_particles:
@@ -452,9 +459,7 @@ def main():
         part.to_pandas().to_hdf(Path(path_out,f'particles_B{beam}{plane}.h5'), key='initial_particles', format='table', mode='a',
             complevel=9, complib='blosc')
 
-    part.at_element = idx 
-    part.start_tracking_at_element = idx 
-
+    
 
     # Track
     coll_manager.enable_scattering()
@@ -524,9 +529,15 @@ def main():
         
         impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS + line.elements[idx_TCCS].ref_y, 
                 epsilon = 0, num_particles=num_particles, num_turns=num_turns)
+        
+        del TCCS_monitor_dict
+        gc.collect()
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCS_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
+        
+        del impact_part_df
+        gc.collect()
 
 
     if 'TCCP_impacts' in save_list:
@@ -545,6 +556,9 @@ def main():
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCP_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
         
+        del impact_part_df
+        gc.collect()
+        
 
     if 'TARGET_impacts' in save_list:
 
@@ -559,6 +573,9 @@ def main():
 
         impact_part_df = get_df_to_save(TARGET_monitor_dict, df_part, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = jaw_L_TARGET + line.elements[idx_TARGET].ref_y,
                 epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+        
+        del TARGET_monitor_dict
+        gc.collect()
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TARGET_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
@@ -575,9 +592,15 @@ def main():
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part, x_dim = xdim_PIXEL, y_dim = ydim_PIXEL, jaw_L = jaw_L_PIXEL,
                 epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+        
+        del PIXEL_monitor_dict
+        gc.collect()
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='PIXEL_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
+        
+        del impact_part_df
+        gc.collect()
 
 
 if __name__ == "__main__":
