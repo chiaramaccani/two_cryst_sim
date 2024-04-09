@@ -41,7 +41,7 @@ families:
   # Dump protection
   - &TCDQ    { <<: *ALL,  gap: 7.3,   stage: tertiary,   material: C,     length: 3,     angle: 0,  side: left }
   - &TCSP    { <<: *ALL,  gap: 7.3,   stage: secondary,  material: C,     length: 1,     angle: 0 }
-  # Physics background minimalisation
+  # Triplet protection
   - &TCT15   { <<: *ALL,  gap: 18.0,   stage: tertiary,   material: Iner,  length: 1,     parking: 0.020 }
   - &TCT2    { <<: *ALL,  gap: 37.0,    stage: tertiary,   material: Iner,  length: 1,     }
   - &TCT8    { <<: *ALL,  gap: 18.0,  stage: tertiary,   material: Iner,  length: 1,     }
@@ -51,11 +51,11 @@ families:
   - &TCL6    { <<: *ALL,  gap: null,    stage: tertiary,   material: Iner,  length: 1,     angle: 0}
   # Physics debris in ALICE (only for ions)
   - &TCLD    { <<: *ALL,  gap: null,  stage: tertiary,   material: Iner,  length: 0.6,   angle: 0}
-
   # TWOCRYST SETUP in IR3
   - &TCCS3    { <<: *ALL,  gap: null,  stage: special,    material: Si,   side: left, angle: 90, crystal: strip, active: true }  #crystal: strip,
   - &TCCP3    { <<: *ALL,  gap: null,  stage: special,    material: Si,   side: left, angle: 90, crystal: strip,  active: true }  #crystal: strip,
   - &TARGET3  { <<: *ALL,  gap: null,  stage: special,    material: Iner, side: left, angle: 90, active: true }
+
 
 emittance:
   x: 3.5e-6
@@ -180,8 +180,7 @@ collimators:
     tcld.a11l2.b2:      { <<: *TCLD                   }
     tctph.4r1.b2:       { <<: *TCT15,  angle:   0     }
     tctpv.4r1.b2:       { <<: *TCT15,  angle:  90     }
+
     tccs.5r3.b2:        { <<: *TCCS3,  gap: 5.0, length: 0.004,  bending_radius: 80.00,  xdim: 2.0e-3,  ydim: 35.0e-3}   # INVERT X Y WHEN ROTATE
     tccp.4l3.b2:        { <<: *TCCP3,  gap: 10, length: 0.070,  angle: 90, bending_radius: 10.00,  xdim: 2.0e-3,  ydim: 8.0e-3 }    # xdim: 10.0e-3
     target.4l3.b2:      { <<: *TARGET3,  gap: 10, length: 0.005,  angle: 90,  xdim: 2.0e-3 ,  ydim: 8.0e-3}   #attention to sigma position
-
-

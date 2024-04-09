@@ -148,6 +148,15 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, epsilon = 0, start =
                     for key in var_dict.keys():
                         impact_part_dict[key].append(var_dict[key][part, turn])
 
+    elif x_dim is None and y_dim is None and jaw_L is not None:
+        abs_y_low = jaw_L
+
+        for part in range(num_particles):
+            for turn in range(num_turns):
+                if var_dict['state'][part, turn] > 0 and var_dict['y'][part, turn] > (abs_y_low - epsilon):
+                    for key in var_dict.keys():
+                        impact_part_dict[key].append(var_dict[key][part, turn])
+
     else:
         for part in range(num_particles):
             for turn in range(num_turns):
@@ -259,6 +268,7 @@ def main():
     TARGET_name = 'target.4l3.b2'
     PIXEL_name = 'pixel.detector'
     TCP_name = 'tcp.d6r7.b2'
+    TCLA_name = 'tcla.a5l3.b2'
 
     d_pix = 1 # [m]
     ydim_PIXEL = 0.01408
@@ -270,6 +280,7 @@ def main():
     TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2 + dx)
     PIXEL_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_pix)
     TCP_loc = line.get_s_position()[line.element_names.index(TCP_name)]
+    TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
 
 
     line.insert_element(at_s=TCCS_loc, element=xt.Marker(), name=TCCS_name)
@@ -296,14 +307,19 @@ def main():
         print('\n... TCCP monitor inserted')
 
     if 'PIXEL_impacts' in save_list:
-        line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
         PIXEL_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
         print('\n... PIXEL monitor inserted')
 
     if 'TCP_generated' in save_list:
-        line.insert_element(at_s = TCP_loc + coll_dict[TCP_name]["length"]/2 + 1e5*dx, element=TCP_monitor, name='TCP_monitor') 
         TCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = TCP_loc + coll_dict[TCP_name]["length"]/2 + 1e5*dx, element=TCP_monitor, name='TCP_monitor') 
         print('\n... TCP monitor inserted')
+
+    if 'TCLA_impacts' in save_list:
+        TCLA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = TCLA_loc - coll_dict[TCLA_name]["length"]/2 - 1e5*dx, element=TCLA_monitor, name='TCLA_monitor') 
+        print('\n... TCLA monitor inserted')
 
     
     
@@ -384,6 +400,7 @@ def main():
     idx_TCCP = line.element_names.index(TCCP_name)
     idx_PIXEL = line.element_names.index(PIXEL_name)
     idx_TCP = line.element_names.index(TCP_name)
+    idx_TCLA = line.element_names.index(TCLA_name)
 
     tw = line.twiss()
     beta_y_TCCS = tw[:,TCCS_name]['bety'][0]
@@ -391,6 +408,7 @@ def main():
     beta_y_TARGET = tw[:,TARGET_name]['bety'][0]
     beta_y_PIXEL = tw[:,PIXEL_name]['bety'][0]
     beta_y_TCP = tw[:,TCP_name]['bety'][0]
+    beta_y_TCLA = tw[:,TCLA_name]['bety'][0]
     beta_rel = line.particle_ref._xobject.beta0[0]
     gamma = line.particle_ref._xobject.gamma0[0]
 
@@ -401,11 +419,13 @@ def main():
     sigma_TARGET = np.sqrt(emittance_phy*beta_y_TARGET)
     sigma_PIXEL = np.sqrt(emittance_phy*beta_y_PIXEL)
     sigma_TCP = np.sqrt(emittance_phy*beta_y_TCP)
+    sigma_TCLA = np.sqrt(emittance_phy*beta_y_TCLA)
 
     print(f"\nTCCS\nCrystalAnalysis(n_sigma={line.elements[idx_TCCS].jaw_L/sigma_TCCS}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bending_radius={ coll_dict[ TCCS_name]['bending_radius']}, align_angle={ line.elements[idx_TCCS].align_angle}, sigma={sigma_TCCS})")
     print(f"TARGET\nTargetAnalysis(n_sigma={line.elements[idx_TARGET].jaw_L/sigma_TARGET}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']}, sigma={sigma_TARGET})")
     print(f"TCCP\nCrystalAnalysis(n_sigma={line.elements[idx_TCCP].jaw_L/sigma_TCCP}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bending_radius={ coll_dict[ TCCP_name]['bending_radius']}, align_angle={line.elements[idx_TCCP].align_angle}, sigma={sigma_TCCP})")
     print(f"TCP\nTargetAnalysis(n_sigma={line.elements[idx_TCP].jaw_L/sigma_TCP}, length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025}, sigma={sigma_TCP})")
+    print(f"TCLA\nTargetAnalysis(n_sigma={line.elements[idx_TCLA].jaw_L/sigma_TCLA}, length={coll_dict[ TCLA_name]['length']}, ydim={0.025}, xdim={0.025}, sigma={sigma_TCLA})")
     print(f"PIXEL\nTargetAnalysis(n_sigma={PIXEL_gap}, length={0}, ydim={ydim_PIXEL}, xdim={xdim_PIXEL}, sigma={sigma_PIXEL})\n")
 
 
@@ -525,9 +545,9 @@ def main():
         
         ydim_TCCS = coll_dict[TCCS_name]['xdim']
         xdim_TCCS =  coll_dict[TCCS_name]['ydim']
-        jaw_L_TCCS = line.elements[idx_TCCS].jaw_L
+        jaw_L_TCCS = line.elements[idx_TCCS].jaw_L  + line.elements[idx_TCCS].ref_y
         
-        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS + line.elements[idx_TCCS].ref_y, 
+        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS, 
                 epsilon = 0, num_particles=num_particles, num_turns=num_turns)
         
         del TCCS_monitor_dict
@@ -548,9 +568,9 @@ def main():
         
         ydim_TCCP = coll_dict[TCCP_name]['xdim']
         xdim_TCCP =  coll_dict[TCCP_name]['ydim']
-        jaw_L_TCCP = line.elements[idx_TCCP].jaw_L
+        jaw_L_TCCP = line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y
         
-        impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP + line.elements[idx_TCCP].ref_y, 
+        impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP, 
                 epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCP_impacts', format='table', mode='a',
@@ -569,9 +589,9 @@ def main():
        
         ydim_TARGET = coll_dict[TARGET_name]['xdim']
         xdim_TARGET =  coll_dict[TARGET_name]['ydim']
-        jaw_L_TARGET = line.elements[idx_TARGET].jaw_L        
+        jaw_L_TARGET = line.elements[idx_TARGET].jaw_L + line.elements[idx_TARGET].ref_y        
 
-        impact_part_df = get_df_to_save(TARGET_monitor_dict, df_part, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = jaw_L_TARGET + line.elements[idx_TARGET].ref_y,
+        impact_part_df = get_df_to_save(TARGET_monitor_dict, df_part, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = jaw_L_TARGET,
                 epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
         
         del TARGET_monitor_dict
@@ -597,6 +617,30 @@ def main():
         gc.collect()
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='PIXEL_impacts', format='table', mode='a',
+            complevel=9, complib='blosc')
+        
+        del impact_part_df
+        gc.collect()
+
+
+    
+    
+    if 'TCLA_impacts' in save_list:
+
+        # SAVE IMPACTS ON PIXEL
+        print("... Saving impacts on TCLA\n")
+
+        TCLA_monitor_dict = TCLA_monitor.to_dict()
+    
+        jaw_L_TCLA = line.elements[idx_TCLA].jaw_L + line.elements[idx_TCLA].ref_y           
+
+        impact_part_df = get_df_to_save(TCLA_monitor_dict, df_part,  jaw_L = jaw_L_TCLA,
+                num_particles=num_particles, num_turns=num_turns, epsilon = 2.5e-3)
+        
+        del TCLA_monitor
+        gc.collect()
+
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCLA_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
         
         del impact_part_df
