@@ -276,6 +276,7 @@ def main():
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
+
     dx = 1e-11
     TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2 + dx)
     PIXEL_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_pix)
@@ -320,6 +321,12 @@ def main():
         TCLA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
         line.insert_element(at_s = TCLA_loc - coll_dict[TCLA_name]["length"]/2 - 1e5*dx, element=TCLA_monitor, name='TCLA_monitor') 
         print('\n... TCLA monitor inserted')
+
+    if 'BLM_impacts' in save_list:
+        BLM_loc = end_s - (6653.3 - 4)
+        BLM_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = BLM_loc, element=BLM_monitor, name='BLM_monitor') 
+        print('\n... BLM monitor inserted')
 
     
     
@@ -421,12 +428,25 @@ def main():
     sigma_TCP = np.sqrt(emittance_phy*beta_y_TCP)
     sigma_TCLA = np.sqrt(emittance_phy*beta_y_TCLA)
 
-    print(f"\nTCCS\nCrystalAnalysis(n_sigma={line.elements[idx_TCCS].jaw_L/sigma_TCCS}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}, bending_radius={ coll_dict[ TCCS_name]['bending_radius']}, align_angle={ line.elements[idx_TCCS].align_angle}, sigma={sigma_TCCS})")
-    print(f"TARGET\nTargetAnalysis(n_sigma={line.elements[idx_TARGET].jaw_L/sigma_TARGET}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']}, sigma={sigma_TARGET})")
-    print(f"TCCP\nCrystalAnalysis(n_sigma={line.elements[idx_TCCP].jaw_L/sigma_TCCP}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']}, bending_radius={ coll_dict[ TCCP_name]['bending_radius']}, align_angle={line.elements[idx_TCCP].align_angle}, sigma={sigma_TCCP})")
-    print(f"TCP\nTargetAnalysis(n_sigma={line.elements[idx_TCP].jaw_L/sigma_TCP}, length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025}, sigma={sigma_TCP})")
-    print(f"TCLA\nTargetAnalysis(n_sigma={line.elements[idx_TCLA].jaw_L/sigma_TCLA}, length={coll_dict[ TCLA_name]['length']}, ydim={0.025}, xdim={0.025}, sigma={sigma_TCLA})")
-    print(f"PIXEL\nTargetAnalysis(n_sigma={PIXEL_gap}, length={0}, ydim={ydim_PIXEL}, xdim={xdim_PIXEL}, sigma={sigma_PIXEL})\n")
+
+    print(f"\nTCCS\nCrystalAnalysis(n_sigma={line.elements[idx_TCCS].jaw_L/sigma_TCCS}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}," + 
+        f"bending_radius={ coll_dict[ TCCS_name]['bending_radius']}, align_angle={ line.elements[idx_TCCS].align_angle}, sigma={sigma_TCCS}, jaw_L={line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y})")
+    print(f"TARGET\nTargetAnalysis(n_sigma={line.elements[idx_TARGET].jaw_L/sigma_TARGET}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']},"+
+        f"sigma={sigma_TARGET}, jaw_L={line.elements[idx_TARGET].jaw_L + line.elements[idx_TARGET].ref_y})")
+    print(f"TCCP\nCrystalAnalysis(n_sigma={line.elements[idx_TCCP].jaw_L/sigma_TCCP}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']},"+ 
+        f"bending_radius={ coll_dict[ TCCP_name]['bending_radius']}, align_angle={line.elements[idx_TCCP].align_angle}, sigma={sigma_TCCP}, jaw_L={line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y})")
+    print(f"TCP\nTargetAnalysis(n_sigma={line.elements[idx_TCP].jaw_L/sigma_TCP}, length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
+        f"sigma={sigma_TCP}, jaw_L={line.elements[idx_TCP].jaw_L + line.elements[idx_TCP].ref_y})")
+    print(f"TCLA\nTargetAnalysis(n_sigma={line.elements[idx_TCLA].jaw_L/sigma_TCLA}, length={coll_dict[ TCLA_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
+        f"sigma={sigma_TCLA},  jaw_L={line.elements[idx_TCLA].jaw_L + line.elements[idx_TCLA].ref_y})")
+    print(f"PIXEL\nTargetAnalysis(n_sigma={PIXEL_gap}, length={0}, ydim={ydim_PIXEL}, xdim={xdim_PIXEL},"+ 
+        f"sigma={sigma_PIXEL})\n")
+        
+    if "BLM_impacts" in save_list:
+        idx_BLM = line.element_names.index('BLM_monitor')
+        beta_y_BLM = tw[:,'BLM_monitor']['bety'][0]
+        sigma_BLM = np.sqrt(emittance_phy*beta_y_BLM)
+        print(f"BLM\nTargetAnalysis(n_sigma={0.03/sigma_BLM}, length={0}, ydim={0.025}, xdim={0.025}, sigma={sigma_BLM}, jaw_L={0.03})\n")
 
 
     # ---------------------------- TRACKING ----------------------------
@@ -571,7 +591,7 @@ def main():
         jaw_L_TCCP = line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y
         
         impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP, 
-                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+                epsilon = 0.5e-3, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCP_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
@@ -641,6 +661,28 @@ def main():
         gc.collect()
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCLA_impacts', format='table', mode='a',
+            complevel=9, complib='blosc')
+        
+        del impact_part_df
+        gc.collect()
+
+
+    if 'BLM_impacts' in save_list:
+
+        # SAVE IMPACTS ON PIXEL
+        print("... Saving impacts on BLM\n")
+
+        BLM_monitor_dict = BLM_monitor.to_dict()
+    
+        jaw_L_BLM = 0.03          
+
+        impact_part_df = get_df_to_save(BLM_monitor_dict, df_part,  jaw_L = jaw_L_BLM,
+                num_particles=num_particles, num_turns=num_turns, epsilon = 0)
+        
+        del BLM_monitor
+        gc.collect()
+
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='BLM_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
         
         del impact_part_df

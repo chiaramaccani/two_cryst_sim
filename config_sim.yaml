@@ -14,12 +14,12 @@ run:
   turn_on_cavities: False # True False 
  
   TCCS_align_angle_step: 0  #-13.5e-6 #-8.909885775156316e-06 #-8.909885775156316e-06  #-3.370066422017441e-06 #-1.1887686184543034e-06
-  TCCS_gap: 5.0 #7.2
+  TCCS_gap: 99.9 #7.2
   TARGET_gap: 99.9 #33.6
-  TCCP_gap: 99.9 #33.6
-  PIXEL_gap: 99.9  #33.6
+  TCCP_gap: 5 #33.6
+  PIXEL_gap: 99.9 #33.6
 
-  save_list: ['losses', 'TCCS_impacts', 'TCLA_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated', TCLA_impacts]        
+  save_list: ['losses', 'TCCP_impacts', 'BLM_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   #            'target_absorber' 
   input_mode: 'generate'  # load  generate
   #load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'   
@@ -27,12 +27,12 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_RUN3_TCLA_CRY5.0_flat_top_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_RUN3_BLMs_inj_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
   jobflavour: 'workday'  #'workday' #'espresso' testmatch
-  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '5120M'}  #
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '5120M'}  # 10240
   mask: ${HOME_TWOCRYST}/mask_condor_script.sh
 
 
@@ -43,8 +43,10 @@ input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3_injection/injection_b2.json
-  line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3_flat_top/flat_top_b2.json
+  line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/injection_b2.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/flat_top_b2.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.17_b2.json
 
 
   # --------- phase scan lines ---------
@@ -58,16 +60,21 @@ input_files:
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_210.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_230.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_250.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_270.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_150.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_158.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_100.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_120.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_105.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_200.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_240.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_220.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_270.json'
   
 
-  collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml
-  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/injection.yaml
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.9.yaml
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.17.yaml
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/injection.yaml
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/HL_tight_twocryst.yaml
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/CollDB_HL_tight_b4.data
 

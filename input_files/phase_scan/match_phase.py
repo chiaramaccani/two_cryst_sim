@@ -203,6 +203,7 @@ def main():
                         FractionalPhase('muy', optphase, tol=1e-3, end='mt_cry1', start='tcp.d6r7.b2', tag='ph'),
                         #FractionalPhase('muy', optphase, tol=1e-3, at_1='mt_cry1', at_0='tcp.d6r7.b2', tag='ph'),
                         xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.l4.b2', tag='ir4'),
+                        xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='ip2', tag='ip2'),
                         #xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.r4.b2', tag='ir4'),
                         xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.l2.b2', tag='ir2'),
                         #xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.r2.b2', tag='ir2')  
