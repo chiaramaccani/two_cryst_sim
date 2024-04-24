@@ -171,7 +171,7 @@ collimators:
     tcsg.4l3.b2:        { <<: *TCSG3,  angle:   0     }
     tcsg.a5l3.b2:       { <<: *TCSG3,  angle: 170.7   }
     tcsg.b5l3.b2:       { <<: *TCSG3,  angle:  10.8   }
-    tcla.a5l3.b2:       { <<: *TCLA3,  angle:  90, gap: 9.5    }   # closed TCLA to intercept channeled halo
+    tcla.a5l3.b2:       { <<: *TCLA3,  angle:  90   }   #, gap: 9.5  closed TCLA to intercept channeled halo
     tcla.b5l3.b2:       { <<: *TCLA3,  angle:   0     }
     tcla.6l3.b2:        { <<: *TCLA3,  angle:   0     }
     tcla.7l3.b2:        { <<: *TCLA3,  angle:   0     }

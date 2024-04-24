@@ -61,5 +61,6 @@ echo $(which python3)
 # you can execute now any command you want. here it's a python script, but it could be anything
 
 python3 $HOME_TWOCRYST/lossmap_LHC.py  ${CONFIGFILE}  
+#python3 $HOME_TWOCRYST/lossmap_LHC_new_version.py  ${CONFIGFILE}  
 #python3 $HOME_TWOCRYST/loss_map_bkp.py  ${CONFIGFILE}  
 

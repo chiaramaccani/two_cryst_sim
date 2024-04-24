@@ -13,26 +13,26 @@ run:
   normalized_emittance: 3.5e-6  #2.5e-6 #3.5e-6
   turn_on_cavities: False # True False 
  
-  TCCS_align_angle_step: 0  #-13.5e-6 #-8.909885775156316e-06 #-8.909885775156316e-06  #-3.370066422017441e-06 #-1.1887686184543034e-06
+  TCCS_align_angle_step: 0 #-13.5e-6 #-8.909885775156316e-06 #-8.909885775156316e-06  #-3.370066422017441e-06 #-1.1887686184543034e-06
   TCCS_gap: 99.9 #7.2
   TARGET_gap: 99.9 #33.6
-  TCCP_gap: 5 #33.6
-  PIXEL_gap: 99.9 #33.6
+  TCCP_gap:  5.0 #33.6
+  PIXEL_gap: 12.0 #33.6
 
-  save_list: ['losses', 'TCCP_impacts', 'BLM_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: ['losses', 'TCCP_impacts', 'PIXEL_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   #            'target_absorber' 
-  input_mode: 'generate'  # load  generate
+  input_mode: 'circular_halo'  # load  generate circular_halo
   #load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'   
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_RUN3_BLMs_inj_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_RUN3_1TeV_circ_halo_bigger_and_Gauss_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
   jobflavour: 'workday'  #'workday' #'espresso' testmatch
-  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '5120M'}  # 10240
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '10240M'}  # 10240M 5120M
   mask: ${HOME_TWOCRYST}/mask_condor_script.sh
 
 
@@ -43,10 +43,11 @@ input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
-  line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/injection_b2.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/flat_top_b2.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.17_b2.json
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/injection_b2.json    # 450 GeV
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/flat_top_b2.json     # 6.8 TeV
+  line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json        # 1 TeV
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.12_b2.json     # 2 TeV
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.17_b2.json      # 3 TeV
 
 
   # --------- phase scan lines ---------
@@ -71,10 +72,11 @@ input_files:
   #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_270.json'
   
 
-  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml
-  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.9.yaml
-  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.17.yaml
-  collimators: ${HOME_TWOCRYST}/input_files/colldbs/injection.yaml
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml  # 6.8 TeV
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.9.yaml     # 1 TeV
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.12.yaml    # 2 TeV
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.17.yaml   # 3 TeV
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/injection.yaml # 450 GeV
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/HL_tight_twocryst.yaml
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/CollDB_HL_tight_b4.data
 

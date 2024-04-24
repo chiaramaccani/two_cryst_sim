@@ -427,8 +427,7 @@ def main():
     sigma_PIXEL = np.sqrt(emittance_phy*beta_y_PIXEL)
     sigma_TCP = np.sqrt(emittance_phy*beta_y_TCP)
     sigma_TCLA = np.sqrt(emittance_phy*beta_y_TCLA)
-
-
+    
     print(f"\nTCCS\nCrystalAnalysis(n_sigma={line.elements[idx_TCCS].jaw_L/sigma_TCCS}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}," + 
         f"bending_radius={ coll_dict[ TCCS_name]['bending_radius']}, align_angle={ line.elements[idx_TCCS].align_angle}, sigma={sigma_TCCS}, jaw_L={line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y})")
     print(f"TARGET\nTargetAnalysis(n_sigma={line.elements[idx_TARGET].jaw_L/sigma_TARGET}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']},"+
@@ -448,7 +447,6 @@ def main():
         sigma_BLM = np.sqrt(emittance_phy*beta_y_BLM)
         print(f"BLM\nTargetAnalysis(n_sigma={0.03/sigma_BLM}, length={0}, ydim={0.025}, xdim={0.025}, sigma={sigma_BLM}, jaw_L={0.03})\n")
 
-
     # ---------------------------- TRACKING ----------------------------
     # Generate initial pencil distribution on horizontal collimator
     tcp  = f"tcp.{'c' if plane=='H' else 'd'}6{'l' if beam=='1' else 'r'}7.b{beam}"
@@ -461,6 +459,29 @@ def main():
         part.start_tracking_at_element = idx 
         #process=psutil.Process(os.getpid())
         #print(process.memory_info().rss)
+
+    elif input_mode == 'circular_halo':
+        print("\n... Generating 2D uniform circular sector\n")
+        coll_manager.set_openings(gaps = {'tcp.d6r7.b2': 6, 'tcp.c6r7.b2': 6, 'tcp.b6r7.b2': 6, TCCS_name: TCCS_gap, TCCP_name: TCCP_gap, TARGET_name: TARGET_gap})
+        ip1_idx = line.element_names.index('ip1')
+        at_s = line.get_s_position(ip1_idx)
+        # Vertical plane: generate cut halo distribution
+        (y_in_sigmas, py_in_sigmas, r_points, theta_points
+            )= xp.generate_2D_uniform_circular_sector(
+                                                num_particles=num_particles,
+                                                r_range=(4.999, 5.1), # sigmas
+                                                )
+
+        x_in_sigmas, px_in_sigmas = xp.generate_2D_gaussian(num_particles)
+
+        part = line.build_particles(
+            x_norm=x_in_sigmas, px_norm=px_in_sigmas,
+            y_norm=y_in_sigmas, py_norm=py_in_sigmas,
+            nemitt_x=normalized_emittance, nemitt_y=normalized_emittance, match_at_s=at_s, at_element=ip1_idx)
+        
+        part.at_element = ip1_idx 
+        part.start_tracking_at_element = ip1_idx 
+
         
         
     elif input_mode == 'load':
@@ -591,7 +612,7 @@ def main():
         jaw_L_TCCP = line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y
         
         impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP, 
-                epsilon = 0.5e-3, num_particles=num_particles, num_turns=num_turns)
+                epsilon = 0, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCP_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
@@ -628,9 +649,9 @@ def main():
 
         PIXEL_monitor_dict = PIXEL_monitor.to_dict()
     
-        jaw_L_PIXEL = sigma_PIXEL * PIXEL_gap        
+        jaw_L_PIXEL = 0.008 #sigma_PIXEL * PIXEL_gap        
 
-        impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part, x_dim = xdim_PIXEL, y_dim = ydim_PIXEL, jaw_L = jaw_L_PIXEL,
+        impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
         
         del PIXEL_monitor_dict
