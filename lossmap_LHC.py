@@ -469,7 +469,7 @@ def main():
         (y_in_sigmas, py_in_sigmas, r_points, theta_points
             )= xp.generate_2D_uniform_circular_sector(
                                                 num_particles=num_particles,
-                                                r_range=(4.999, 5.1), # sigmas
+                                                r_range=(4.999, 6), # sigmas
                                                 )
 
         x_in_sigmas, px_in_sigmas = xp.generate_2D_gaussian(num_particles)
@@ -649,7 +649,7 @@ def main():
 
         PIXEL_monitor_dict = PIXEL_monitor.to_dict()
     
-        jaw_L_PIXEL = 0.008 #sigma_PIXEL * PIXEL_gap        
+        jaw_L_PIXEL = 0.007 #sigma_PIXEL * PIXEL_gap        
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)

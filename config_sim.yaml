@@ -14,20 +14,20 @@ run:
   turn_on_cavities: False # True False 
  
   TCCS_align_angle_step: 0 #-13.5e-6 #-8.909885775156316e-06 #-8.909885775156316e-06  #-3.370066422017441e-06 #-1.1887686184543034e-06
-  TCCS_gap: 99.9 #7.2
-  TARGET_gap: 99.9 #33.6
-  TCCP_gap:  5.0 #33.6
-  PIXEL_gap: 12.0 #33.6
+  TCCS_gap: 5.5 #7.2
+  TARGET_gap: 27.0 #33.6
+  TCCP_gap:  99.9 #33.6
+  PIXEL_gap: 99.9 #33.6
 
-  save_list: ['losses', 'TCCP_impacts', 'PIXEL_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
-  target_mode: ''   #            'target_absorber' 
-  input_mode: 'circular_halo'  # load  generate circular_halo
+  save_list: ['losses', 'TCCS_impacts', 'TARGET_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
+  target_mode: 'target_absorber'   #            'target_absorber' 
+  input_mode: 'generate'  # load  generate circular_halo
   #load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'   
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_RUN3_1TeV_circ_halo_bigger_and_Gauss_
+  working_directory: ${HOME_TWOCRYST}/Condor/RUN3_PH_SCAN_def_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
@@ -45,35 +45,51 @@ input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/injection_b2.json    # 450 GeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/flat_top_b2.json     # 6.8 TeV
-  line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json        # 1 TeV
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json        # 1 TeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.12_b2.json     # 2 TeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.17_b2.json      # 3 TeV
 
 
+
+  # --------- Run3 phase scan lines ---------
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_70.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_90.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_110.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_130.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_150.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_170.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_190.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_210.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_230.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_250.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_270.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/lines_ref/flat_top_b2_w_aper.json'
+  line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/lines_ref/flat_top_b2.json'
+
   # --------- phase scan lines ---------
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_70.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_90.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_110.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_130.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_150.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_170.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_190.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_210.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_230.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_250.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_150.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_158.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_100.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_120.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_105.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_200.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_240.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_220.json'
-  #line_b2: '${HOME_TWOCRYST}/input_files/phase_scan/b4_sequence_patched_phadv_270.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_70.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_90.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_110.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_130.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_150.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_170.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_190.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_210.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_230.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_250.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_150.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_158.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_100.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_120.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_105.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_200.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_240.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_220.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/HL_phase_scan/b4_sequence_patched_phadv_270.json'
   
 
-  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml  # 6.8 TeV
-  collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.9.yaml     # 1 TeV
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml  # 6.8 TeV
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.9.yaml     # 1 TeV
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.12.yaml    # 2 TeV
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.17.yaml   # 3 TeV
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/injection.yaml # 450 GeV
