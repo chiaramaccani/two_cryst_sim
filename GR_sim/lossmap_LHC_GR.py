@@ -128,7 +128,7 @@ def main():
     turn_on_cavities = bool(run_dict['turn_on_cavities'])
     print('input mode: ', input_mode, '\t',  'Seed: ', seed, '\tCavities on: ', turn_on_cavities ,  '\n')
 
-    #save_list = run_dict['save_list']
+    save_list = run_dict['save_list']
 
     # Setup input files
     file_dict = config_dict['input_files']
@@ -162,45 +162,46 @@ def main():
     line = xt.Line.from_json(line_file)
     end_s = line.get_length()
 
-    if beam == '1' and plane == 'H':
-        save_list = ['B1H']
-    elif beam == '1' and plane == 'V':
-        save_list = ['B1V']
-    elif beam == '2' and plane == 'H':
-        save_list = ['B2H']
-    elif beam == '2' and plane == 'V':
-        save_list = ['B2V']
-        
-    MAX_BETA_name = 'max.ir3.beta'
-    MIN_BETA_name = 'min.ir3.beta'
+    if 'beta_impacts' in save_list:
+        if beam == '1' and plane == 'H':
+            beam_list = ['B1H']
+        elif beam == '1' and plane == 'V':
+            beam_list = ['B1V']
+        elif beam == '2' and plane == 'H':
+            beam_list = ['B2H']
+        elif beam == '2' and plane == 'V':
+            beam_list = ['B2V']
+            
+        MAX_BETA_name = 'max.ir3.beta'
+        MIN_BETA_name = 'min.ir3.beta'
 
-    if 'B2V' in save_list:
-        MAX_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = (end_s - 6626.128995520019), element=MAX_BETA_monitor, name=MAX_BETA_name)
-        MIN_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = (end_s - 6528.569595520017), element=MIN_BETA_monitor, name=MIN_BETA_name)
-        print('\n... B2V monitors inserted')
+        if 'B2V' in beam_list:
+            MAX_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+            line.insert_element(at_s = (end_s - 6626.128995520019), element=MAX_BETA_monitor, name=MAX_BETA_name)
+            MIN_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+            line.insert_element(at_s = (end_s - 6528.569595520017), element=MIN_BETA_monitor, name=MIN_BETA_name)
+            print('\n... B2V monitors inserted')
 
-    if 'B2H' in save_list:
-        MAX_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = (end_s - 6529.3983955200165), element=MAX_BETA_monitor, name=MAX_BETA_name)
-        MIN_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = (end_s - 6624.471395520017 ), element=MIN_BETA_monitor, name=MIN_BETA_name)
-        print('\n... B2H monitor inserted')
+        if 'B2H' in beam_list:
+            MAX_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+            line.insert_element(at_s = (end_s - 6529.3983955200165), element=MAX_BETA_monitor, name=MAX_BETA_name)
+            MIN_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+            line.insert_element(at_s = (end_s - 6624.471395520017 ), element=MIN_BETA_monitor, name=MIN_BETA_name)
+            print('\n... B2H monitor inserted')
 
-    if 'B1H' in save_list:
-        MAX_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = (end_s - 6800.043196084 ), element=MAX_BETA_monitor, name=MAX_BETA_name)
-        MIN_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = (end_s - 6704.970196083999 ), element=MIN_BETA_monitor, name=MIN_BETA_name)
-        print('\n... B1H monitor inserted')
+        if 'B1H' in beam_list:
+            MAX_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+            line.insert_element(at_s = (end_s - 6800.043196084 ), element=MAX_BETA_monitor, name=MAX_BETA_name)
+            MIN_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+            line.insert_element(at_s = (end_s - 6704.970196083999 ), element=MIN_BETA_monitor, name=MIN_BETA_name)
+            print('\n... B1H monitor inserted')
 
-    if 'B1V' in save_list:
-        MAX_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = (end_s -  6703.312596084), element=MAX_BETA_monitor, name=MAX_BETA_name)
-        MIN_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = (end_s - 6800.871996084), element=MIN_BETA_monitor, name=MIN_BETA_name)
-        print('\n... B1V monitor inserted')
+        if 'B1V' in beam_list:
+            MAX_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+            line.insert_element(at_s = (end_s -  6703.312596084), element=MAX_BETA_monitor, name=MAX_BETA_name)
+            MIN_BETA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+            line.insert_element(at_s = (end_s - 6800.871996084), element=MIN_BETA_monitor, name=MIN_BETA_name)
+            print('\n... B1V monitor inserted')
 
 
     # switch on cavities
@@ -256,30 +257,31 @@ def main():
     df_with_coll = line.check_aperture()
     assert not np.any(df_with_coll.has_aperture_problem)
     
-    # Printout useful informations
-    idx_MAX_BETA = line.element_names.index(MAX_BETA_name)
-    idx_MIN_BETA = line.element_names.index(MIN_BETA_name)
+    if 'beta_impacts' in save_list:
+        # Printout useful informations
+        idx_MAX_BETA = line.element_names.index(MAX_BETA_name)
+        idx_MIN_BETA = line.element_names.index(MIN_BETA_name)
 
-    tw = line.twiss()
-    beta_rel = float(line.particle_ref.beta0)
-    gamma = float(line.particle_ref.gamma0)
-    emittance_phy = normalized_emittance/(beta_rel*gamma)
+        tw = line.twiss()
+        beta_rel = float(line.particle_ref.beta0)
+        gamma = float(line.particle_ref.gamma0)
+        emittance_phy = normalized_emittance/(beta_rel*gamma)
 
-    if plane == 'V':
-        sigma_MAX_BETA = np.sqrt(emittance_phy*tw['bety',idx_MAX_BETA])
-        sigma_MIN_BETA = np.sqrt(emittance_phy*tw['bety',idx_MIN_BETA])
-        co_ref_max = tw['y',idx_MAX_BETA]
-        co_ref_min = tw['y',idx_MIN_BETA]
-    elif plane == 'H':
-        sigma_MAX_BETA = np.sqrt(emittance_phy*tw['betx',idx_MAX_BETA])
-        sigma_MIN_BETA = np.sqrt(emittance_phy*tw['betx',idx_MIN_BETA])
-        co_ref_max = tw['x',idx_MAX_BETA]
-        co_ref_min = tw['x',idx_MIN_BETA]
-    
-    print(f"MAX_BETA\nTargetAnalysis(n_sigma={0}, length={0}, xdim={0.25},  ydim={0.25},"+
-        f"sigma={sigma_MAX_BETA}, jaw_L={co_ref_max})")
-    print(f"MIN_BETA\nTargetAnalysis(n_sigma={0}, length={0}, ydim={0.25}, xdim={0.25},"+ 
-        f"sigma={sigma_MIN_BETA}, jaw_L={co_ref_min})")
+        if plane == 'V':
+            sigma_MAX_BETA = np.sqrt(emittance_phy*tw['bety',idx_MAX_BETA])
+            sigma_MIN_BETA = np.sqrt(emittance_phy*tw['bety',idx_MIN_BETA])
+            co_ref_max = tw['y',idx_MAX_BETA]
+            co_ref_min = tw['y',idx_MIN_BETA]
+        elif plane == 'H':
+            sigma_MAX_BETA = np.sqrt(emittance_phy*tw['betx',idx_MAX_BETA])
+            sigma_MIN_BETA = np.sqrt(emittance_phy*tw['betx',idx_MIN_BETA])
+            co_ref_max = tw['x',idx_MAX_BETA]
+            co_ref_min = tw['x',idx_MIN_BETA]
+        
+        print(f"MAX_BETA\nTargetAnalysis(n_sigma={0}, length={0}, xdim={0.25},  ydim={0.25},"+
+            f"sigma={sigma_MAX_BETA}, jaw_L={co_ref_max})")
+        print(f"MIN_BETA\nTargetAnalysis(n_sigma={0}, length={0}, ydim={0.25}, xdim={0.25},"+ 
+            f"sigma={sigma_MIN_BETA}, jaw_L={co_ref_min})")
 
     # ---------------------------- TRACKING ----------------------------
     # Generate initial pencil distribution on horizontal collimator
@@ -299,25 +301,22 @@ def main():
     coll_manager.disable_scattering()
     print(f"Done tracking in {line.time_last_track:.1f}s.")
 
-    # Printout useful informations
-    print("\n----- Check information -----")
-    print(f"Line index of MAX: {idx_MAX_BETA}, MIN: {idx_MIN_BETA}\n")
 
 
 
 
     # ---------------------------- LOSSMAPS ----------------------------    
 
+    if 'losses' in save_list:
+        # Save lossmap to json, which can be loaded, combined (for more statistics),
+        # and plotted with the 'lossmaps' package
+        print("\n... Saving losses \n")
+        _ = coll_manager.lossmap(part, file=Path(path_out,f'lossmap_B{beam}{plane}.json'))
 
-    # Save lossmap to json, which can be loaded, combined (for more statistics),
-    # and plotted with the 'lossmaps' package
-    print("\n... Saving losses \n")
-    _ = coll_manager.lossmap(part, file=Path(path_out,f'lossmap_B{beam}{plane}.json'))
 
-
-    # Save a summary of the collimator losses to a text file
-    summary = coll_manager.summary(part) #, file=Path(path_out,f'coll_summary_B{beam}{plane}.out')
-    print(summary)
+        # Save a summary of the collimator losses to a text file
+        summary = coll_manager.summary(part) #, file=Path(path_out,f'coll_summary_B{beam}{plane}.out')
+        print(summary)
 
 
 
@@ -333,38 +332,45 @@ def main():
     df_part[int_variables] = df_part[int_variables].astype('int32')
 
 
-    print("\n... Saving particles at MAX beta location in \n", save_list[0], "\n")
+    if 'beta_impacts' in save_list:
 
-    MAX_BETA_monitor_dict = MAX_BETA_monitor.to_dict()
+        # Printout useful informations
+        print("\n----- Check information -----")
+        print(f"Line index of MAX: {idx_MAX_BETA}, MIN: {idx_MIN_BETA}\n")
 
-    impact_part_df = get_df_to_save(MAX_BETA_monitor_dict, df_part,
-                                    num_particles=num_particles, num_turns=num_turns)
 
-    del MAX_BETA_monitor_dict
-    gc.collect()
-    
-    impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='MAX_BETA', format='table', mode='a',
-        complevel=9, complib='blosc')
+        print("\n... Saving particles at MAX beta location in \n", beam_list[0], "\n")
 
-    del impact_part_df
-    gc.collect()
+        MAX_BETA_monitor_dict = MAX_BETA_monitor.to_dict()
 
-    
-    print("\n... Saving particles at MIN beta location ", save_list[0], "\n")
+        impact_part_df = get_df_to_save(MAX_BETA_monitor_dict, df_part,
+                                        num_particles=num_particles, num_turns=num_turns)
 
-    MIN_BETA_monitor_dict = MIN_BETA_monitor.to_dict()
+        del MAX_BETA_monitor_dict
+        gc.collect()
+        
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='MAX_BETA', format='table', mode='a',
+            complevel=9, complib='blosc')
 
-    impact_part_df = get_df_to_save(MIN_BETA_monitor_dict, df_part,
-                                    num_particles=num_particles, num_turns=num_turns)
+        del impact_part_df
+        gc.collect()
 
-    del MIN_BETA_monitor_dict
-    gc.collect()
-    
-    impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='MIN_BETA', format='table', mode='a',
-        complevel=9, complib='blosc')
+        
+        print("\n... Saving particles at MIN beta location ", beam_list[0], "\n")
 
-    del impact_part_df
-    gc.collect()
+        MIN_BETA_monitor_dict = MIN_BETA_monitor.to_dict()
+
+        impact_part_df = get_df_to_save(MIN_BETA_monitor_dict, df_part,
+                                        num_particles=num_particles, num_turns=num_turns)
+
+        del MIN_BETA_monitor_dict
+        gc.collect()
+        
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='MIN_BETA', format='table', mode='a',
+            complevel=9, complib='blosc')
+
+        del impact_part_df
+        gc.collect()
 
 
 

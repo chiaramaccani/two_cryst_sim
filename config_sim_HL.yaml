@@ -6,10 +6,10 @@ run:
   engine: 'everest'
   seed: 1
 
-  beam: '1'
+  beam: '2'
   plane: 'V'
-  turns: 200 #200
-  nparticles: 10000  #100000 #1000
+  turns: 500 #200
+  nparticles: 100000  #100000 #1000
   normalized_emittance: 2.5e-6  #2.5e-6 #3.5e-6
   turn_on_cavities: True # True False 
  
@@ -25,7 +25,7 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/RUN3_PH_SCAN_160_
+  working_directory: ${HOME_TWOCRYST}/Condor/GR_TEST_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
@@ -41,10 +41,10 @@ input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
   line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
   #line_b1: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b1_sequence_patched.json
-  line_b1: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b1_sequence_tune.json
+  #line_b1: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b1_sequence_tune.json
 
 
 
-  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/HL_tight_b2.yaml
-  collimators: ${HOME_TWOCRYST}/input_files/colldbs/HL_tight_b1.yaml
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/HL_tight_b2.yaml
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/HL_tight_b1.yaml
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/CollDB_HL_tight_b4.data
