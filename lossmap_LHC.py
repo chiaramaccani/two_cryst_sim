@@ -410,33 +410,26 @@ def main():
     idx_TCLA = line.element_names.index(TCLA_name)
 
     tw = line.twiss()
-    beta_y_TCCS = tw[:,TCCS_name]['bety'][0]
-    beta_y_TCCP = tw[:,TCCP_name]['bety'][0]
-    beta_y_TARGET = tw[:,TARGET_name]['bety'][0]
-    beta_y_PIXEL = tw[:,PIXEL_name]['bety'][0]
-    beta_y_TCP = tw[:,TCP_name]['bety'][0]
-    beta_y_TCLA = tw[:,TCLA_name]['bety'][0]
-    beta_rel = line.particle_ref._xobject.beta0[0]
-    gamma = line.particle_ref._xobject.gamma0[0]
-
+    beta_rel = float(line.particle_ref.beta0)
+    gamma = float(line.particle_ref.gamma0)
     emittance_phy = normalized_emittance/(beta_rel*gamma)
 
-    sigma_TCCS = np.sqrt(emittance_phy*beta_y_TCCS)
-    sigma_TCCP = np.sqrt(emittance_phy*beta_y_TCCP)
-    sigma_TARGET = np.sqrt(emittance_phy*beta_y_TARGET)
-    sigma_PIXEL = np.sqrt(emittance_phy*beta_y_PIXEL)
-    sigma_TCP = np.sqrt(emittance_phy*beta_y_TCP)
-    sigma_TCLA = np.sqrt(emittance_phy*beta_y_TCLA)
+    sigma_TCCS = np.sqrt(emittance_phy*tw['bety',TCCS_name])
+    sigma_TCCP = np.sqrt(emittance_phy*tw['bety',TCCP_name])
+    sigma_TARGET = np.sqrt(emittance_phy* tw['bety',TARGET_name])
+    sigma_PIXEL = np.sqrt(emittance_phy*tw['bety',PIXEL_name])
+    sigma_TCP = np.sqrt(emittance_phy*tw['bety',TCP_name])
+    sigma_TCLA = np.sqrt(emittance_phy*tw['bety',TCLA_name])
     
-    print(f"\nTCCS\nCrystalAnalysis(n_sigma={line.elements[idx_TCCS].jaw_L/sigma_TCCS}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}," + 
+    print(f"\nTCCS\nCrystalAnalysis(n_sigma={round(line.elements[idx_TCCS].jaw_L/sigma_TCCS, 4)}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}," + 
         f"bending_radius={ coll_dict[ TCCS_name]['bending_radius']}, align_angle={ line.elements[idx_TCCS].align_angle}, sigma={sigma_TCCS}, jaw_L={line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y})")
-    print(f"TARGET\nTargetAnalysis(n_sigma={line.elements[idx_TARGET].jaw_L/sigma_TARGET}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']},"+
+    print(f"TARGET\nTargetAnalysis(n_sigma={round(line.elements[idx_TARGET].jaw_L/sigma_TARGET, 4)}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']},"+
         f"sigma={sigma_TARGET}, jaw_L={line.elements[idx_TARGET].jaw_L + line.elements[idx_TARGET].ref_y})")
-    print(f"TCCP\nCrystalAnalysis(n_sigma={line.elements[idx_TCCP].jaw_L/sigma_TCCP}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']},"+ 
+    print(f"TCCP\nCrystalAnalysis(n_sigma={round(line.elements[idx_TCCP].jaw_L/sigma_TCCP, 4)}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']},"+ 
         f"bending_radius={ coll_dict[ TCCP_name]['bending_radius']}, align_angle={line.elements[idx_TCCP].align_angle}, sigma={sigma_TCCP}, jaw_L={line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y})")
-    print(f"TCP\nTargetAnalysis(n_sigma={line.elements[idx_TCP].jaw_L/sigma_TCP}, length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
+    print(f"TCP\nTargetAnalysis(n_sigma={round(line.elements[idx_TCP].jaw_L/sigma_TCP, 4)}, length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
         f"sigma={sigma_TCP}, jaw_L={line.elements[idx_TCP].jaw_L + line.elements[idx_TCP].ref_y})")
-    print(f"TCLA\nTargetAnalysis(n_sigma={line.elements[idx_TCLA].jaw_L/sigma_TCLA}, length={coll_dict[ TCLA_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
+    print(f"TCLA\nTargetAnalysis(n_sigma={round(line.elements[idx_TCLA].jaw_L/sigma_TCLA, 4)}, length={coll_dict[ TCLA_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
         f"sigma={sigma_TCLA},  jaw_L={line.elements[idx_TCLA].jaw_L + line.elements[idx_TCLA].ref_y})")
     print(f"PIXEL\nTargetAnalysis(n_sigma={PIXEL_gap}, length={0}, ydim={ydim_PIXEL}, xdim={xdim_PIXEL},"+ 
         f"sigma={sigma_PIXEL})\n")

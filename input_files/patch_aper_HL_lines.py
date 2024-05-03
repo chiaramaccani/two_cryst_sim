@@ -11,8 +11,8 @@ import xpart as xp
 
 
 #input_file  = Path(str(sys.argv[1]))
-beam        = 2  # int(sys.argv[2])
-line_name = os.path.expandvars("${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence.json")
+beam        = 1  # int(sys.argv[2])
+line_name = os.path.expandvars("${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b1_sequence.json")
 input_file = Path(line_name)
 particle_ref_HL = xp.Particles(p0c=7000e9, q0=1, mass0=xp.PROTON_MASS_EV)
 
@@ -51,11 +51,73 @@ def patch_aperture_with(missing, patch):
 
 
 
-patch_aperture_with(['tdisa.a4r8.b2', 'tdisb.a4r8.b2', 'tdisc.a4r8.b2'], 'vmbgd.4r8.d.b2_aper')
+"""patch_aperture_with(['tdisa.a4r8.b2', 'tdisb.a4r8.b2', 'tdisc.a4r8.b2'], 'vmbgd.4r8.d.b2_aper')
 patch_aperture_with('tcld.a11l2.b2', 'lepra.11l2.b2_mkex_aper')
 #patch_aperture_with('tcld.a11l2.b2', xt.LimitEllipse(a=4e-2, b=4e-2))
 patch_aperture_with(['tcspm.b4r7.b2', 'tcspm.e5l7.b2', 'tcspm.6l7.b2'], 'tcspm.4r7.b.b2_aper')
 patch_aperture_with('tcld.9l7.b2', 'mbh.a9l7.b2_mken_aper')
+"""
+
+
+
+"""if beam == 1:
+    patch_aperture_with(['mo.28r3.b1', 'mo.32r3.b1'], 'mo.22r1.b1_mken_aper')
+    patch_aperture_with(['mqwa.f5l7.b1..1', 'mqwa.f5l7.b1..2', 'mqwa.f5l7.b1..3',
+                         'mqwa.f5l7.b1..4', 'mqwa.f5r7.b1..1', 'mqwa.f5r7.b1..2',
+                         'mqwa.f5r7.b1..3', 'mqwa.f5r7.b1..4'
+                        ], 'mqwa.e5l3.b1_mken_aper')
+    patch_aperture_with(['tdisa.a4l2.b1', 'tdisb.a4l2.b1', 'tdisc.a4l2.b1'
+                        ], 'tdisa.a4l2.a.b1_aper')
+    patch_aperture_with('tcld.a11r2.b1', xt.LimitEllipse(a=4e-2, b=4e-2))
+    patch_aperture_with(['tcspm.b4l7.b1', 'tcspm.e5r7.b1', 'tcspm.6r7.b1'
+                        ], 'tcspm.6r7.a.b1_aper')
+    patch_aperture_with(['tcpch.a4l7.b1', 'tcpcv.a6l7.b1'], 'tcpch.a4l7.a.b1_aper')
+
+else:
+    patch_aperture_with(['mo.32r3.b2', 'mo.28r3.b2'], 'mo.22l1.b2_mken_aper')
+    patch_aperture_with(['mqwa.f5r7.b2..1', 'mqwa.f5r7.b2..2', 'mqwa.f5r7.b2..3',
+                         'mqwa.f5r7.b2..4', 'mqwa.f5l7.b2..1', 'mqwa.f5l7.b2..2',
+                         'mqwa.f5l7.b2..3', 'mqwa.f5l7.b2..4'
+                        ], 'mqwa.e5r3.b2_mken_aper')
+    patch_aperture_with(['tdisa.a4r8.b2', 'tdisb.a4r8.b2', 'tdisc.a4r8.b2'
+                        ], 'tdisa.a4r8.a.b2_aper')
+    patch_aperture_with('tcld.a11l2.b2', xt.LimitEllipse(a=4e-2, b=4e-2))
+    patch_aperture_with(['tcspm.d4r7.b2', 'tcspm.b4r7.b2', 'tcspm.e5l7.b2', 'tcspm.6l7.b2'
+                        ], 'tcspm.6l7.a.b2_aper')
+    patch_aperture_with(['tcpch.a5r7.b2', 'tcpcv.a6r7.b2'], 'tcpch.a5r7.b.b2_aper')"""
+
+
+
+if beam == 1:
+    patch_aperture_with(['mo.28r3.b1', 'mo.32r3.b1'], 'mo.22r1.b1_mken_aper')
+    patch_aperture_with(['mqwa.f5l7.b1..1', 'mqwa.f5l7.b1..2', 'mqwa.f5l7.b1..3',
+                         'mqwa.f5l7.b1..4', 'mqwa.f5r7.b1..1', 'mqwa.f5r7.b1..2',
+                         'mqwa.f5r7.b1..3', 'mqwa.f5r7.b1..4'
+                        ], 'mqwa.e5l3.b1_mken_aper')
+    patch_aperture_with(['tdisa.a4l2.b1', 'tdisb.a4l2.b1', 'tdisc.a4l2.b1'
+                        ], xt.LimitRect(min_x=-0.043, max_x=0.043, min_y=-0.055, max_y=0.055))
+    patch_aperture_with('tcld.a11r2.b1', xt.LimitEllipse(a=4e-2, b=4e-2))
+    patch_aperture_with(['tcspm.b4l7.b1', 'tcspm.e5r7.b1', 'tcspm.6r7.b1'
+                        ], xt.LimitRectEllipse(max_x=0.04, max_y=0.04, a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06))
+    patch_aperture_with(['tcpch.a4l7.b1', 'tcpcv.a6l7.b1'
+                        ], xt.LimitRectEllipse(max_x=0.04, max_y=0.04, a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06))
+
+else:
+    patch_aperture_with(['mo.32r3.b2', 'mo.28r3.b2'], 'mo.22l1.b2_mken_aper')
+    patch_aperture_with(['mqwa.f5r7.b2..1', 'mqwa.f5r7.b2..2', 'mqwa.f5r7.b2..3',
+                         'mqwa.f5r7.b2..4', 'mqwa.f5l7.b2..1', 'mqwa.f5l7.b2..2',
+                         'mqwa.f5l7.b2..3', 'mqwa.f5l7.b2..4'
+                        ], 'mqwa.e5r3.b2_mken_aper')
+    patch_aperture_with(['tdisa.a4r8.b2', 'tdisb.a4r8.b2', 'tdisc.a4r8.b2'
+                        ], xt.LimitRect(min_x=-0.043, max_x=0.043, min_y=-0.055, max_y=0.055))
+    patch_aperture_with('tcld.a11l2.b2', xt.LimitEllipse(a=4e-2, b=4e-2))
+    patch_aperture_with(['tcspm.d4r7.b2', 'tcspm.b4r7.b2', 'tcspm.e5l7.b2', 'tcspm.6l7.b2'
+                        ], xt.LimitRectEllipse(max_x=0.04, max_y=0.04, a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06))
+    patch_aperture_with(['tcpch.a5r7.b2', 'tcpcv.a6r7.b2'
+                        ], xt.LimitRectEllipse(max_x=0.04, max_y=0.04, a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06))
+
+
+
 
 
 

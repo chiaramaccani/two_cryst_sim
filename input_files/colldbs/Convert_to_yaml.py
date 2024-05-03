@@ -19,8 +19,8 @@ from IPython import embed
 def main():
 
     # Get the input file
-    input_collimator_file = 'CollDB_HL_tight_b4.data' #sys.argv[1]
-    output_collimator_file = 'HL_tight_twocryst' #sys.argv[2]
+    input_collimator_file = 'CollDB_HL_tight_b1.data' #sys.argv[1]
+    output_collimator_file = 'HL_tight_b1' #sys.argv[2]
     emitt = 2.5e-6
 
     colldb = xc.CollimatorDatabase.from_SixTrack(input_collimator_file, nemitt_x=emitt, nemitt_y=emitt, ignore_crystals=False)
