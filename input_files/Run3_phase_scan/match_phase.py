@@ -82,7 +82,7 @@ def main():
 
 
     ##### use ir2 and ir4 for changing the phase, knobs:
-    nrj = 7000
+    nrj = 6800
     scale = 23348.89927
     scmin = 0.03*7000./nrj
     qtlimitx28 = 1.0*225.0/scale
@@ -255,7 +255,7 @@ def main():
 
     # ----------------------- Save line with knobs -----------------------
     print('\n----------------------------------------------------------------------')
-    new_line_name = f'flat_top_b2_phadv_{deg_name}.json'
+    new_line_name = f'flat_top_b2_phadv_{deg_name}_new.json'
     line.to_json(new_line_name)
 
 

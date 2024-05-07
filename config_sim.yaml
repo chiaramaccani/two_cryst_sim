@@ -13,7 +13,7 @@ run:
   normalized_emittance: 3.5e-6  #2.5e-6 #3.5e-6
   turn_on_cavities: False # True False 
  
-  TCCS_align_angle_step:  -1.7307204221061705e-06 #3.870452793781121e-06 #2.3704527937811217e-06 # 8.704527937811208e-07 #-6.295472062188801e-07  # -3.6295472062188785e-06 #-5.129547206218881e-06 #-6.62954720621888e-06 # -8.12954720621888e-06
+  TCCS_align_angle_step:  -2.1295472062188793e-06 #3.870452793781121e-06 #2.3704527937811217e-06 # 8.704527937811208e-07 #-6.295472062188801e-07  # -3.6295472062188785e-06 #-5.129547206218881e-06 #-6.62954720621888e-06 # -8.12954720621888e-06
   TCCS_gap: 5.5 #7.2
   TARGET_gap: 27.0 #33.6
   TCCP_gap:  99.9 #33.6
@@ -27,7 +27,7 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/RUN3_ANG_SCAN_-1.7_
+  working_directory: ${HOME_TWOCRYST}/Condor/RUN3_ANG_SCAN_opt_new_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
@@ -58,7 +58,8 @@ input_files:
   #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_130.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_140.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_145.json'
-  line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_150.json'
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_150.json'
+  line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_150_new.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_155.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_160.json'
   #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_170.json'
