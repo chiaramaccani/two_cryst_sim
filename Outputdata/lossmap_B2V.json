@@ -1,26 +1,23 @@
 {
  "collimator": {
+  "s": [],
+  "name": [],
+  "length": [],
+  "n": []
+ },
+ "aperture": {
   "s": [
-   20199.14037329887,
-   20092.41837574687
+   6647.180794214313,
+   6648.287626575664
   ],
   "name": [
-   "tcp.d6r7.b2",
-   "tcsg.a5r7.b2"
-  ],
-  "length": [
-   0.6,
-   1.0
+   "vctne.4l3.a.b2_aper",
+   "vcda.c4l3.a.b2_aper"
   ],
   "n": [
    1.0,
-   1.0
+   3.0
   ]
- },
- "aperture": {
-  "s": [],
-  "name": [],
-  "n": []
  },
  "machine_length": 26658.88317064787,
  "interpolation": 0.1,

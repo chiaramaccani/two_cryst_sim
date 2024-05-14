@@ -245,6 +245,7 @@ def main():
     TCCP_gap = float(run_dict['TCCP_gap'])
     TARGET_gap = float(run_dict['TARGET_gap'])
     PIXEL_gap = float(run_dict['PIXEL_gap'])
+    TCP_gap = float(run_dict['TCP_gap'])
 
     context = xo.ContextCpu(omp_num_threads='auto')
 
@@ -356,7 +357,7 @@ def main():
 
     # Initialise collmanager
     coll_manager = xc.CollimatorManager.from_yaml(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False)
-
+    
     # Install collimators into line
     if engine == 'everest':
         coll_names = coll_manager.collimator_names
@@ -373,7 +374,7 @@ def main():
     else:
         raise ValueError(f"Unknown scattering engine {engine}!")
 
-
+    
     # Aperture model check
     print('\nAperture model check after introducing collimators:')
     df_with_coll = line.check_aperture()
@@ -386,7 +387,8 @@ def main():
     # Set the collimator openings based on the colldb,
     # or manually override with the option gaps={collname: gap}
     #coll_manager.set_openings()
-    coll_manager.set_openings(gaps = {TCCS_name: TCCS_gap, TCCP_name: TCCP_gap, TARGET_name: TARGET_gap})
+
+    coll_manager.set_openings(gaps = {'tcp.d6r7.b2': TCP_gap, 'tcp.c6r7.b2': TCP_gap, 'tcp.b6r7.b2': TCP_gap, TCCS_name: TCCS_gap, TCCP_name: TCCP_gap, TARGET_name: TARGET_gap})
 
 
     print("\nTCCS aligned to beam: ", line[TCCS_name].align_angle)
@@ -455,17 +457,20 @@ def main():
 
     elif input_mode == 'circular_halo':
         print("\n... Generating 2D uniform circular sector\n")
-        coll_manager.set_openings(gaps = {'tcp.d6r7.b2': 6, 'tcp.c6r7.b2': 6, 'tcp.b6r7.b2': 6, TCCS_name: TCCS_gap, TCCP_name: TCCP_gap, TARGET_name: TARGET_gap})
+        coll_manager.set_openings(gaps = {'tcp.d6r7.b2': TCP_gap, 'tcp.c6r7.b2': TCP_gap, 'tcp.b6r7.b2': TCP_gap, TCCS_name: TCCS_gap, TCCP_name: TCCP_gap, TARGET_name: TARGET_gap})
         ip1_idx = line.element_names.index('ip1')
         at_s = line.get_s_position(ip1_idx)
         # Vertical plane: generate cut halo distribution
         (y_in_sigmas, py_in_sigmas, r_points, theta_points
             )= xp.generate_2D_uniform_circular_sector(
                                                 num_particles=num_particles,
-                                                r_range=(4.999, 6), # sigmas
+                                                r_range=(4.998, 5.002), # sigmas
                                                 )
 
-        x_in_sigmas, px_in_sigmas = xp.generate_2D_gaussian(num_particles)
+        #x_in_sigmas, px_in_sigmas = xp.generate_2D_gaussian(num_particles)
+        transverse_spread_sigma = 0.01
+        x_in_sigmas   = np.random.normal(loc=3.45e-7, scale=transverse_spread_sigma, size=num_particles)
+        px_in_sigmas = np.random.normal(scale=transverse_spread_sigma, size=num_particles)
 
         part = line.build_particles(
             x_norm=x_in_sigmas, px_norm=px_in_sigmas,
