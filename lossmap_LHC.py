@@ -11,6 +11,8 @@ import xobjects as xo
 import xtrack as xt
 import xpart as xp
 import xcoll as xc
+import xfields as xf
+import xdeps as xd
 import scipy
 import gc
 import io 
@@ -195,6 +197,14 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, epsilon = 0, start =
 
 def main():
 
+    print('xcoll version: ', xc.__version__)
+    print('xtrack version: ', xt.__version__)
+    print('xpart version: ', xp.__version__)
+    print('xobjects version: ', xo.__version__)
+    print('xfields version: ', xf.__version__)
+    print('xdeps version: ', xd.__version__)
+
+
     config_file = sys.argv[1]
     
     with open(config_file, 'r') as stream:
@@ -213,6 +223,7 @@ def main():
     seed          = run_dict['seed']
 
     TCCS_align_angle_step = float(run_dict['TCCS_align_angle_step'])
+    TCCP_align_angle_step = float(run_dict['TCCP_align_angle_step'])
 
     normalized_emittance = run_dict['normalized_emittance']
 
@@ -271,9 +282,9 @@ def main():
     TCP_name = 'tcp.d6r7.b2'
     TCLA_name = 'tcla.a5l3.b2'
 
-    d_pix = 1 # [m]
+    d_pix = 0.720 + 0.663 # [m]
     ydim_PIXEL = 0.01408
-    xdim_PIXEL = 0.04246
+    xdim_PIXEL = 0.01408 #0.04246
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
@@ -322,13 +333,6 @@ def main():
         TCLA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
         line.insert_element(at_s = TCLA_loc - coll_dict[TCLA_name]["length"]/2 - 1e5*dx, element=TCLA_monitor, name='TCLA_monitor') 
         print('\n... TCLA monitor inserted')
-
-    if 'BLM_impacts' in save_list:
-        BLM_loc = end_s - (6653.3 - 4)
-        BLM_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = BLM_loc, element=BLM_monitor, name='BLM_monitor') 
-        print('\n... BLM monitor inserted')
-
     
     
     bad_aper = find_bad_offset_apertures(line)
@@ -373,7 +377,6 @@ def main():
         coll_manager.install_black_absorbers(names = black_absorbers, verbose=True)
     else:
         raise ValueError(f"Unknown scattering engine {engine}!")
-
     
     # Aperture model check
     print('\nAperture model check after introducing collimators:')
@@ -384,19 +387,20 @@ def main():
     #coll_manager.build_tracker()
     coll_manager.build_tracker()
 
-    # Set the collimator openings based on the colldb,
-    # or manually override with the option gaps={collname: gap}
+    # Set the collimator openings based on the colldb, or manually override with the option gaps={collname: gap}
     #coll_manager.set_openings()
-
     coll_manager.set_openings(gaps = {'tcp.d6r7.b2': TCP_gap, 'tcp.c6r7.b2': TCP_gap, 'tcp.b6r7.b2': TCP_gap, TCCS_name: TCCS_gap, TCCP_name: TCCP_gap, TARGET_name: TARGET_gap})
 
 
     print("\nTCCS aligned to beam: ", line[TCCS_name].align_angle)
-    #line[TTCS_name].align_angle = TTCS_align_angle_step
     print("TCCS align angle incremented by step: ", TCCS_align_angle_step)
     line[TCCS_name].align_angle = line[TCCS_name].align_angle + TCCS_align_angle_step
     print("TCCS final alignment angle: ", line[TCCS_name].align_angle)
 
+    print("\nTCCP aligned to beam: ", line[TCCP_name].align_angle)
+    print("TCCP align angle incremented by step: ", TCCP_align_angle_step)
+    line[TCCP_name].align_angle = line[TCCP_name].align_angle + TCCP_align_angle_step
+    print("TCCP final alignment angle: ", line[TCCP_name].align_angle)
 
     # Aperture model check
     print('\nAperture model check after introducing collimators:')
@@ -436,24 +440,26 @@ def main():
     print(f"PIXEL\nTargetAnalysis(n_sigma={PIXEL_gap}, length={0}, ydim={ydim_PIXEL}, xdim={xdim_PIXEL},"+ 
         f"sigma={sigma_PIXEL})\n")
         
-    if "BLM_impacts" in save_list:
-        idx_BLM = line.element_names.index('BLM_monitor')
-        beta_y_BLM = tw[:,'BLM_monitor']['bety'][0]
-        sigma_BLM = np.sqrt(emittance_phy*beta_y_BLM)
-        print(f"BLM\nTargetAnalysis(n_sigma={0.03/sigma_BLM}, length={0}, ydim={0.025}, xdim={0.025}, sigma={sigma_BLM}, jaw_L={0.03})\n")
 
     # ---------------------------- TRACKING ----------------------------
-    # Generate initial pencil distribution on horizontal collimator
-    tcp  = f"tcp.{'c' if plane=='H' else 'd'}6{'l' if beam=='1' else 'r'}7.b{beam}"
-    idx = line.element_names.index(tcp)
+   
+   
     
-    if input_mode == 'generate':
+    if input_mode == 'pencil_TCP':
         print("\n... Generating initial particles\n")
-        part = coll_manager.generate_pencil_on_collimator(tcp, num_particles=num_particles)
-        part.at_element = idx 
-        part.start_tracking_at_element = idx 
-        #process=psutil.Process(os.getpid())
-        #print(process.memory_info().rss)
+        # Generate initial pencil distribution on horizontal collimator
+        #tcp  = f"tcp.{'c' if plane=='H' else 'd'}6{'l' if beam=='1' else 'r'}7.b{beam}"
+        part = coll_manager.generate_pencil_on_collimator(TCP_name, num_particles=num_particles)
+        part.at_element = idx_TCP 
+        part.start_tracking_at_element = idx_TCP 
+
+    elif input_mode == 'pencil_TCCS':
+        print("\n... Generating initial particles\n")
+        idx = line.element_names.index(TCCS_name)
+        transverse_spread_sigma = 1
+        part = coll_manager.generate_pencil_on_collimator(TCCS_name, num_particles=num_particles, transverse_spread_sigma=transverse_spread_sigma)
+        part.at_element = idx_TCCS 
+        part.start_tracking_at_element = idx_TCCS 
 
     elif input_mode == 'circular_halo':
         print("\n... Generating 2D uniform circular sector\n")
@@ -480,8 +486,6 @@ def main():
         part.at_element = ip1_idx 
         part.start_tracking_at_element = ip1_idx 
 
-        
-        
     elif input_mode == 'load':
         print("\n... Loading initial particles\n")
         n_job = seed - 1
@@ -504,11 +508,10 @@ def main():
             if nn in dct_part.keys() and not np.isscalar(dct_part[nn]):
                  dct_part[nn] = dct_part[nn][0]
         part = xp.Particles.from_dict(dct_part, load_rng_state=True)
-        #process=psutil.Process(os.getpid())
-        #print(process.memory_info().rss)
+
         del df_part, dct_part
         gc.collect()
-        #print(process.memory_info().rss)
+
         part.at_element = idx + 2 
         part.start_tracking_at_element = idx + 2
 
@@ -561,7 +564,6 @@ def main():
     #          complevel=9, complib='blosc')
 
 
-
     if 'TCP_generated' in save_list:
         
         print("\n... Saving particles generated in interactions with TCP \n")
@@ -610,7 +612,7 @@ def main():
         jaw_L_TCCP = line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y
         
         impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP, 
-                epsilon = 0, num_particles=num_particles, num_turns=num_turns)
+                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCP_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
@@ -647,10 +649,10 @@ def main():
 
         PIXEL_monitor_dict = PIXEL_monitor.to_dict()
     
-        jaw_L_PIXEL = 0.007 #sigma_PIXEL * PIXEL_gap        
+        jaw_L_PIXEL = sigma_PIXEL * PIXEL_gap        
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+                epsilon = 3.5e-3, num_particles=num_particles, num_turns=num_turns)
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -660,8 +662,6 @@ def main():
         
         del impact_part_df
         gc.collect()
-
-
     
     
     if 'TCLA_impacts' in save_list:
@@ -685,27 +685,6 @@ def main():
         del impact_part_df
         gc.collect()
 
-
-    if 'BLM_impacts' in save_list:
-
-        # SAVE IMPACTS ON PIXEL
-        print("... Saving impacts on BLM\n")
-
-        BLM_monitor_dict = BLM_monitor.to_dict()
-    
-        jaw_L_BLM = 0.03          
-
-        impact_part_df = get_df_to_save(BLM_monitor_dict, df_part,  jaw_L = jaw_L_BLM,
-                num_particles=num_particles, num_turns=num_turns, epsilon = 0)
-        
-        del BLM_monitor
-        gc.collect()
-
-        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='BLM_impacts', format='table', mode='a',
-            complevel=9, complib='blosc')
-        
-        del impact_part_df
-        gc.collect()
 
 
 if __name__ == "__main__":

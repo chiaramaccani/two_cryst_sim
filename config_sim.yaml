@@ -14,21 +14,23 @@ run:
   turn_on_cavities: False # True False 
  
   TCCS_align_angle_step:  0 #-2.1295472062188793e-06 #3.870452793781121e-06 #2.3704527937811217e-06 # 8.704527937811208e-07 #-6.295472062188801e-07  # -3.6295472062188785e-06 #-5.129547206218881e-06 #-6.62954720621888e-06 # -8.12954720621888e-06
-  TCCS_gap: 99.9 #7.2
+  TCCP_align_angle_step: 2.171664447708839e-05  #5.2469086727490615e-06
+  
+  TCCS_gap: 5.0 #7.2
   TARGET_gap: 99.9 #33.6
-  TCCP_gap:  5.0 #33.6
-  PIXEL_gap: 12.0 #33.6
+  TCCP_gap:  9.4 #33.6
+  PIXEL_gap: 8.0 #33.6
   TCP_gap: 6.0
 
-  save_list: ['losses', 'TCCP_impacts', 'PIXEL_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: ['TCCP_impacts', 'PIXEL_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   #            'target_absorber' 
-  input_mode: 'circular_halo'  # load  generate circular_halo
+  input_mode: 'pencil_TCCS'  # load  pencil_TCCS pencil_TCP circular_halo
   #load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'   
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/test_circ_halo_w_tranversespreadsigma_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_TWOCRYST_double_channeling_inj_v2_
   num_jobs: 100 #5 100  
   run_local: False
   dryrun: False
@@ -44,9 +46,9 @@ input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_rematched/b4_sequence_patched.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_phase_advance/b4_sequence_patched_phadv.json
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
-  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/injection_b2.json    # 450 GeV
+  line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/injection_b2.json    # 450 GeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/flat_top_b2.json     # 6.8 TeV
-  line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json        # 1 TeV
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json        # 1 TeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.12_b2.json     # 2 TeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.17_b2.json      # 3 TeV
 
@@ -96,10 +98,10 @@ input_files:
   
 
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/flat_top.yaml  # 6.8 TeV
-  collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.9.yaml     # 1 TeV
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.9.yaml     # 1 TeV
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.12.yaml    # 2 TeV
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/ramp.17.yaml   # 3 TeV
-  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/injection.yaml # 450 GeV
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/injection.yaml # 450 GeV
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/HL_tight_twocryst.yaml
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/CollDB_HL_tight_b4.data
 
