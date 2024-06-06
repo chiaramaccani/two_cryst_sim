@@ -256,7 +256,14 @@ def main():
     TCCP_gap = float(run_dict['TCCP_gap'])
     TARGET_gap = float(run_dict['TARGET_gap'])
     PIXEL_gap = float(run_dict['PIXEL_gap'])
+    ALFA_gap = float(run_dict['ALFA_gap'])
     TCP_gap = float(run_dict['TCP_gap'])
+
+    epsilon_TCCS = float(run_dict['epsilon_TCCS'])
+    epsilon_TCCP = float(run_dict['epsilon_TCCP'])
+    epsilon_TARGET = float(run_dict['epsilon_TARGET'])
+    epsilon_PIXEL = float(run_dict['epsilon_PIXEL'])
+    epsilon_ALFA = float(run_dict['epsilon_ALFA'])
 
     context = xo.ContextCpu(omp_num_threads='auto')
 
@@ -279,19 +286,27 @@ def main():
     TCCP_name = 'tccp.4l3.b2'
     TARGET_name = 'target.4l3.b2'
     PIXEL_name = 'pixel.detector'
+    ALFA_name = 'alfa.detector'
     TCP_name = 'tcp.d6r7.b2'
     TCLA_name = 'tcla.a5l3.b2'
 
-    d_pix = 0.720 + 0.663 # [m]
+    print('\n... PIXEL in the first roman pot\n')
+    d_PIXEL = 0.663 # [m]
     ydim_PIXEL = 0.01408
-    xdim_PIXEL = 0.01408 #0.04246
+    xdim_PIXEL = 0.04224 #0.04246
+
+    print('\n... ALFA in the second roman pot\n')
+    d_ALFA = 0.720 + 0.663 # [m]
+    ydim_ALFA = 0.029698484809835
+    xdim_ALFA = 0.04525483399593905
 
     TCCS_loc = end_s - 6773.7 #6775
     TCCP_loc = end_s - 6653.3 #6655
 
     dx = 1e-11
     TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2 + dx)
-    PIXEL_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_pix)
+    PIXEL_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_PIXEL)
+    ALFA_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_ALFA )
     TCP_loc = line.get_s_position()[line.element_names.index(TCP_name)]
     TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
 
@@ -303,6 +318,7 @@ def main():
     line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name=TARGET_name)
     line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name= TARGET_name + '_aper')
     line.insert_element(at_s=PIXEL_loc, element=xt.Marker(), name=PIXEL_name)
+    line.insert_element(at_s=ALFA_loc, element=xt.Marker(), name=ALFA_name)
     
     if 'TCCS_impacts' in save_list:
         TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
@@ -323,6 +339,11 @@ def main():
         PIXEL_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
         line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
         print('\n... PIXEL monitor inserted')
+
+    if 'ALFA_impacts' in save_list:
+        ALFA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = ALFA_loc, element=ALFA_monitor, name='ALFA_monitor')
+        print('\n... ALFA monitor inserted')
 
     if 'TCP_generated' in save_list:
         TCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
@@ -412,6 +433,7 @@ def main():
     idx_TARGET = line.element_names.index(TARGET_name)
     idx_TCCP = line.element_names.index(TCCP_name)
     idx_PIXEL = line.element_names.index(PIXEL_name)
+    idx_ALFA = line.element_names.index(ALFA_name)
     idx_TCP = line.element_names.index(TCP_name)
     idx_TCLA = line.element_names.index(TCLA_name)
 
@@ -424,21 +446,24 @@ def main():
     sigma_TCCP = np.sqrt(emittance_phy*tw['bety',TCCP_name])
     sigma_TARGET = np.sqrt(emittance_phy* tw['bety',TARGET_name])
     sigma_PIXEL = np.sqrt(emittance_phy*tw['bety',PIXEL_name])
+    sigma_ALFA = np.sqrt(emittance_phy*tw['bety',ALFA_name])
     sigma_TCP = np.sqrt(emittance_phy*tw['bety',TCP_name])
     sigma_TCLA = np.sqrt(emittance_phy*tw['bety',TCLA_name])
     
     print(f"\nTCCS\nCrystalAnalysis(n_sigma={round(line.elements[idx_TCCS].jaw_L/sigma_TCCS, 4)}, length={ coll_dict[ TCCS_name]['length']}, ydim={ coll_dict[ TCCS_name]['xdim']}, xdim={ coll_dict[ TCCS_name]['ydim']}," + 
         f"bending_radius={ coll_dict[ TCCS_name]['bending_radius']}, align_angle={ line.elements[idx_TCCS].align_angle}, sigma={sigma_TCCS}, jaw_L={line.elements[idx_TCCS].jaw_L + line.elements[idx_TCCS].ref_y})")
-    print(f"TARGET\nTargetAnalysis(n_sigma={round(line.elements[idx_TARGET].jaw_L/sigma_TARGET, 4)}, length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']},"+
+    print(f"TARGET\nTargetAnalysis(n_sigma={round(line.elements[idx_TARGET].jaw_L/sigma_TARGET, 4)}, target_type='target', length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['xdim']}, xdim={ coll_dict[ TARGET_name]['ydim']},"+
         f"sigma={sigma_TARGET}, jaw_L={line.elements[idx_TARGET].jaw_L + line.elements[idx_TARGET].ref_y})")
     print(f"TCCP\nCrystalAnalysis(n_sigma={round(line.elements[idx_TCCP].jaw_L/sigma_TCCP, 4)}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['xdim']}, xdim={ coll_dict[ TCCP_name]['ydim']},"+ 
         f"bending_radius={ coll_dict[ TCCP_name]['bending_radius']}, align_angle={line.elements[idx_TCCP].align_angle}, sigma={sigma_TCCP}, jaw_L={line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y})")
-    print(f"TCP\nTargetAnalysis(n_sigma={round(line.elements[idx_TCP].jaw_L/sigma_TCP, 4)}, length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
+    print(f"TCP\nTargetAnalysis(n_sigma={round(line.elements[idx_TCP].jaw_L/sigma_TCP, 4)}, target_type='collimator', length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
         f"sigma={sigma_TCP}, jaw_L={line.elements[idx_TCP].jaw_L + line.elements[idx_TCP].ref_y})")
-    print(f"TCLA\nTargetAnalysis(n_sigma={round(line.elements[idx_TCLA].jaw_L/sigma_TCLA, 4)}, length={coll_dict[ TCLA_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
+    print(f"TCLA\nTargetAnalysis(n_sigma={round(line.elements[idx_TCLA].jaw_L/sigma_TCLA, 4)}, target_type='collimator', length={coll_dict[ TCLA_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
         f"sigma={sigma_TCLA},  jaw_L={line.elements[idx_TCLA].jaw_L + line.elements[idx_TCLA].ref_y})")
-    print(f"PIXEL\nTargetAnalysis(n_sigma={PIXEL_gap}, length={0}, ydim={ydim_PIXEL}, xdim={xdim_PIXEL},"+ 
+    print(f"PIXEL\nTargetAnalysis(n_sigma={PIXEL_gap}, target_type = 'pixel', ydim={ydim_PIXEL}, xdim={xdim_PIXEL},"+ 
         f"sigma={sigma_PIXEL})\n")
+    print(f"ALFA\nTargetAnalysis(n_sigma={ALFA_gap}, target_type='alfa', ydim={round(ydim_ALFA, 5)}, xdim={round(xdim_ALFA, 5)},"+ 
+        f"sigma={sigma_ALFA})\n")
         
 
     # ---------------------------- TRACKING ----------------------------
@@ -589,7 +614,7 @@ def main():
         jaw_L_TCCS = line.elements[idx_TCCS].jaw_L  + line.elements[idx_TCCS].ref_y
         
         impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS, 
-                epsilon = 0, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_TCCS, num_particles=num_particles, num_turns=num_turns)
         
         del TCCS_monitor_dict
         gc.collect()
@@ -612,7 +637,7 @@ def main():
         jaw_L_TCCP = line.elements[idx_TCCP].jaw_L + line.elements[idx_TCCP].ref_y
         
         impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP, 
-                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_TCCP, num_particles=num_particles, num_turns=num_turns)
 
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCP_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
@@ -633,7 +658,7 @@ def main():
         jaw_L_TARGET = line.elements[idx_TARGET].jaw_L + line.elements[idx_TARGET].ref_y        
 
         impact_part_df = get_df_to_save(TARGET_monitor_dict, df_part, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = jaw_L_TARGET,
-                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_TARGET, num_particles=num_particles, num_turns=num_turns)
         
         del TARGET_monitor_dict
         gc.collect()
@@ -652,7 +677,7 @@ def main():
         jaw_L_PIXEL = sigma_PIXEL * PIXEL_gap        
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = 3.5e-3, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -663,10 +688,30 @@ def main():
         del impact_part_df
         gc.collect()
     
+    if 'ALFA_impacts' in save_list:
+
+        # SAVE IMPACTS ON ALFA
+        print("... Saving impacts on ALFA\n")
+
+        ALFA_monitor_dict = ALFA_monitor.to_dict()
+    
+        jaw_L_ALFA = sigma_ALFA * ALFA_gap        
+
+        impact_part_df = get_df_to_save(ALFA_monitor_dict, df_part,  jaw_L = jaw_L_ALFA,  #x_dim = xdim_ALFA, y_dim = ydim_ALFA,
+                epsilon = epsilon_ALFA, num_particles=num_particles, num_turns=num_turns)
+        
+        del ALFA_monitor_dict
+        gc.collect()
+
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='ALFA_impacts', format='table', mode='a',
+            complevel=9, complib='blosc')
+        
+        del impact_part_df
+        gc.collect()
     
     if 'TCLA_impacts' in save_list:
 
-        # SAVE IMPACTS ON PIXEL
+        # SAVE IMPACTS ON TCLA
         print("... Saving impacts on TCLA\n")
 
         TCLA_monitor_dict = TCLA_monitor.to_dict()
@@ -674,7 +719,7 @@ def main():
         jaw_L_TCLA = line.elements[idx_TCLA].jaw_L + line.elements[idx_TCLA].ref_y           
 
         impact_part_df = get_df_to_save(TCLA_monitor_dict, df_part,  jaw_L = jaw_L_TCLA,
-                num_particles=num_particles, num_turns=num_turns, epsilon = 2.5e-3)
+                num_particles=num_particles, num_turns=num_turns, epsilon = 0)
         
         del TCLA_monitor
         gc.collect()
