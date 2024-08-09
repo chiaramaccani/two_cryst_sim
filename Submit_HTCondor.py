@@ -44,7 +44,7 @@ def main():
     mask_abspath = Path(os.path.expandvars(sub_dict['mask'])).resolve()
 
 
-    workdir = workdir.parent / Path(f"{workdir.name}_{config_dict['run']['target_mode']}_{time.strftime('%Y%m%d-%H%M')}")
+    workdir = workdir.parent / Path(f"{workdir.name}_{time.strftime('%Y%m%d-%H%M')}")
 
     input_cache = Path(workdir, 'input_cache')
     os.makedirs(workdir)
