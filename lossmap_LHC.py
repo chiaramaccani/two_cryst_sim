@@ -178,6 +178,7 @@ def main():
     epsilon_TARGET = float(run_dict['epsilon_TARGET'])
     epsilon_PIXEL = float(run_dict['epsilon_PIXEL'])
     epsilon_ALFA = float(run_dict['epsilon_ALFA'])
+    epsilon_TCLA = float(run_dict['epsilon_TCLA'])
 
     context = xo.ContextCpu(omp_num_threads='auto')
 
@@ -607,7 +608,7 @@ def main():
         jaw_L_TCCS = line.elements[idx_TCCS].jaw_U
         
         impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS, 
-                epsilon = 0, num_particles=num_particles, num_turns=num_turns, 
+                epsilon = epsilon_TCCS, num_particles=num_particles, num_turns=num_turns, 
                 df_imp = impacts.interactions_per_collimator(TCCS_name).reset_index())
         
         del TCCS_monitor_dict
@@ -634,7 +635,7 @@ def main():
         jaw_L_TCCP = line.elements[idx_TCCP].jaw_U
         
         impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP, 
-                epsilon = 0.5e-3, num_particles=num_particles, num_turns=num_turns,
+                epsilon = epsilon_TCCP, num_particles=num_particles, num_turns=num_turns,
                 df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
         
         if output_mode == 'reduced':
@@ -659,7 +660,7 @@ def main():
         jaw_L_TARGET = line.elements[idx_TARGET].jaw_LU 
 
         impact_part_df = get_df_to_save(TARGET_monitor_dict, df_part, x_dim = xdim_TARGET, y_dim = ydim_TARGET, jaw_L = jaw_L_TARGET,
-                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns,
+                epsilon = epsilon_TARGET, num_particles=num_particles, num_turns=num_turns,
                 df_imp = impacts.interactions_per_collimator(TARGET_name).reset_index())
         
         del TARGET_monitor_dict
@@ -685,7 +686,7 @@ def main():
         jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name]      
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = 2.5e-3, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -733,7 +734,7 @@ def main():
         jaw_L_TCLA = line.elements[idx_TCLA].jaw_LU
 
         impact_part_df = get_df_to_save(TCLA_monitor_dict, df_part,  jaw_L = jaw_L_TCLA,
-                num_particles=num_particles, num_turns=num_turns, epsilon = 2.5e-3)
+                num_particles=num_particles, num_turns=num_turns, epsilon = epsilon_TCLA)
         
         del TCLA_monitor
         gc.collect()
