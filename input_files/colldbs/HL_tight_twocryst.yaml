@@ -95,6 +95,6 @@ collimators:
     tctpv.6r1.b2:   { <<: *tctv1,    material: iner,    length: 1.0,    active: True,    angle: 90.0,    gap: 12.0 }
     tctpxh.4r1.b2:  { <<: *tcth1,    material: iner,    length: 1.0,    active: True,    angle: 0.0,    gap: 12.0 }
     tctpxv.4r1.b2:  { <<: *tctv1,    material: iner,    length: 1.0,    active: True,    angle: 90.0,    gap: 12.0 }
-    tccs.5r3.b2:    { <<: *tccs3,    material: si,    length: 0.004,    bending_radius: 80.0,    xdim: 0.002,    ydim: 0.035,    thick: 0.0,    miscut: 0.0,    crystal: strip,    side: left,    active: True,    angle: 90.0,    gap: 7.2 }
-    tccp.4l3.b2:    { <<: *tccp3,    material: si,    length: 0.07,    bending_radius: 10.0,    xdim: 0.002,    ydim: 0.008,    thick: 0.0,    miscut: 0.0,    crystal: strip,    side: left,    active: True,    angle: 90.0,    gap: 33.6 }
-    target.4l3.b2:  { <<: *target3,  material: iner,  length: 0.005,   xdim: 2.0e-3 ,  ydim: 8.0e-3 , side: left,  active: true, angle: 90, gap: 33.6} 
+    tccs.5r3.b2:    { <<: *tccs3,    material: si,    length: 0.004,    bending_radius: 80.0,    width: 0.002,    height: 0.035,    thick: 0.0,    miscut: 0.0,    crystal: strip,    side: left,    active: True,    angle: 90.0,    gap: 7.2 }
+    tccp.4l3.b2:    { <<: *tccp3,    material: si,    length: 0.07,    bending_radius: 10.0,    width: 0.002,    height: 0.008,    thick: 0.0,    miscut: 0.0,    crystal: strip,    side: left,    active: True,    angle: 90.0,    gap: 33.6 }
+    target.4l3.b2:  { <<: *target3,  material: iner,  length: 0.005,   width: 2.0e-3 ,  height: 8.0e-3 , side: left,  active: true, angle: 90, gap: 33.6} 

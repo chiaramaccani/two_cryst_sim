@@ -9,36 +9,37 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 #200
-  nparticles: 100000  #100000 #1000
+  nparticles: 50000  #100000 #1000 50000
   normalized_emittance: 3.5e-6  #2.5e-6 #3.5e-6
   turn_on_cavities: False # True False 
  
   TCCS_align_angle_step:  0 #-2.1295472062188793e-06 #3.870452793781121e-06 #2.3704527937811217e-06 # 8.704527937811208e-07 #-6.295472062188801e-07  # -3.6295472062188785e-06 #-5.129547206218881e-06 #-6.62954720621888e-06 # -8.12954720621888e-06
-  TCCP_align_angle_step: 2.6928973196760413e-05 #2.171664447708839e-05  #5.2469086727490615e-06
+  TCCP_align_angle_step: 2.6241997062733383e-05  # 2.6928973196760413e-05 #2.171664447708839e-05  #5.2469086727490615e-06
   
   TCCS_gap: 5.0 
-  TARGET_gap: 99.9 
-  TCCP_gap: 12.5 #9.4 
-  PIXEL_gap: 9.6 #8.0 
-  ALFA_gap: 9.0 #8.0 
+  TARGET_gap: None
+  TCCP_gap: 12.5 #14.0 #12.5 #9.4 
+  PIXEL_gap: 10.2  #9.6 #8.0 
+  ALFA_gap: 10.2 #9.0 #8.0 
   TCP_gap: 6.0
 
   epsilon_TCCS: 0
-  epsilon_TCCP: 2.5e-3
+  epsilon_TCCP: 7.0e-3
   epsilon_TARGET: 2.5e-3
   epsilon_PIXEL: 3.5e-3
   epsilon_ALFA: 3.5e-3
 
-  save_list: ['TCCP_impacts', 'ALFA_impacts', 'PIXEL_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'ALFA_impacts','PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: ['PIXEL_impacts', 'TCCP_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'ALFA_impacts','PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   #            'target_absorber' 
   input_mode: 'pencil_TCCS'  # load  pencil_TCCS pencil_TCP circular_halo
+  output_mode: '' # reduced
   #load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7___20240319-0931'   
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_TWOCRYST_double_channeling_1tev_
-  num_jobs: 100 #5 100  
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_1000GeV_DC_more_margin
+  num_jobs: 200 #5 100  
   run_local: False
   dryrun: False
   jobflavour: 'workday'  #'workday' #'espresso' testmatch
@@ -55,11 +56,11 @@ input_files:
   #line_b2: ${HOME_TWOCRYST}/input_files/HL_IR7_tune_changed/b4_sequence_patched_tune.json
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/injection_b2.json    # 450 GeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/flat_top_b2.json     # 6.8 TeV
-  line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json        # 1 TeV
+  #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.9_b2.json        # 1 TeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.12_b2.json     # 2 TeV
   #line_b2: ${HOME_TWOCRYST}/input_files/2024_Run3/ramp.17_b2.json      # 3 TeV
-
-
+  line_b2: ${HOME_TWOCRYST}/MadX/2024/track_ramp.9_b2.json
+  #line_b2: ${HOME_TWOCRYST}/MadX/2024/track_flat_top_b2.json
 
   # --------- Run3 phase scan lines ---------
   #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_70.json'
