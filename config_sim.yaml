@@ -28,6 +28,7 @@ run:
   epsilon_TARGET: 2.5e-3
   epsilon_PIXEL: 3.5e-3
   epsilon_ALFA: 3.5e-3
+  epsilon_TCLA: 3.5e-3
 
   save_list: ['PIXEL_impacts', 'TCCP_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'ALFA_impacts','PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   #            'target_absorber' 
