@@ -24,7 +24,7 @@ from IPython import embed
 
 # ---------------------------- LOADING FUNCTIONS ----------------------------
 
-def get_df_to_save(dict, df_part, num_particles, num_turns, epsilon = 0, start = False, x_dim = None, y_dim = None, jaw_L = None):
+def get_df_to_save(dict, df_part, num_particles, num_turns, epsilon = 0, start = False, jaw_L = None, plane = 'V'):
 
     float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta', 'p0c']
     int_variables = ['at_turn', 'particle_id', 'at_element', 'state', 'parent_particle_id']
@@ -44,35 +44,19 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, epsilon = 0, start =
     for key in var_dict.keys():
         impact_part_dict[key] = []
 
-    if x_dim is not None and jaw_L is not None and y_dim is not None:
-
-        abs_y_low = jaw_L
-        abs_y_up = jaw_L + y_dim
-        abs_x_low = -x_dim/2
-        abs_x_up = x_dim/2
-
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low - epsilon) and var_dict['x'][part, turn] < (abs_x_up + epsilon) and var_dict['y'][part, turn] > (abs_y_low - epsilon) and var_dict['y'][part, turn] < (abs_y_up + epsilon):
-                    for key in var_dict.keys():
-                        impact_part_dict[key].append(var_dict[key][part, turn])
-
-    elif x_dim is None and y_dim is None and jaw_L is not None:
-        abs_y_low = jaw_L
-
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                if var_dict['state'][part, turn] > 0 and var_dict['y'][part, turn] > (abs_y_low - epsilon):
-                    for key in var_dict.keys():
-                        impact_part_dict[key].append(var_dict[key][part, turn])
-
-    else:
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                if start and turn > 0:
-                    continue
-                else: 
-                    if var_dict['state'][part, turn] > 0:
+    if jaw_L is not None:
+        if plane == 'V':
+            abs_y_low = jaw_L
+            for part in range(num_particles):
+                for turn in range(num_turns):
+                    if var_dict['state'][part, turn] > 0 and var_dict['y'][part, turn] > (abs_y_low - epsilon):
+                        for key in var_dict.keys():
+                            impact_part_dict[key].append(var_dict[key][part, turn])
+        elif plane == 'H':
+            abs_x_low = jaw_L
+            for part in range(num_particles):
+                for turn in range(num_turns):
+                    if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low - epsilon):
                         for key in var_dict.keys():
                             impact_part_dict[key].append(var_dict[key][part, turn])
 
@@ -125,6 +109,11 @@ def main():
 
     input_mode = run_dict['input_mode']
 
+    lim_max_B2H = float(run_dict['lim_max_B2H'])
+    lim_min_B2H = float(run_dict['lim_min_B2H'])
+    lim_max_B2V = float(run_dict['lim_max_B2V']) 
+    lim_min_B2V = float(run_dict['lim_min_B2V']) 
+
     turn_on_cavities = bool(run_dict['turn_on_cavities'])
     print('input mode: ', input_mode, '\t',  'Seed: ', seed, '\tCavities on: ', turn_on_cavities ,  '\n')
 
@@ -162,6 +151,41 @@ def main():
     line = xt.Line.from_json(line_file)
     end_s = line.get_length()
 
+    # switch on cavities
+    if turn_on_cavities:
+        speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c
+        harmonic_number = 35640
+        voltage = 12e6/len(line.get_elements_of_type(xt.Cavity)[1])
+        frequency = harmonic_number * speed /line.get_length()
+        for side in ['l', 'r']:
+            for cell in ['a','b','c','d']:
+                line[f'acsca.{cell}5{side}4.b{beam}'].voltage = voltage
+                line[f'acsca.{cell}5{side}4.b{beam}'].frequency = frequency   
+
+    # Aperture model check
+    print('\nAperture model check on imported model:')
+    df_imported = line.check_aperture()
+    assert not np.any(df_imported.has_aperture_problem)
+
+
+    # Initialise collmanager
+    colldb = xc.CollimatorDatabase.from_yaml(coll_file, beam=beam, ignore_crystals=False)
+    coll_names = colldb.collimator_names
+    #embed()
+
+    # Install collimators into line
+    if engine == 'everest':
+        
+        black_absorbers = []
+        everest_colls = [name for name in coll_names if name not in black_absorbers]
+
+        colldb.install_everest_collimators(line = line, names=everest_colls,verbose=True)
+        colldb.install_black_absorbers(line = line, names = black_absorbers, verbose=True)
+    else:
+        raise ValueError(f"Unknown scattering engine {engine}!")
+
+
+
     if 'beta_impacts' in save_list:
         if beam == '1' and plane == 'H':
             beam_list = ['B1H']
@@ -169,8 +193,12 @@ def main():
             beam_list = ['B1V']
         elif beam == '2' and plane == 'H':
             beam_list = ['B2H']
+            lim_max = lim_max_B2H
+            lim_min = lim_min_B2H
         elif beam == '2' and plane == 'V':
             beam_list = ['B2V']
+            lim_max = lim_max_B2V
+            lim_min = lim_min_B2V
             
         MAX_BETA_name = 'max.ir3.beta'
         MIN_BETA_name = 'min.ir3.beta'
@@ -203,54 +231,17 @@ def main():
             line.insert_element(at_s = (end_s - 6800.871996084), element=MIN_BETA_monitor, name=MIN_BETA_name)
             print('\n... B1V monitor inserted')
 
-
-    # switch on cavities
-    if turn_on_cavities:
-        speed = line.particle_ref._xobject.beta0[0]*scipy.constants.c
-        harmonic_number = 35640
-        voltage = 12e6/len(line.get_elements_of_type(xt.Cavity)[1])
-        frequency = harmonic_number * speed /line.get_length()
-        for side in ['l', 'r']:
-            for cell in ['a','b','c','d']:
-                line[f'acsca.{cell}5{side}4.b{beam}'].voltage = voltage
-                line[f'acsca.{cell}5{side}4.b{beam}'].frequency = frequency   
-
-    # Aperture model check
-    print('\nAperture model check on imported model:')
-    df_imported = line.check_aperture()
-    assert not np.any(df_imported.has_aperture_problem)
-
-
-    # Initialise collmanager
-    coll_manager = xc.CollimatorManager.from_yaml(coll_file, line=line, beam=beam, _context=context, ignore_crystals=False)
-
-    #embed()
-
-    # Install collimators into line
-    if engine == 'everest':
-        coll_names = coll_manager.collimator_names
-
-        black_absorbers = []
-        everest_colls = [name for name in coll_names if name not in black_absorbers]
-
-        coll_manager.install_everest_collimators(names=everest_colls,verbose=True)
-        coll_manager.install_black_absorbers(names = black_absorbers, verbose=True)
-    else:
-        raise ValueError(f"Unknown scattering engine {engine}!")
-
-
     # Aperture model check
     print('\nAperture model check after introducing collimators:')
     df_with_coll = line.check_aperture()
     assert not np.any(df_with_coll.has_aperture_problem)
 
     # Build the tracker
-    #coll_manager.build_tracker()
-    coll_manager.build_tracker()
+    line.build_tracker()
 
     # Set the collimator openings based on the colldb,
     # or manually override with the option gaps={collname: gap}
-    coll_manager.set_openings()
+    xc.assign_optics_to_collimators(line=line)
 
     # Aperture model check
     print('\nAperture model check after introducing collimators:')
@@ -290,15 +281,15 @@ def main():
     
     if input_mode == 'generate':
         print("\n... Generating initial particles\n")
-        part = coll_manager.generate_pencil_on_collimator(tcp, num_particles=num_particles)
+        part = xc.generate_pencil_on_collimator(name = tcp, line = line, num_particles=num_particles)
         part.at_element = idx 
         part.start_tracking_at_element = idx     
     
 
     # Track
-    coll_manager.enable_scattering()
+    xc.enable_scattering(line)
     line.track(part, num_turns=num_turns, time=True)
-    coll_manager.disable_scattering()
+    xc.disable_scattering(line)
     print(f"Done tracking in {line.time_last_track:.1f}s.")
 
 
@@ -308,15 +299,11 @@ def main():
     # ---------------------------- LOSSMAPS ----------------------------    
 
     if 'losses' in save_list:
-        # Save lossmap to json, which can be loaded, combined (for more statistics),
-        # and plotted with the 'lossmaps' package
-        print("\n... Saving losses \n")
-        _ = coll_manager.lossmap(part, file=Path(path_out,f'lossmap_B{beam}{plane}.json'))
-
-
-        # Save a summary of the collimator losses to a text file
-        summary = coll_manager.summary(part) #, file=Path(path_out,f'coll_summary_B{beam}{plane}.out')
-        print(summary)
+        line_is_reversed = True if f'{beam}' == '2' else False
+        ThisLM = xc.LossMap(line, line_is_reversed=line_is_reversed, part=part)
+        print(ThisLM.summary, '\n')
+        ThisLM.to_json(file=Path(path_out, f'lossmap_B{beam}{plane}.json'))
+        #ThisLM.save_summary(file=Path(path_out, f'coll_summary_B{beam}{plane}.out'))
 
 
 
@@ -339,11 +326,11 @@ def main():
         print(f"Line index of MAX: {idx_MAX_BETA}, MIN: {idx_MIN_BETA}\n")
 
 
-        print("\n... Saving particles at MAX beta location in \n", beam_list[0], "\n")
+        print("\n... Saving particles at MAX beta location in ", beam_list[0], "\n")
 
         MAX_BETA_monitor_dict = MAX_BETA_monitor.to_dict()
 
-        impact_part_df = get_df_to_save(MAX_BETA_monitor_dict, df_part,
+        impact_part_df = get_df_to_save(MAX_BETA_monitor_dict, df_part, jaw_L = lim_max, plane = plane,
                                         num_particles=num_particles, num_turns=num_turns)
 
         del MAX_BETA_monitor_dict
@@ -360,7 +347,7 @@ def main():
 
         MIN_BETA_monitor_dict = MIN_BETA_monitor.to_dict()
 
-        impact_part_df = get_df_to_save(MIN_BETA_monitor_dict, df_part,
+        impact_part_df = get_df_to_save(MIN_BETA_monitor_dict, df_part, jaw_L = lim_min, plane = plane,
                                         num_particles=num_particles, num_turns=num_turns)
 
         del MIN_BETA_monitor_dict
