@@ -198,7 +198,7 @@ def main():
         elif beam == '2' and plane == 'V':
             beam_list = ['B2V']
             lim_max = lim_max_B2V
-            lim_min = lim_min_B2V
+            lim_min = lim_min_B2
             
         MAX_BETA_name = 'max.ir3.beta'
         MIN_BETA_name = 'min.ir3.beta'

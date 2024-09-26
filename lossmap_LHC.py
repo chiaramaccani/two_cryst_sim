@@ -215,11 +215,10 @@ def main():
     ydim_ALFA = 0.029698484809835
     xdim_ALFA = 0.04525483399593905
 
-    TCCS_loc = end_s - 6773.8785  #6773.7 #6775
-    TCCP_loc = end_s - 6653.2545  #6653.3 #6655
+    TCCS_loc = end_s - 6773.9428  #6773.7 #6775
+    TCCP_loc = end_s - 6653.2543  #6653.3 #6655
 
-    dx = 0 #1e-11
-    TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2 + dx)
+    TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
     PIXEL_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_PIXEL)
     ALFA_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_ALFA )
     TCP_loc = line.get_s_position()[line.element_names.index(TCP_name)]
@@ -266,41 +265,6 @@ def main():
 
     colldb.install_everest_collimators(line = line, names=everest_colls,verbose=True)
     colldb.install_black_absorbers(line = line, names = black_absorbers, verbose=True)
-
-    if 'TCCS_impacts' in save_list:
-        TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 - dx, element=TCCS_monitor, name='TCCS_monitor')
-        print('\n... TCCS monitor inserted')
-
-    if 'TARGET_impacts' in save_list:
-        TARGET_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2 - dx, element=TARGET_monitor, name='TARGET_monitor')
-        print('\n... TARGET monitor inserted')
-
-    if 'TCCP_impacts' in save_list:
-        TCCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = TCCP_loc - coll_dict[TCCP_name]["length"]/2 - 4*dx, element=TCCP_monitor, name='TCCP_monitor')
-        print('\n... TCCP monitor inserted')
-
-    if 'PIXEL_impacts' in save_list:
-        PIXEL_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
-        print('\n... PIXEL monitor inserted')
-
-    if 'ALFA_impacts' in save_list:
-        ALFA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = ALFA_loc, element=ALFA_monitor, name='ALFA_monitor')
-        print('\n... ALFA monitor inserted')
-
-    if 'TCP_generated' in save_list:
-        TCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = TCP_loc + coll_dict[TCP_name]["length"]/2 + 1e5*dx, element=TCP_monitor, name='TCP_monitor') 
-        print('\n... TCP monitor inserted')
-
-    if 'TCLA_impacts' in save_list:
-        TCLA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = TCLA_loc - coll_dict[TCLA_name]["length"]/2 - 1e5*dx, element=TCLA_monitor, name='TCLA_monitor') 
-        print('\n... TCLA monitor inserted')
 
     # Aperture model check
     print('\nAperture model check after introducing collimators:')
@@ -365,7 +329,53 @@ def main():
     print('\nAperture model check after introducing collimators:')
     df_with_coll = line.check_aperture()
     assert not np.any(df_with_coll.has_aperture_problem)
-    
+
+    # ---------------------------- CALCULATE TWISS ----------------------------
+    tw = line.twiss()
+
+    line.discard_tracker()
+    # ---------------------------- SETUP MONITORS ----------------------------
+    if 'TCCS_impacts' in save_list:
+        TCCS_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        tilt_face_shift_TCCS = coll_dict[TCCS_name]["width"]*np.sin(line[TCCS_name].tilt) if tw['alfy', TCCS_name] < 0 else 0
+        line.insert_element(at_s = TCCS_loc - coll_dict[TCCS_name]["length"]/2 -tilt_face_shift_TCCS, element=TCCS_monitor, name='TCCS_monitor')
+        print('\n... TCCS monitor inserted')
+
+    if 'TARGET_impacts' in save_list:
+        TARGET_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = TARGET_loc - coll_dict[TARGET_name]["length"]/2, element=TARGET_monitor, name='TARGET_monitor')
+        print('\n... TARGET monitor inserted')
+
+    if 'TCCP_impacts' in save_list:
+        TCCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        tilt_face_shift_TCCP = coll_dict[TCCP_name]["width"]*np.sin(line[TCCP_name].tilt) if tw['alfy', TCCP_name] < 0 else 0
+        TCCP_monitor_s = TCCP_loc - coll_dict[TCCP_name]["length"]/2 - tilt_face_shift_TCCP
+        line.insert_element(at_s = TCCP_monitor_s, element=TCCP_monitor, name='TCCP_monitor')
+        print('\n... TCCP monitor inserted')
+
+    if 'PIXEL_impacts' in save_list:
+        PIXEL_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
+        print('\n... PIXEL monitor inserted')
+
+    if 'ALFA_impacts' in save_list:
+        ALFA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = ALFA_loc, element=ALFA_monitor, name='ALFA_monitor')
+        print('\n... ALFA monitor inserted')
+
+    if 'TCP_generated' in save_list:
+        TCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = TCP_loc + coll_dict[TCP_name]["length"]/2, element=TCP_monitor, name='TCP_monitor') 
+        print('\n... TCP monitor inserted')
+
+    if 'TCLA_impacts' in save_list:
+        TCLA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = TCLA_loc - coll_dict[TCLA_name]["length"]/2, element=TCLA_monitor, name='TCLA_monitor') 
+        print('\n... TCLA monitor inserted')
+    line.build_tracker()
+
+    #embed()
+
     # Printout useful informations
     idx_TCCS = line.element_names.index(TCCS_name)
     idx_TARGET = line.element_names.index(TARGET_name)
@@ -374,8 +384,7 @@ def main():
     idx_ALFA = line.element_names.index(ALFA_name)
     idx_TCP = line.element_names.index(TCP_name)
     idx_TCLA = line.element_names.index(TCLA_name)
-
-    tw = line.twiss()
+    
     beta_rel = float(line.particle_ref.beta0)
     gamma = float(line.particle_ref.gamma0)
     emittance_phy = normalized_emittance/(beta_rel*gamma)
@@ -402,7 +411,6 @@ def main():
         f"sigma={sigma_PIXEL})")
     print(f"ALFA\nTargetAnalysis(n_sigma={gaps['ALFA_gap']}, target_type='alfa', ydim={round(ydim_ALFA, 5)}, xdim={round(xdim_ALFA, 5)},"+ 
         f"sigma={sigma_ALFA})\n")
-
 
 
     # ---------------------------- TRACKING ----------------------------
