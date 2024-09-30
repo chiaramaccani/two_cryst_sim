@@ -166,7 +166,7 @@ def main():
         sys.exit(1)
                
     gaps = {}
-    for gap_name in ['TCCS_gap', 'TCCP_gap', 'TARGET_gap', 'PIXEL_gap', 'ALFA_gap', 'TCP_gap']:
+    for gap_name in ['TCCS_gap', 'TCCP_gap', 'TARGET_gap', 'PIXEL_gap', 'TFT_gap', 'TCP_gap']:
         gap = run_dict[gap_name]
         if gap == 'None':
             gaps[gap_name]= None
@@ -177,7 +177,7 @@ def main():
     epsilon_TCCP = float(run_dict['epsilon_TCCP'])
     epsilon_TARGET = float(run_dict['epsilon_TARGET'])
     epsilon_PIXEL = float(run_dict['epsilon_PIXEL'])
-    epsilon_ALFA = float(run_dict['epsilon_ALFA'])
+    epsilon_TFT = float(run_dict['epsilon_TFT'])
     epsilon_TCLA = float(run_dict['epsilon_TCLA'])
 
     context = xo.ContextCpu(omp_num_threads='auto')
@@ -201,26 +201,35 @@ def main():
     TCCP_name = 'tccp.4l3.b2'
     TARGET_name = 'target.4l3.b2'
     PIXEL_name = 'pixel.detector'
-    ALFA_name = 'alfa.detector'
+    TFT_name = 'tft.detector'
     TCP_name = 'tcp.d6r7.b2'
     TCLA_name = 'tcla.a5l3.b2'
 
     print('\n... PIXEL in the first roman pot\n')
-    d_PIXEL = 0.663 # [m]
     ydim_PIXEL = 0.01408
     xdim_PIXEL = 0.04224 #0.04246
 
-    print('... ALFA in the second roman pot\n')
-    d_ALFA = 0.720 + 0.663 # [m]
-    ydim_ALFA = 0.029698484809835
-    xdim_ALFA = 0.04525483399593905
+    print('... TFT in the second roman pot\n')
+    ydim_TFT = 0.029698484809835
+    xdim_TFT = 0.04525483399593905
 
-    TCCS_loc = end_s - 6773.9428  #6773.7 #6775
-    TCCP_loc = end_s - 6653.2543  #6653.3 #6655
+    RPX_bottom_wall_thickess = 2.14e-3
+    PIX_y_distance_to_RPX = 4.26e-3
 
-    TARGET_loc = end_s - (6653.3 + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
-    PIXEL_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_PIXEL)
-    ALFA_loc = end_s - (6653.3 - coll_dict[TCCP_name]["length"]/2 - d_ALFA )
+    TCCS_loc_abs  = 6773.9428  #6773.7 #6775
+    TCCP_loc_abs  = 6653.2543  #6653.3 #6655
+    PIX1_loc_abs = 6652.7039
+    PIX2_loc_abs = 6652.6929
+    PIX3_loc_abs = 6652.6819
+    TFT_loc_abs = 6652.114
+
+    TCCS_loc = end_s - TCCS_loc_abs
+    TCCP_loc = end_s - TCCP_loc_abs
+    TARGET_loc = end_s - (TCCP_loc_abs + coll_dict[TCCP_name]["length"]/2 + coll_dict[TARGET_name]["length"]/2)
+    PIX1_loc = end_s - PIX1_loc_abs
+    PIX2_loc = end_s - PIX2_loc_abs
+    PIX3_loc = end_s - PIX3_loc_abs
+    TFT_loc = end_s - TFT_loc_abs
     TCP_loc = line.get_s_position()[line.element_names.index(TCP_name)]
     TCLA_loc = line.get_s_position()[line.element_names.index(TCLA_name)]
 
@@ -231,8 +240,13 @@ def main():
     line.insert_element(at_s=TCCP_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name=TCCP_name+'_aper')
     line.insert_element(at_s=TARGET_loc, element=xt.Marker(), name=TARGET_name)
     line.insert_element(at_s=TARGET_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name= TARGET_name + '_aper')
-    line.insert_element(at_s=PIXEL_loc, element=xt.Marker(), name=PIXEL_name)
-    line.insert_element(at_s=ALFA_loc, element=xt.Marker(), name=ALFA_name)
+    line.insert_element(at_s=PIX1_loc, element=xt.Marker(), name=PIXEL_name+'_1')
+    line.insert_element(at_s=PIX1_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name= PIXEL_name+'_1' + '_aper')
+    line.insert_element(at_s=PIX2_loc, element=xt.Marker(), name=PIXEL_name+'_2')
+    line.insert_element(at_s=PIX2_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name= PIXEL_name+'_2' + '_aper')
+    line.insert_element(at_s=PIX3_loc, element=xt.Marker(), name=PIXEL_name+'_3')
+    line.insert_element(at_s=PIX3_loc, element=xt.LimitEllipse(a_squ=0.0016, b_squ=0.0016, a_b_squ=2.56e-06), name= PIXEL_name+'_3' + '_aper')
+    line.insert_element(at_s=TFT_loc, element=xt.Marker(), name=TFT_name)
 
     # switch on cavities
     if turn_on_cavities:
@@ -353,15 +367,25 @@ def main():
         line.insert_element(at_s = TCCP_monitor_s, element=TCCP_monitor, name='TCCP_monitor')
         print('\n... TCCP monitor inserted')
 
-    if 'PIXEL_impacts' in save_list:
-        PIXEL_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = PIXEL_loc, element=PIXEL_monitor, name='PIXEL_monitor')
-        print('\n... PIXEL monitor inserted')
+    if 'PIXEL_impacts' or 'PIXEL_impacts_1' or 'PIXEL_impacts_ALL'  in save_list:
+        PIXEL_monitor_1 = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = PIX1_loc - coll_dict[PIXEL_name+'_1']["length"]/2, element=PIXEL_monitor_1, name='PIXEL_monitor_1')
+        print('\n... PIXEL 1 monitor inserted')
 
-    if 'ALFA_impacts' in save_list:
-        ALFA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = ALFA_loc, element=ALFA_monitor, name='ALFA_monitor')
-        print('\n... ALFA monitor inserted')
+    if 'PIXEL_impacts_2' or 'PIXEL_impacts_ALL'  in save_list:
+        PIXEL_monitor_2 = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = PIX2_loc - coll_dict[PIXEL_name+'_2']["length"]/2, element=PIXEL_monitor_2, name='PIXEL_monitor_2')
+        print('\n... PIXEL 3 monitor inserted')
+
+    if 'PIXEL_impacts_3' or 'PIXEL_impacts_ALL'  in save_list:
+        PIXEL_monitor_3 = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = PIX3_loc - coll_dict[PIXEL_name+'_3']["length"]/2, element=PIXEL_monitor_3, name='PIXEL_impacts_3')
+        print('\n... PIXEL 3 monitor inserted')
+
+    if 'TFT_impacts' in save_list:
+        TFT_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = TFT_loc, element=TFT_monitor, name='TFT_monitor')
+        print('\n... TFT monitor inserted')
 
     if 'TCP_generated' in save_list:
         TCP_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
@@ -380,8 +404,10 @@ def main():
     idx_TCCS = line.element_names.index(TCCS_name)
     idx_TARGET = line.element_names.index(TARGET_name)
     idx_TCCP = line.element_names.index(TCCP_name)
-    idx_PIXEL = line.element_names.index(PIXEL_name)
-    idx_ALFA = line.element_names.index(ALFA_name)
+    idx_PIXEL_1 = line.element_names.index(PIXEL_name + '_1')
+    idx_PIXEL_2 = line.element_names.index(PIXEL_name + '_2')
+    idx_PIXEL_3 = line.element_names.index(PIXEL_name + '_3')
+    idx_TFT = line.element_names.index(TFT_name)
     idx_TCP = line.element_names.index(TCP_name)
     idx_TCLA = line.element_names.index(TCLA_name)
     
@@ -392,8 +418,8 @@ def main():
     sigma_TCCS = np.sqrt(emittance_phy*tw['bety',TCCS_name])
     sigma_TCCP = np.sqrt(emittance_phy*tw['bety',TCCP_name])
     sigma_TARGET = np.sqrt(emittance_phy* tw['bety',TARGET_name])
-    sigma_PIXEL = np.sqrt(emittance_phy*tw['bety',PIXEL_name])
-    sigma_ALFA = np.sqrt(emittance_phy*tw['bety',ALFA_name])
+    sigma_PIXEL = np.sqrt(emittance_phy*tw['bety',PIXEL_name+'_1'])
+    sigma_TFT = np.sqrt(emittance_phy*tw['bety',TFT_name])
     sigma_TCP = np.sqrt(emittance_phy*tw['bety',TCP_name])
     sigma_TCLA = np.sqrt(emittance_phy*tw['bety',TCLA_name])
     
@@ -409,8 +435,8 @@ def main():
         f"sigma={sigma_TCLA},  jaw_L={line.elements[idx_TCLA].jaw_LU })")
     print(f"PIXEL\nTargetAnalysis(n_sigma={gaps['PIXEL_gap']}, target_type = 'pixel', ydim={ydim_PIXEL}, xdim={xdim_PIXEL},"+ 
         f"sigma={sigma_PIXEL})")
-    print(f"ALFA\nTargetAnalysis(n_sigma={gaps['ALFA_gap']}, target_type='alfa', ydim={round(ydim_ALFA, 5)}, xdim={round(xdim_ALFA, 5)},"+ 
-        f"sigma={sigma_ALFA})\n")
+    print(f"TFT\nTargetAnalysis(n_sigma={gaps['TFT_gap']}, target_type='alfa', ydim={round(ydim_TFT, 5)}, xdim={round(xdim_TFT, 5)},"+ 
+        f"sigma={sigma_TFT})\n")
 
 
     # ---------------------------- TRACKING ----------------------------
@@ -506,7 +532,7 @@ def main():
 
     # Printout useful informations
     print("\n----- Check information -----")
-    print(f"Line index of TCCS: {idx_TCCS}, TARGET: {idx_TARGET}, TCCP: {idx_TCCP}, PIXEL: {idx_PIXEL}, TCP: {idx_TCP}\n")
+    print(f"Line index of TCCS: {idx_TCCS}, TARGET: {idx_TARGET}, TCCP: {idx_TCCP}, PIXEL 1: {idx_PIXEL_1}, PIXEL 2: {idx_PIXEL_2}, PIXEL 3: {idx_PIXEL_3}, TCP: {idx_TCP}\n")
 
 
     # ---------------------------- LOSSMAPS ----------------------------    
@@ -684,14 +710,13 @@ def main():
         gc.collect()
         
 
-    if 'PIXEL_impacts' in save_list:
+    if 'PIXEL_impacts' or 'PIXEL_impacts_1' or 'PIXEL_impacts_ALL' in save_list:
 
-        # SAVE IMPACTS ON PIXEL
-        print("... Saving impacts on PIXEL\n")
+        print("... Saving impacts on PIXEL 1\n")
 
-        PIXEL_monitor_dict = PIXEL_monitor.to_dict()
+        PIXEL_monitor_dict = PIXEL_monitor_1.to_dict()
     
-        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name]      
+        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_1'] + PIX_y_distance_to_RPX     
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
@@ -702,31 +727,86 @@ def main():
         if output_mode == 'reduced':
             impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]
 
-        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='PIXEL_impacts', format='table', mode='a',
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='PIXEL_impacts_1', format='table', mode='a',
             complevel=9, complib='blosc')
         
         del impact_part_df
         gc.collect()
 
-    if 'ALFA_impacts' in save_list:
 
-        # SAVE IMPACTS ON ALFA
-        print("... Saving impacts on ALFA\n")
 
-        ALFA_monitor_dict = ALFA_monitor.to_dict()
+
+    if 'PIXEL_impacts_2' or 'PIXEL_impacts_ALL' in save_list:
+
+        print("... Saving impacts on PIXEL 2\n")
+
+        PIXEL_monitor_dict = PIXEL_monitor_2.to_dict()
     
-        jaw_L_ALFA = sigma_ALFA * gaps['ALFA_gap'] + tw['y',ALFA_name]          
+        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2']  + PIX_y_distance_to_RPX    
 
-        impact_part_df = get_df_to_save(ALFA_monitor_dict, df_part,  jaw_L = jaw_L_ALFA,  #x_dim = xdim_ALFA, y_dim = ydim_ALFA,
-                epsilon = epsilon_ALFA, num_particles=num_particles, num_turns=num_turns)
+        impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
         
-        del ALFA_monitor_dict
+        del PIXEL_monitor_dict
         gc.collect()
 
         if output_mode == 'reduced':
             impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]
 
-        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='ALFA_impacts', format='table', mode='a',
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='PIXEL_impacts_2', format='table', mode='a',
+            complevel=9, complib='blosc')
+        
+        del impact_part_df
+        gc.collect()
+
+
+
+
+    if 'PIXEL_impacts_3' or 'PIXEL_impacts_ALL' in save_list:
+
+        print("... Saving impacts on PIXEL 3\n")
+
+        PIXEL_monitor_dict = PIXEL_monitor_3.to_dict()
+    
+        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2'] + PIX_y_distance_to_RPX
+
+        impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
+        
+        del PIXEL_monitor_dict
+        gc.collect()
+
+        if output_mode == 'reduced':
+            impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]
+
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='PIXEL_impacts_3', format='table', mode='a',
+            complevel=9, complib='blosc')
+        
+        del impact_part_df
+        gc.collect()
+
+
+
+
+    if 'TFT_impacts' in save_list:
+
+        # SAVE IMPACTS ON TFT
+        print("... Saving impacts on TFT\n")
+
+        TFT_monitor_dict = TFT_monitor.to_dict()
+    
+        jaw_L_TFT = sigma_TFT * gaps['TFT_gap'] + tw['y',TFT_name] + RPX_bottom_wall_thickess         
+
+        impact_part_df = get_df_to_save(TFT_monitor_dict, df_part,  jaw_L = jaw_L_TFT,  #x_dim = xdim_TFT, y_dim = ydim_TFT,
+                epsilon = epsilon_TFT, num_particles=num_particles, num_turns=num_turns)
+        
+        del TFT_monitor_dict
+        gc.collect()
+
+        if output_mode == 'reduced':
+            impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]
+
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TFT_impacts', format='table', mode='a',
             complevel=9, complib='blosc')
         
         del impact_part_df
