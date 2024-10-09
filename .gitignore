@@ -215,3 +215,4 @@ Outputdata/lossmap*.json
 Outputdata/*.out
 Outputdata/*.root
 GR_sim/Outputdata/*
+not_git/

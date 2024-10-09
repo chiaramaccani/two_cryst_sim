@@ -166,12 +166,16 @@ def main():
         sys.exit(1)
                
     gaps = {}
-    for gap_name in ['TCCS_gap', 'TCCP_gap', 'TARGET_gap', 'PIXEL_gap', 'TFT_gap', 'TCP_gap']:
+    for gap_name in ['TCCS_gap', 'TCCP_gap', 'TARGET_gap', 'PIXEL_gap', 'TFT_gap', 'TCP_gap', 'TCLA_gap']:
         gap = run_dict[gap_name]
         if gap == 'None':
             gaps[gap_name]= None
+        elif gap == 'default':
+            pass
         else:
             gaps[gap_name]= float(gap)  
+
+    part_energy = None if run_dict['energy'] == 'None' else float(run_dict['energy'])
 
     epsilon_TCCS = float(run_dict['epsilon_TCCS'])
     epsilon_TCCP = float(run_dict['epsilon_TCCP'])
@@ -194,6 +198,10 @@ def main():
 
     # Load from json
     line = xt.Line.from_json(line_file)
+    if part_energy is not None:
+        line.particle_ref = xt.Particles(p0c=part_energy, #eV
+                                 q0=1, mass0=xt.PROTON_MASS_EV)
+    print(f'\nParticle energy: {float(line.particle_ref.p0c)/1e9:} GeV\n')
 
     end_s = line.get_length()
 
@@ -288,9 +296,6 @@ def main():
     # ---------------------------- SETUP IMPACTS ----------------------------
 
 
-    print("\n... Setting up impacts\n")
-    impacts = xc.InteractionRecord.start(line= line)  #capacity=int(2e7)
-
     # Build the tracker
     line.build_tracker()
     xc.assign_optics_to_collimators(line=line)
@@ -307,6 +312,9 @@ def main():
         line[tcp].gap = gaps['TCP_gap']
         print(f'TCP {tcp} gap set to: ', line[tcp].gap, ':', line[tcp].gap_L, line[tcp].gap_R)
 
+    if 'TCLA_gap' in gaps.keys():
+        line[TCLA_name].gap = gaps['TCLA_gap']
+        print('TCLA gap set to: ', line[TCLA_name].gap)
 
     print('\n---- Crystal alignment ----')
     if 'miscut' in  coll_dict[TCCS_name].keys():
@@ -439,16 +447,20 @@ def main():
         f"sigma={sigma_TFT})\n")
 
 
+
+    print("\n... Setting up impacts\n")
+    impacts = xc.InteractionRecord.start(line= line)  #capacity=int(2e7)
+
     # ---------------------------- TRACKING ----------------------------
     if input_mode == 'pencil_TCP':
-        print("\n... Generating initial particles\n")
+        print("\n... Generating initial particles on TCP \n")
         # Generate initial pencil distribution on horizontal collimator
         part = xc.generate_pencil_on_collimator(name = TCP_name, line = line, num_particles=num_particles)
         part.at_element = idx_TCP 
         part.start_tracking_at_element = idx_TCP 
 
     elif input_mode == 'pencil_TCCS':
-        print("\n... Generating initial particles\n")
+        print("\n... Generating initial particles on TCCS\n")
         #transverse_spread_sigma = 1
         #part = xc.generate_pencil_on_collimator(TCCS_name, num_particles=num_particles, transverse_spread_sigma=transverse_spread_sigma)
         part = xc.generate_pencil_on_collimator(name = TCCS_name, line=line, num_particles=num_particles)
@@ -521,12 +533,39 @@ def main():
     
 
     # Track
-    xc.enable_scattering(line)
+    debug = False
+    if debug:
+        print("\n... Tracking in debug mode\n")
+        import json
+        with open('./Outputdata/part_before.json', 'w') as fid:
+            json.dump(part.to_dict(), fid, cls=xo.JEncoder)
+
+        #embed()
+        xc.enable_scattering(line)
+        line.track(part, ele_stop="drift_23526..1..1")
+        xc.disable_scattering(line)
+        with open('./Outputdata/part_after.json', 'w') as fid:
+            json.dump(part.to_dict(), fid, cls=xo.JEncoder)
+        #embed()
+        tccs_imp = impacts.interactions_per_collimator(TCCS_name).reset_index()
+        with open('./Outputdata/impacts.json', 'w') as fid:
+            #json.dump(tccs_imp[[ 'int']].to_dict(), fid, cls=xo.JEncoder)
+            json.dump(impacts.to_pandas().to_json(), fid, cls=xo.JEncoder)
+        del tccs_imp
+
+    xc.enable_scattering(line)    
     line.track(part, num_turns=num_turns, time=True)
     print("\nTCCS critical angle: ", line[idx_TCCS].critical_angle)
     print("TCCP critical angle: ", line[idx_TCCP].critical_angle)
     xc.disable_scattering(line)
+    impacts.stop()
     print(f"\nDone tracking in {line.time_last_track:.1f}s.")
+
+
+    if debug:
+        print("\n... Saving final particles\n")
+        with open('./Outputdata/part_final.json', 'w') as fid:
+            json.dump(part.to_dict(), fid, cls=xo.JEncoder)
 
 
 
@@ -575,7 +614,7 @@ def main():
 
     tccs_imp = impacts.interactions_per_collimator(TCCS_name).reset_index()
     n_TCCS_abs = tccs_imp['int'].apply(lambda x: 'A'  in x).sum()
-    print(f"\TCCS: {n_TCCS_abs} particles absorbed\n")
+    print(f"\nTCCS: {n_TCCS_abs} particles absorbed\n")
     tccs_imp = tccs_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
     tccs_imp.rename(columns={'turn': 'TCCS_turn', 'pid':'particle_id'}, inplace=True)
     df_part = pd.merge(df_part, tccs_imp, on='particle_id', how='left')
@@ -584,12 +623,13 @@ def main():
     
     tccp_imp = impacts.interactions_per_collimator(TCCP_name).reset_index()
     n_TCCP_abs = tccp_imp['int'].apply(lambda x: 'A'  in x).sum()
-    print(f"\TCCP: {n_TCCP_abs} particles absorbed\n")
+    print(f"TCCP: {n_TCCP_abs} particles absorbed\n")
     tccp_imp = tccp_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
     tccp_imp.rename(columns={'turn': 'TCCP_turn', 'pid':'particle_id'}, inplace=True)
     df_part = pd.merge(df_part, tccp_imp, on='particle_id', how='left')
     del tccp_imp
     gc.collect()
+
 
     tcp_hor_imp = impacts.interactions_per_collimator('tcp.d6r7.b2').reset_index().groupby('pid').agg(list).reset_index()[['pid', 'turn']]
     tcp_ver_imp = impacts.interactions_per_collimator('tcp.c6r7.b2').reset_index().groupby('pid').agg(list).reset_index()[['pid', 'turn']]
@@ -613,7 +653,10 @@ def main():
 
 
     print("... Saving metadata\n")
-    metadata = {'p0c': line.particle_ref.p0c[0], 'mass0': line.particle_ref.mass0, 'q0': line.particle_ref.q0, 'gamma0': line.particle_ref.gamma0[0], 'beta0': line.particle_ref.beta0[0], 'TCCS_absorbed': n_TCCS_abs, 'TCCP_absorbed': n_TCCP_abs}
+    metadata = {'p0c': line.particle_ref.p0c[0], 'mass0': line.particle_ref.mass0, 'q0': line.particle_ref.q0, 'gamma0': line.particle_ref.gamma0[0], 'beta0': line.particle_ref.beta0[0], 
+                'TCCS_absorbed': n_TCCS_abs, 'TCCP_absorbed': n_TCCP_abs, 
+                'TCCS_gap': gaps['TCCS_gap'], 'TCCP_gap': gaps['TCCP_gap'], 'TARGET_gap': gaps['TARGET_gap'], 'PIXEL_gap': gaps['PIXEL_gap'], 'TFT_gap': gaps['TFT_gap'], 'TCP_gap': gaps['TCP_gap'],
+                'TCCS_align_angle': line.elements[idx_TCCS].tilt, 'TCCP_align_angle': line.elements[idx_TCCP].tilt, 'TCCS_miscut': miscut_TCCS, 'TCCP_miscut': miscut_TCCP,}
     pd.DataFrame(list(metadata.values()), index=metadata.keys()).to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='metadata', format='table', mode='a',
             complevel=9, complib='blosc')
 
@@ -633,7 +676,7 @@ def main():
 
     if 'TCCS_impacts' in save_list:
         # SAVE IMPACTS ON TCCS
-        print("... Saving impacts on TCCS\n")
+        print("... Saving impacts on TCCS\n(epsilon: ", epsilon_TCCS, ")\n")
 
         TCCS_monitor_dict = TCCS_monitor.to_dict()
         
@@ -660,7 +703,7 @@ def main():
 
     if 'TCCP_impacts' in save_list:
         # SAVE IMPACTS ON TCCP
-        print("... Saving impacts on TCCP\n")
+        print("... Saving impacts on TCCP\n(epsilon: ", epsilon_TCCP, ")\n")
 
         TCCP_monitor_dict = TCCP_monitor.to_dict()
         
@@ -685,7 +728,7 @@ def main():
     if 'TARGET_impacts' in save_list:
 
         # SAVE IMPACTS ON TARGET
-        print("... Saving impacts on TARGET\n")
+        print("... Saving impacts on TARGET\n(epsilon: ", epsilon_TARGET, ")\n")
 
         TARGET_monitor_dict = TARGET_monitor.to_dict()
        
@@ -712,7 +755,7 @@ def main():
 
     if 'PIXEL_impacts' or 'PIXEL_impacts_1' or 'PIXEL_impacts_ALL' in save_list:
 
-        print("... Saving impacts on PIXEL 1\n")
+        print("... Saving impacts on PIXEL 1\n(epsilon: ", epsilon_PIXEL, ")\n")
 
         PIXEL_monitor_dict = PIXEL_monitor_1.to_dict()
     
@@ -738,7 +781,7 @@ def main():
 
     if 'PIXEL_impacts_2' or 'PIXEL_impacts_ALL' in save_list:
 
-        print("... Saving impacts on PIXEL 2\n")
+        print("... Saving impacts on PIXEL 2\n(epsilon: ", epsilon_PIXEL, ")\n")
 
         PIXEL_monitor_dict = PIXEL_monitor_2.to_dict()
     
@@ -764,7 +807,7 @@ def main():
 
     if 'PIXEL_impacts_3' or 'PIXEL_impacts_ALL' in save_list:
 
-        print("... Saving impacts on PIXEL 3\n")
+        print("... Saving impacts on PIXEL 3\n(epsilon: ", epsilon_PIXEL, ")\n")
 
         PIXEL_monitor_dict = PIXEL_monitor_3.to_dict()
     
@@ -791,7 +834,7 @@ def main():
     if 'TFT_impacts' in save_list:
 
         # SAVE IMPACTS ON TFT
-        print("... Saving impacts on TFT\n")
+        print("... Saving impacts on TFT\n(epsilon: ", epsilon_TFT, ")\n")
 
         TFT_monitor_dict = TFT_monitor.to_dict()
     
@@ -815,7 +858,7 @@ def main():
     if 'TCLA_impacts' in save_list:
 
         # SAVE IMPACTS ON TCLA
-        print("... Saving impacts on TCLA\n")
+        print("... Saving impacts on TCLA\n, epsilon: ", epsilon_TCLA)
 
         TCLA_monitor_dict = TCLA_monitor.to_dict()
     
