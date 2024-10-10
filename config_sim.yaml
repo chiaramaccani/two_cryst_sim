@@ -8,8 +8,8 @@ run:
 
   beam: '2'
   plane: 'V'
-  turns: 200 #200
-  nparticles: 50000  #100000 #1000 50000
+  turns: 1 #200
+  nparticles: 10000  #100000 #1000 50000
   normalized_emittance: 3.5e-6  #2.5e-6 #3.5e-6
   turn_on_cavities: False # True False 
 
@@ -29,24 +29,24 @@ run:
   epsilon_TCCS: 0 #1.0e-3
   epsilon_TCCP: 2.0e-3
   epsilon_TARGET: 0 #2.5e-3
-  epsilon_PIXEL: 3.0e-3
+  epsilon_PIXEL: 4.3e-3 #3.0e-3
   epsilon_TFT: 3.0e-3
   epsilon_TCLA: 3.5e-3
 
-  save_list: ['TCCP_impacts', 'PIXEL_impacts_ALL', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: ["TCCS_impacts", 'TCCP_impacts', 'PIXEL_impacts_ALL', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   #            'target_absorber' 
   input_mode: 'pencil_TCCS'  # load  pencil_TCCS pencil_TCP circular_halo
-  output_mode: 'reduced' # reduced
+  output_mode: '' # reduced
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_450GeV_DC_v2_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_BAD_6_impandmon_closer_
   num_jobs: 200 #5 100  
   run_local: False
   dryrun: False
   jobflavour: 'workday'  #'workday' #'espresso' testmatch
-  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '10240M'}  # 10240M 5120M
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"'}  # 10240M 5120M , 'request_memory': '10240M'
   mask: ${HOME_TWOCRYST}/mask_condor_script.sh
 
 
