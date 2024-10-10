@@ -404,9 +404,16 @@ def main():
         TCLA_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
         line.insert_element(at_s = TCLA_loc - coll_dict[TCLA_name]["length"]/2, element=TCLA_monitor, name='TCLA_monitor') 
         print('\n... TCLA monitor inserted')
-    line.build_tracker()
 
-    #embed()
+
+
+    debug_2 = True
+    if debug_2:
+        TCCS_monitor_debug = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = TCCS_loc + 0.0025, element=TCCS_monitor_debug, name='TCCS_monitor_debug')
+        print('\n... TCCS monitor DEBUG inserted')
+
+    line.build_tracker()
 
     # Printout useful informations
     idx_TCCS = line.element_names.index(TCCS_name)
@@ -540,13 +547,12 @@ def main():
         with open('./Outputdata/part_before.json', 'w') as fid:
             json.dump(part.to_dict(), fid, cls=xo.JEncoder)
 
-        #embed()
         xc.enable_scattering(line)
         line.track(part, ele_stop="drift_23526..1..1")
         xc.disable_scattering(line)
         with open('./Outputdata/part_after.json', 'w') as fid:
             json.dump(part.to_dict(), fid, cls=xo.JEncoder)
-        #embed()
+
         tccs_imp = impacts.interactions_per_collimator(TCCS_name).reset_index()
         with open('./Outputdata/impacts.json', 'w') as fid:
             #json.dump(tccs_imp[[ 'int']].to_dict(), fid, cls=xo.JEncoder)
@@ -567,6 +573,11 @@ def main():
         with open('./Outputdata/part_final.json', 'w') as fid:
             json.dump(part.to_dict(), fid, cls=xo.JEncoder)
 
+    if debug_2:
+        a =  impacts.to_pandas()[impacts.to_pandas()['collimator']==TCCS_name][['collimator', 'id_before', 'interaction_type', 's_before', 'energy_before', 
+                                                                           'x_before', 'px_before', 'y_before', 'py_before', 's_after', 'energy_after', 'x_after', 'px_after', 'y_after', 'py_after']]
+        a.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='impacts', format='table', mode='a',
+                        complevel=9, complib='blosc')
 
 
     # Printout useful informations
@@ -672,6 +683,33 @@ def main():
         impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCP_generated', format='table', mode='a',
             complevel=9, complib='blosc')
 
+
+
+    if debug_2:
+        # SAVE IMPACTS ON TCCS
+        print("... Saving impacts on TCCS DEBUG\n(epsilon: ", 1e-4, ")\n")
+
+        TCCS_monitor_dict = TCCS_monitor_debug.to_dict()
+        
+        ydim_TCCS = coll_dict[TCCS_name]['width']
+        xdim_TCCS =  coll_dict[TCCS_name]['height']
+        jaw_L_TCCS = line.elements[idx_TCCS].jaw_U
+        
+        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS, 
+                epsilon = 1e-4, num_particles=num_particles, num_turns=num_turns, 
+                df_imp = impacts.interactions_per_collimator(TCCS_name).reset_index())
+        
+        del TCCS_monitor_dict
+        gc.collect()
+
+        if output_mode == 'reduced':
+            impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]
+
+        impact_part_df.to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='TCCS_monitor_debug', format='table', mode='a',
+            complevel=9, complib='blosc')
+        
+        del impact_part_df
+        gc.collect()
 
 
     if 'TCCS_impacts' in save_list:
