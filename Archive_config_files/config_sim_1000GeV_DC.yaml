@@ -5,6 +5,7 @@ run:
 
   engine: 'everest'
   seed: 1
+  fixed_seed: True
 
   beam: '2'
   plane: 'V'
@@ -36,12 +37,12 @@ run:
   save_list: ['TCCP_impacts', 'PIXEL_impacts_1', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   #            'target_absorber' 
   input_mode: 'pencil_TCCS'  # load  pencil_TCCS pencil_TCP circular_halo
-  output_mode: 'reduced' # reduced
+  output_mode:  # reduced
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_1000GeV_DC_v3_
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_1000GeV_DC_v4_
   num_jobs: 200 #5 100  
   run_local: False
   dryrun: False

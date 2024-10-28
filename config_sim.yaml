@@ -5,11 +5,12 @@ run:
 
   engine: 'everest'
   seed: 1
+  fixed_seed: True
 
   beam: '2'
   plane: 'V'
-  turns: 1 #200
-  nparticles: 10000  #100000 #1000 50000
+  turns: 200 #200
+  nparticles:  1000 #100000 #1000 50000
   normalized_emittance: 3.5e-6  #2.5e-6 #3.5e-6
   turn_on_cavities: False # True False 
 
@@ -33,15 +34,15 @@ run:
   epsilon_TFT: 3.0e-3
   epsilon_TCLA: 3.5e-3
 
-  save_list: ["TCCS_impacts", 'TCCP_impacts', 'PIXEL_impacts_ALL', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: ["TCCS_impacts", 'TCCP_impacts', 'PIXEL_impacts_1' ] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   #            'target_absorber' 
-  input_mode: 'pencil_TCCS'  # load  pencil_TCCS pencil_TCP circular_halo
+  input_mode: 'pencil_TCCS'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
   output_mode: '' # reduced
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TEST_BAD_6_impandmon_closer_
+  working_directory: ${HOME_TWOCRYST}/Condor/TEST_BAD_MAYBEFIXED_
   num_jobs: 200 #5 100  
   run_local: False
   dryrun: False

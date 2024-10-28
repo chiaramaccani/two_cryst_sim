@@ -1,3 +1,241 @@
+import json
+import os
+import subprocess
+import glob
+
+import numpy as np
+from pathlib import Path
+import yaml
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import pandas as pd
+
+from matplotlib.ticker import MaxNLocator
+import lossmaps as lm
+import xobjects as xo
+
+import xtrack as xt
+import xcoll as xc
+
+import lossmaps as lm
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+import xarray as xr
+
+import json
+
+import xtrack as xt
+import xpart as xp
+import xobjects as xo
+
+
+import pickle 
+import h5py
+import io
+import scipy
+from scipy.optimize import curve_fit
+
+import ast
+
+from scipy.special import erf
+import scipy.optimize as opt
+from matplotlib.ticker import FixedLocator
+from scipy.stats import norm
+
+import uproot 
+
+
+
+
+
+# ---------------------------- SIMULATION CHECKING FUNCTIONS ----------------------------
+
+
+def ls(path="/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/"):
+    print(subprocess.check_output("ls -ht " + path, shell=True).decode('ascii').strip())
+
+def get_simulation_output(folder, path="/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/",file_name="htcondor*.out", print_1=True, n=0):
+    file_content = subprocess.check_output("cat " + path + folder + f'/Job.{n}/' + file_name, shell=True).decode('ascii').strip()
+    if print_1:
+        print(file_content)
+    else:
+        return file_content
+
+def get_analysis_init(folder, suffix='' , path="/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/", file_name="htcondor*.out", n=0, only_sim_obj = True):
+    file_lines = get_simulation_output(folder, print_1=False, path = path, n=n).split('\n')
+    if only_sim_obj:
+        file_pattern = os.path.join(path, folder, 'input_cache', 'config_sim*.yaml')
+        matching_files = glob.glob(file_pattern)
+        if matching_files:
+            with open(matching_files[0], 'r') as file:
+                config = yaml.load(file, Loader=yaml.FullLoader)
+                obj_list = config['run']['save_list']
+
+    for i in range(len(file_lines)):
+        if 'CrystalAnalysis' in file_lines[i] or 'TargetAnalysis' in file_lines[i]:
+            if file_lines[i-1] in ['TCCS', 'TCCP', 'TARGET', 'PIXEL', 'TCP', 'BLM', 'TCLA', 'TFT']:
+                if only_sim_obj:
+                    if any([file_lines[i-1] in obj for obj in obj_list]):
+                        print(file_lines[i-1]+suffix+' = '+file_lines[i])
+                else:    
+                    print(file_lines[i-1]+suffix+' = '+file_lines[i])
+            else:    
+                print('OBJ'+suffix+' = '+file_lines[i])
+
+
+
+def check_config(folder, path="/afs/cern.ch/work/c/cmaccani/xsuite_sim/twocryst_sim/Condor/", cat=['run']):
+    file_pattern = os.path.join(path, folder, 'input_cache', 'config_sim*.yaml')
+    matching_files = glob.glob(file_pattern)
+    if matching_files:
+        with open(matching_files[0], 'r') as file:
+            config = yaml.load(file, Loader=yaml.FullLoader)
+    for c in cat:
+        print(config[c])
+
+
+def check_hdf_keys(input_path):
+    with pd.HDFStore(input_path, 'r') as store:
+         keys = store.keys()
+    for key in keys:
+        print(key)
+
+
+def display_rows(rows = None, cols = None):
+    pd.set_option('display.max_rows', rows)
+    pd.set_option('display.max_columns', cols)
+
+
+
+
+
+
+
+
+# ----------------------------- TURN AND COMPARISON FUNCTIONS ----------------------------
+
+
+def plot_at_turn(TCCS, TARGET, n_turn, plot_whole = False, plot_chann=True, percentile = 0.0):
+
+    df_TCCS = TCCS.data
+    df_TARGET = TARGET.impact_part()
+    df_TARGET_all = TARGET.data
+
+    df_TCCS = df_TCCS[df_TCCS['this_turn']==n_turn]
+    df_TARGET = df_TARGET[df_TARGET['this_turn']==n_turn]
+    df_TARGET_all = df_TARGET_all[df_TARGET_all['this_turn']==n_turn]
+
+    print("IMPACT ON TCCS AT TURN ", n_turn)    
+    fig_TCCS, ax_TCCS_list = TCCS.plot_distributions(df_TCCS['x'], df_TCCS['y'], df_TCCS['px'], df_TCCS['py'], xpcrit=True, return_fig=True, percentile = percentile)
+    if plot_whole:
+        ax_TCCS_list[1].hist(TCCS.data['y'], bins=100, alpha = 0.3) 
+        ax_TCCS_list[2].scatter(TCCS.data['x'], TCCS.data['y'], alpha = 0.03, zorder=1) 
+        ax_TCCS_list[4].hist(TCCS.data['py'], bins=100, alpha = 0.3) 
+
+    print("IMPACT ON TARGET AT TURN ", n_turn)    
+    fig_TARGET, ax_TARGET_list = TARGET.plot_distributions(df_TARGET['x'], df_TARGET['y'], df_TARGET['px'], df_TARGET['py'],  return_fig=True, percentile = percentile)
+    if plot_whole:
+        ax_TARGET_list[2].scatter(TARGET.data['x'], TARGET.data['y'], alpha = 0.03, zorder=1) 
+
+    common_ids = np.intersect1d(df_TCCS['particle_id'], df_TARGET['particle_id'])
+
+    channable = df_TCCS[(df_TCCS['py'] > TCCS.align_angle - np.abs(TCCS.xp_crit)) & (df_TCCS['py'] < TCCS.align_angle  + np.abs(TCCS.xp_crit))]
+
+    print('TCCS impacts: ', len(df_TCCS), '\ninside critical angle:', len(channable)  ,'\nTARGET impacts' ,len(df_TARGET), '\nCommon impacts: ', len(common_ids))
+
+    df_common = df_TCCS[df_TCCS['particle_id'].isin(common_ids)]
+    print("\nIMPACTS ON TARGET FROM TCCS AT TURN ", n_turn)    
+    fig_common, ax_common_list = TCCS.plot_distributions(df_common['x'], df_common['y'], df_common['px'], df_common['py'], xpcrit=True, return_fig=True)
+
+    if plot_chann:
+        ax_TCCS_list[2].scatter(df_common['x'], df_common['y'], color='pink',zorder=10, alpha =0.01) 
+        ax_TCCS_list[4].hist(df_common['py'], bins=90, alpha = 0.3, color='pink')
+
+
+def check_plot_turns(TCCS, TARGET, turns=200):
+    df_TCCS = TCCS.data
+    df_TARGET = TARGET.impact_part()
+    tccs, target, channable, common = [], [], [], []
+    x = np.arange(turns)
+    for t in range(turns):
+        tccs.append(len(df_TCCS[df_TCCS['this_turn']==t]))
+        target.append(len(df_TARGET[df_TARGET['this_turn']==t]))
+        tmp_TCCS = df_TCCS[df_TCCS['this_turn']==t]
+        tmp_target = df_TARGET[df_TARGET['this_turn']==t]
+        common_ids = np.intersect1d(tmp_TCCS['particle_id'], tmp_target['particle_id'])
+        channable.append(len(tmp_TCCS[(tmp_TCCS['py'] > TCCS.align_angle - np.abs(TCCS.xp_crit)) & (tmp_TCCS['py'] < TCCS.align_angle  + np.abs(TCCS.xp_crit))]))
+        common.append(len(tmp_TCCS[tmp_TCCS['particle_id'].isin(common_ids)]))
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+    ax.plot(x, tccs, label='TCCS impacts')
+    ax.plot(x, target, label='TARGET impacts')
+    ax.plot(x, channable, label='TCCS impacts inside critical angle')
+    ax.plot(x, common, label='Common impacts')
+    #ax.set_yscale('log')
+    ax.legend()
+    print(np.argmax(target))
+
+
+
+def plot_turn_impacts(impact_list, turns=200, threshold=10000, labels = None, linestyles = None, return_fig = False):
+    if not hasattr(impact_list, '__iter__'):
+            impact_list = [impact_list]
+    dfs = [i.impact_part() for i in impact_list]
+
+    x = np.arange(turns)
+    fig, ax = plt.subplots(figsize=(10, 7))
+
+    for i, df in enumerate(dfs):
+        imp = []
+        for t in range(turns):
+            imp.append(len(df[df['this_turn']==t]))
+
+        if labels is not None:
+            label=labels[i]
+        else:
+             label = f'impacts {i}'
+        if linestyles is not None:
+            linestyle=linestyles[i]
+        else:
+            linestyle = '-'
+        ax.plot(x, imp, label=label, linewidth=2, linestyle=linestyle, marker='o')
+        peaks = []
+        for i in range(1, len(imp)):
+            if imp[i] - imp[i-1] > threshold:
+                peaks.append(i)
+        print('\nPeaks at turns: ', peaks)       
+        print('Absolute max: ', np.argmax(imp))
+
+    ax.legend()
+    ax.set_xlabel('Turn number')
+    ax.set_ylabel('N impacts')
+
+    if return_fig:
+        return fig, ax  
+
+def calculate_target_impacts_threshold(TARGET, threshold , turns=200):
+    df_TARGET = TARGET.impact_part()
+    target = []
+    x = np.arange(turns)
+    for t in range(turns):
+        target.append(len(df_TARGET[df_TARGET['this_turn']==t]))
+
+    print('thershold: ', threshold, 'before thershold: ', np.sum(target[:threshold]), f"{  (np.sum(target[:threshold])/np.sum(target)*100):.{1}f}% \t after thershold: ", np.sum(target[threshold:]), f"   {(np.sum(target[threshold:])/np.sum(target)*100):.{1}f}%")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class ParticleAnalysis():
 
     def __init__(self, n_sigma, length, sigma, xdim = None, ydim = None, beam = 2, plane = 'V', jaw_L = None, emittance_n = 3.5e-6):
@@ -227,6 +465,7 @@ class ParticleAnalysis():
 
 
     def plot_xy_distribution(self, fig, ax, x, y, bins = 100, axins_params = ["100%", "5%", "right", -6], sigma_line = True,**kwargs):
+       
 
         h = ax.hist2d(x, y, bins=bins, norm=matplotlib.colors.LogNorm(), zorder=2)
     
@@ -236,8 +475,9 @@ class ParticleAnalysis():
             ax.set_xlim(kwargs['xlim'][0], kwargs['xlim'][1])
         ax.set_xlabel(r'x [mm]')
         ax.set_ylabel(r'y [mm]')
-        ax.set_xticks(ticks=ax.get_xticks(), labels=[f"{x_tick*1e3:.{2}f}" for x_tick in ax.get_xticks()])
-        ax.set_yticks(ticks=ax.get_yticks(), labels=[f"{x_tick*1e3:.{2}f}" for x_tick in ax.get_yticks()])
+        ax.set_xticks(ticks=ax.get_xticks(), labels=[f"{x_tick*1e3:.{3}f}" for x_tick in ax.get_xticks()])
+        ax.set_yticks(ticks=ax.get_yticks(), labels=[f"{x_tick*1e3:.{3}f}" for x_tick in ax.get_yticks()])
+        
 
         if self.plane == 'V':
 
@@ -588,9 +828,13 @@ class ParticleAnalysis():
         if 'interactions' in self.data.columns:
             data = self.data['interactions'].apply(lambda x: str(x))
             data = data.groupby(data).count()
+            pd.set_option('display.max_rows', None)
+            pd.set_option('display.max_columns', None)
             print(data)
             if 'nan' in data.index:
                 data = data.drop('nan')
+            pd.set_option('display.max_rows', 30)
+            pd.set_option('display.max_columns', 30)
             print(f"\n ---- Total interacting particles: {data.sum()} ---- \n")
         else:
             print('No interaction data available')
@@ -724,7 +968,7 @@ class CrystalAnalysis(ParticleAnalysis):
         # ax_list = [ax1, ax2, ax3, ax12, ax22, ax32]
         fig, ax_list = super().plot_distributions_base(x, y, px, py, fit = fit, return_fig = True, **kwargs)
 
-        super().plot_xy_distribution(fig, ax_list[2], x, y)
+        super().plot_xy_distribution(fig, ax_list[2], x, y, xlim = [-5e-3, 5e-3])
 
         if lines:
             self.plot_rectangle(ax_list[2], self.abs_x_low, self.abs_x_up, self.abs_y_low, self.abs_y_up)
@@ -824,13 +1068,24 @@ class CrystalAnalysis(ParticleAnalysis):
 
 class TargetAnalysis(ParticleAnalysis):
 
-  def __init__(self, target_type, n_sigma,  sigma, xdim = None, ydim = None, length = None, beam = 2, plane = 'V', jaw_L = None):
+  def __init__(self, target_type, n_sigma,  sigma, xdim = None, ydim = None, length = None, beam = 2, plane = 'V', jaw_L = None, PIX_y_distance_to_RPX = 4.26e-3, RPX_bottom_wall_thickess = 2.14e-3):
 
     super().__init__(n_sigma = n_sigma, length = length, xdim = xdim, ydim = ydim, sigma = sigma, beam = beam, plane = plane, jaw_L = jaw_L)
     
     if target_type not in ['pixel', 'alfa', 'target', 'collimator']:
         print('Target type not valid\nAllowed types: [pixel, alfa, target, collimator]')
     self.type = target_type
+
+    self.PIX_y_distance_to_RPX = PIX_y_distance_to_RPX
+    self.RPX_bottom_wall_thickess = RPX_bottom_wall_thickess
+
+    if self.type == 'pixel' and self.PIX_y_distance_to_RPX is not None:
+        self.abs_y_up = self.abs_y_up + self.PIX_y_distance_to_RPX
+        self.abs_y_low = self.abs_y_low + self.PIX_y_distance_to_RPX
+
+    if self.type == 'alfa' and self.RPX_bottom_wall_thickess is not None:
+        self.abs_y_up = self.abs_y_up + self.RPX_bottom_wall_thickess
+        self.abs_y_low = self.abs_y_low + self.RPX_bottom_wall_thickess
 
 
 
@@ -881,16 +1136,18 @@ class TargetAnalysis(ParticleAnalysis):
             ALFA_y.append(ALFA_y[0])
 
             # Center in x an apply vertical offset
-            jaw_L = self.jaw_L
+            y_lim = self.abs_y_low
             ALFA_x = [i -side_lengths[0]/2 for i in ALFA_x]
-            ALFA_y = [i + jaw_L for i in ALFA_y]
+            ALFA_y = [i + y_lim for i in ALFA_y]
 
             
             super().plot_xy_distribution(fig, ax_list[2], x, y,  xlim = [np.min(ALFA_x)-1e-3, np.max(ALFA_x)+1e-3], ylim = [self.jaw_L-3.5e-3, np.max(ALFA_y)+1e-3], bins = (round(self.xdim /30e-6), round(self.ydim /30e-6)))
             
             if lines:
                 ax_list[2].plot(ALFA_x, ALFA_y, 'r')
-        
+                #super().plot_rectangle(ax_list[2], self.abs_x_low, self.abs_x_up, self.jaw_L, self.jaw_L + self.RPX_bottom_wall_thickess)
+                ax_list[2].axhline(self.jaw_L, color = 'grey', linestyle = '-')
+                ax_list[2].axhline(self.jaw_L +self.RPX_bottom_wall_thickess, color = 'grey', linestyle = '-')
         
         elif self.type == 'pixel':
             super().plot_xy_distribution(fig, ax_list[2], x, y, xlim = [self.abs_x_low-1e-3, self.abs_x_up+1e-3],  ylim = [self.jaw_L-3.5e-3, self.abs_y_up+1e-3], bins = (round(self.xdim /55e-6), round(self.ydim /55e-6)))            
@@ -901,6 +1158,9 @@ class TargetAnalysis(ParticleAnalysis):
                     super().plot_rectangle(ax_list[2], self.abs_x_low + self.xdim/3*2, self.abs_x_up, self.abs_y_low, self.abs_y_up)
                 else:
                     super().plot_rectangle(ax_list[2], self.abs_x_low, self.abs_x_up, self.abs_y_low, self.abs_y_up)
+                #super().plot_rectangle(ax_list[2], self.abs_x_low, self.abs_x_up, self.jaw_L, self.jaw_L + self.RPX_bottom_wall_thickess)
+                ax_list[2].axhline(self.jaw_L, color = 'grey', linestyle = '-')
+                ax_list[2].axhline(self.jaw_L + self.RPX_bottom_wall_thickess, color = 'grey', linestyle = '-')
         
         elif self.type == 'target':
             super().plot_xy_distribution(fig, ax_list[2], x, y, xlim = [self.abs_x_low-1e-3, self.abs_x_up+1e-3], lines = lines) 
@@ -996,4 +1256,22 @@ class TargetAnalysis(ParticleAnalysis):
 
 
 
-      
+
+
+
+
+def plot_at_turn_simple(OBJ, n_turn, plot_whole = False, plot_chann=True, percentile = 0.0):
+
+    df = OBJ.data
+
+    df = df[df['this_turn']==n_turn]
+
+
+    print("IMPACT ON TCCS AT TURN ", n_turn)    
+    fig, ax_list = OBJ.plot_distributions(df['x'], df['y'], df['px'], df['py'],  return_fig=True, percentile = percentile)
+    if plot_whole:
+        ax_list[1].hist(OBJ.data['y'], bins=100, alpha = 0.3) 
+        ax_list[2].scatter(OBJ.data['x'], OBJ.data['y'], alpha = 0.03, zorder=1) 
+        ax_list[4].hist(OBJ.data['py'], bins=100, alpha = 0.3) 
+
+   
