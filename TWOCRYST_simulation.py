@@ -26,7 +26,7 @@ from xcoll.interaction_record.interaction_types import shortcuts
 
 
 # ---------------------------- LOADING FUNCTIONS ----------------------------
-def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsilon = 0, start = False, x_dim = None, y_dim = None, jaw_L = None):
+def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsilon = 0, x_dim = None, y_dim = None, jaw_L = None):
 
     float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta']
     int_variables = ['at_turn', 'particle_id', 'state']
@@ -45,37 +45,16 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsil
     for key in var_dict.keys():
         impact_part_dict[key] = []
 
-    if x_dim is not None and jaw_L is not None and y_dim is not None:
-
-        abs_y_low = jaw_L
-        abs_y_up = jaw_L + y_dim
-        abs_x_low = -x_dim/2
-        abs_x_up = x_dim/2
-
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low - epsilon) and var_dict['x'][part, turn] < (abs_x_up + epsilon) and var_dict['y'][part, turn] > (abs_y_low - epsilon) and var_dict['y'][part, turn] < (abs_y_up + epsilon):
-                    for key in var_dict.keys():
-                        impact_part_dict[key].append(var_dict[key][part, turn])
-
-    elif x_dim is None and y_dim is None and jaw_L is not None:
-        abs_y_low = jaw_L
-
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                if var_dict['state'][part, turn] > 0 and var_dict['y'][part, turn] > (abs_y_low - epsilon):
-                    for key in var_dict.keys():
-                        impact_part_dict[key].append(var_dict[key][part, turn])
-
-    else:
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                if start and turn > 0:
-                    continue
-                else: 
-                    if var_dict['state'][part, turn] > 0:
-                        for key in var_dict.keys():
-                            impact_part_dict[key].append(var_dict[key][part, turn])
+    abs_y_low = jaw_L if jaw_L is not None else -0.04
+    abs_y_up = jaw_L + y_dim if y_dim is not None else 0.04
+    abs_x_low = -x_dim/2 if x_dim is not None else -0.04
+    abs_x_up = x_dim/2 if x_dim is not None else 0.04
+    
+    for part in range(num_particles):
+        for turn in range(num_turns):
+            if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low - epsilon) and var_dict['x'][part, turn] < (abs_x_up + epsilon) and var_dict['y'][part, turn] > (abs_y_low - epsilon) and var_dict['y'][part, turn] < (abs_y_up + epsilon ):
+                for key in var_dict.keys():
+                    impact_part_dict[key].append(var_dict[key][part, turn])
 
     del var_dict
     gc.collect()
@@ -610,11 +589,28 @@ def main():
         del elements_idx
         gc.collect()
 
+    def calculate_xpcrit(name):
+        bending_radius = line[name].bending_radius
+        dp = 1.92e-10 
+        pot_crit = 21.34
+        eta = 0.9
+        Rcrit = line.particle_ref.p0c/(2*np.sqrt(eta)*pot_crit) * (dp/2)
+        xp_crit = np.sqrt(2*eta*pot_crit/line.particle_ref.p0c)*(1 - Rcrit/bending_radius)
+        return xp_crit[0]
 
 
     tccs_imp = impacts.interactions_per_collimator(TCCS_name).reset_index()
     n_TCCS_abs = tccs_imp['int'].apply(lambda x: 'A'  in x).sum()
-    print(f"\nTCCS: {n_TCCS_abs} particles absorbed\n")
+    print(f"\nTCCS: {n_TCCS_abs} particles absorbed")
+    tccs_sim_chann_eff = None
+    if len(tccs_imp) > 0:
+        unique_values, counts = np.unique(tccs_imp['int'], return_counts=True)
+        summary_int = pd.DataFrame({'int': unique_values,'counts': counts})
+        summary_int.int = summary_int.int.astype(str)
+        if "['CH']" in summary_int.int.to_list():
+            tccs_sim_chann_eff = summary_int[summary_int['int'] == "['CH']"].counts.iloc[0] / sum((impacts.at_element == idx_TCCS) & (impacts.interaction_type == "Enter Jaw L") 
+                                                                                             & (impacts.px_before < calculate_xpcrit(TCCS_name))&(impacts.px_before> - calculate_xpcrit(TCCS_name)))
+    print("TCCS channeling efficiency: ", tccs_sim_chann_eff, '\n')
     tccs_imp = tccs_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
     tccs_imp.rename(columns={'turn': 'TCCS_turn', 'pid':'particle_id'}, inplace=True)
     df_part = pd.merge(df_part, tccs_imp, on='particle_id', how='left')
@@ -623,7 +619,16 @@ def main():
     
     tccp_imp = impacts.interactions_per_collimator(TCCP_name).reset_index()
     n_TCCP_abs = tccp_imp['int'].apply(lambda x: 'A'  in x).sum()
-    print(f"TCCP: {n_TCCP_abs} particles absorbed\n")
+    print(f"\nTCCP: {n_TCCP_abs} particles absorbed")
+    tccp_sim_chann_eff = None
+    if len(tccp_imp) > 0:
+        unique_values, counts = np.unique(tccp_imp['int'], return_counts=True)
+        summary_int = pd.DataFrame({'int': unique_values,'counts': counts})
+        summary_int.int = summary_int.int.astype(str)
+        if "['CH']" in summary_int.int.to_list():
+            tccp_sim_chann_eff = summary_int[summary_int['int'] == "['CH']"].counts[0] /  sum((impacts.at_element == idx_TCCP) & (impacts.interaction_type == "Enter Jaw L") 
+                                                                                             & (impacts.px_before < calculate_xpcrit(TCCP_name))&(impacts.px_before> - calculate_xpcrit(TCCP_name)))
+    print("TCCP channeling efficiency: ", tccp_sim_chann_eff, '\n')
     tccp_imp = tccp_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
     tccp_imp.rename(columns={'turn': 'TCCP_turn', 'pid':'particle_id'}, inplace=True)
     df_part = pd.merge(df_part, tccp_imp, on='particle_id', how='left')
@@ -655,6 +660,7 @@ def main():
     print("... Saving metadata\n")
     metadata = {'p0c': line.particle_ref.p0c[0], 'mass0': line.particle_ref.mass0, 'q0': line.particle_ref.q0, 'gamma0': line.particle_ref.gamma0[0], 'beta0': line.particle_ref.beta0[0], 
                 'TCCS_absorbed': n_TCCS_abs, 'TCCP_absorbed': n_TCCP_abs, 
+                'TCCS_sim_chann_eff': tccs_sim_chann_eff, 'TCCP_sim_chann_eff': tccp_sim_chann_eff,
                 'TCCS_gap': gaps['TCCS_gap'], 'TCCP_gap': gaps['TCCP_gap'], 'TARGET_gap': gaps['TARGET_gap'], 'PIXEL_gap': gaps['PIXEL_gap'], 'TFT_gap': gaps['TFT_gap'], 'TCP_gap': gaps['TCP_gap'],
                 'TCCS_align_angle': line.elements[idx_TCCS].tilt, 'TCCP_align_angle': line.elements[idx_TCCP].tilt, 'TCCS_miscut': miscut_TCCS, 'TCCP_miscut': miscut_TCCP,}
     pd.DataFrame(list(metadata.values()), index=metadata.keys()).to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='metadata', format='table', mode='a',
@@ -671,7 +677,7 @@ def main():
         xdim_TCCS =  coll_dict[TCCS_name]['height']
         jaw_L_TCCS = line.elements[idx_TCCS].jaw_U
         
-        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS, y_dim = ydim_TCCS, jaw_L = jaw_L_TCCS, 
+        impact_part_df = get_df_to_save(TCCS_monitor_dict, df_part, x_dim = xdim_TCCS,  jaw_L = jaw_L_TCCS, 
                 epsilon = epsilon_TCCS, num_particles=num_particles, num_turns=num_turns, 
                 df_imp = impacts.interactions_per_collimator(TCCS_name).reset_index())
         
@@ -697,9 +703,9 @@ def main():
         ydim_TCCP = coll_dict[TCCP_name]['width']
         xdim_TCCP =  coll_dict[TCCP_name]['height']
         jaw_L_TCCP = line.elements[idx_TCCP].jaw_U
-        
-        impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP, y_dim = ydim_TCCP, jaw_L = jaw_L_TCCP, 
-                epsilon = epsilon_TCCP, num_particles=num_particles, num_turns=num_turns,
+
+        impact_part_df = get_df_to_save(TCCP_monitor_dict, df_part, x_dim = xdim_TCCP,  jaw_L = jaw_L_TCCP, 
+                epsilon = epsilon_TCCP,  num_particles=num_particles, num_turns=num_turns,
                 df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
         
         if output_mode == 'reduced':
@@ -746,7 +752,7 @@ def main():
 
         PIXEL_monitor_dict = PIXEL_monitor_1.to_dict()
     
-        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_1'] + PIX_y_distance_to_RPX     
+        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_1'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
@@ -772,7 +778,7 @@ def main():
 
         PIXEL_monitor_dict = PIXEL_monitor_2.to_dict()
     
-        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2']  + PIX_y_distance_to_RPX    
+        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
@@ -798,7 +804,7 @@ def main():
 
         PIXEL_monitor_dict = PIXEL_monitor_3.to_dict()
     
-        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2'] + PIX_y_distance_to_RPX
+        jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
@@ -825,7 +831,7 @@ def main():
 
         TFT_monitor_dict = TFT_monitor.to_dict()
     
-        jaw_L_TFT = sigma_TFT * gaps['TFT_gap'] + tw['y',TFT_name] + RPX_bottom_wall_thickess         
+        jaw_L_TFT = sigma_TFT * gaps['TFT_gap'] + tw['y',TFT_name] 
 
         impact_part_df = get_df_to_save(TFT_monitor_dict, df_part,  jaw_L = jaw_L_TFT,  #x_dim = xdim_TFT, y_dim = ydim_TFT,
                 epsilon = epsilon_TFT, num_particles=num_particles, num_turns=num_turns)

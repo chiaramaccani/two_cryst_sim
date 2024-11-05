@@ -8,6 +8,9 @@ import time
 import copy
 import gzip
 
+from IPython import embed
+
+
 
 
 import shutil
@@ -26,16 +29,11 @@ def dump_dict_to_yaml(dict_obj, file_path):
         with open(file_path, 'w') as yaml_file:
             yaml.dump(dict_obj, yaml_file, 
                       default_flow_style=False, sort_keys=False)
+            
 
 
-def main():
-
-    config_file = sys.argv[1]
-    with open(config_file, 'r') as stream:
-        config_dict = yaml.safe_load(stream)
-
-    file_dict = config_dict['input_files']
-
+def submit_jobs(config_dict, config_file):
+    
     sub_dict = config_dict['jobsubmission']
     workdir = Path(os.path.expandvars(sub_dict['working_directory'])).resolve()
     num_jobs = sub_dict['num_jobs']
@@ -52,8 +50,6 @@ def main():
 
 
     print(workdir)
-    #test_dir = Path(workdir, 'TEST')
-
 
     shutil.copy(config_file, input_cache)
 
@@ -89,6 +85,36 @@ def main():
         replace_dict=replace_dict,
         jobflavour = jobflavour,
         **submitter_options_dict)
+
+def main():
+
+    config_file = sys.argv[1]
+    with open(config_file, 'r') as stream:
+        config_dict = yaml.safe_load(stream)
+    sub_dict = config_dict['jobsubmission']
+    keys_to_drop = [  'angular_scan', 'angular_scan_range_lower', 'angular_scan_range_upper', 'angular_scan_step' ]
+    angular_scan = sub_dict['angular_scan'] if sub_dict['angular_scan'] != 'None' else None
+    if angular_scan is not None:
+        lower_bound = sub_dict['angular_scan_range_lower']
+        upper_bound = sub_dict['angular_scan_range_upper']
+        step = sub_dict['angular_scan_step']
+        angles_list = np.arange(lower_bound, upper_bound, step)
+        config_dict_to_submit = copy.deepcopy(config_dict)
+        for angle in angles_list:
+            if sub_dict['angular_scan'] == 'TCCS':
+                config_dict_to_submit['run']['TCCS_align_angle_step'] = float(angle)
+            elif sub_dict['angular_scan'] == 'TCCP':    
+                config_dict_to_submit['run']['TCCP_align_angle_step'] = float(angle)
+            config_dict_to_submit['jobsubmission']['working_directory'] = sub_dict['working_directory'] + f'_{angle*1e6:.{1}f}_'
+            for key in keys_to_drop:
+                if key in config_dict_to_submit['jobsubmission']:
+                    del config_dict_to_submit['jobsubmission'][key]
+            submit_jobs(config_dict_to_submit, config_file)  
+    else:
+        for key in keys_to_drop:
+                if key in config_dict['jobsubmission']:
+                    del config_dict['jobsubmission'][key]
+        submit_jobs(config_dict, config_file)
 
 if __name__ == '__main__':
 
