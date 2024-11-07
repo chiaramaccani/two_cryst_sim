@@ -4,7 +4,7 @@
 run: 
 
   engine: 'everest'
-  seed: 0
+  seed: 134
   fixed_seed: True
 
   beam: '2'
@@ -16,7 +16,7 @@ run:
 
   energy:  450e9 
  
-  TCCS_align_angle_step: 0
+  TCCS_align_angle_step: 20.9e-6
   TCCP_align_angle_step: 0 
   
   TCCS_gap: 5.0 
@@ -45,8 +45,8 @@ jobsubmission:
   working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_ang_scan_450GeV
   num_jobs: 200 
   angular_scan: TCCS
-  angular_scan_range_lower: 11.0e-6
-  angular_scan_range_upper: 22.0e-6
+  angular_scan_range_lower: -15.4e-6
+  angular_scan_range_upper: -4.4e-6
   angular_scan_step: 1.1e-6
   run_local: False
   dryrun: False

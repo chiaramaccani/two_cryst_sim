@@ -124,7 +124,7 @@ collimators:
     tctpv.4r1.b2:       { <<: *TCT15,  angle:  90     }
 
     tccs.5r3.b2:        { <<: *TCCS3,  gap: 5.0, length: 0.004,  bending_radius: 80.00,  width: 2.0e-3,  height: 35.0e-3}   # INVERT X Y WHEN ROTATE
-    tccp.4l3.b2:        { <<: *TCCP3,  gap: 10, length: 0.070,  angle: 90, bending_radius: 10.00,  width: 2.0e-3,  height: 8.0e-3 }    # width: 10.0e-3
+    tccp.4l3.b2:        { <<: *TCCP3,  gap: 10, length: 0.070,  angle: 90, bending_radius: 10.00,  width: 2.0e-3,  height: 9.0e-3 }    # width: 10.0e-3
     target.4l3.b2:      { <<: *TARGET3,  gap: 10, length: 0.005,  angle: 90,  width: 2.0e-3 ,  height: 8.0e-3}   #attention to sigma position
     pixel.detector_1:   { <<: *PIX3, gap: 10}
     pixel.detector_2:   { <<: *PIX3, gap: 10}
