@@ -10,7 +10,7 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 
-  nparticles: 200  #100000 #1000 50000
+  nparticles: 10000  #100000 #1000 50000
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
