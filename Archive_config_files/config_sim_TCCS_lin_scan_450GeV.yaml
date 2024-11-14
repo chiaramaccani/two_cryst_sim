@@ -28,14 +28,14 @@ run:
   PIXEL_gap: None
   TFT_gap: None
   TCP_gap: 6.0
-  TCLA_gap: 5.5
+  TCLA_gap: 8.0 #5.0
 
   epsilon_TCCS: 0 
   epsilon_TCCP: 2.0e-3
   epsilon_TARGET: 0 
   epsilon_PIXEL: 0.8e-3
   epsilon_TFT: 1.4e-3
-  epsilon_TCLA: 0.3e-3
+  epsilon_TCLA: 3.32e-3 #1.5e-3
 
   save_list: ['TCCS_impacts', 'TCLA_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   
@@ -45,7 +45,7 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_lin_scan_450GeV
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_lin_scan_450GeV_open
   num_jobs: 200
   angular_scan: None
   angular_scan_range_lower: 0

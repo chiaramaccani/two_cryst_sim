@@ -4,7 +4,7 @@
 run: 
 
   engine: 'everest'
-  seed: 134
+  seed: 0
   fixed_seed: True
 
   beam: '2'
@@ -16,8 +16,11 @@ run:
 
   energy:  450e9 
  
-  TCCS_align_angle_step: 20.9e-6
+  TCCS_align_angle_step: -60.5e-6
   TCCP_align_angle_step: 0 
+  
+  TCCS_potential: default # 16 default
+  TCCP_potential: default # default
   
   TCCS_gap: 5.0 
   TARGET_gap: None
@@ -34,7 +37,7 @@ run:
   epsilon_TFT: 0.6e-3
   epsilon_TCLA: 3.5e-3
 
-  save_list: [] 
+  save_list: ['TCCS_impacts'] 
   target_mode: ''   
   input_mode: 'pencil_TCCS' 
   output_mode: '' 
@@ -42,11 +45,11 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_ang_scan_450GeV
-  num_jobs: 200 
-  angular_scan: TCCS
-  angular_scan_range_lower: -15.4e-6
-  angular_scan_range_upper: -4.4e-6
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_ang_scan_NOTRANS_test_-60.5_
+  num_jobs: 4 
+  angular_scan: None 
+  angular_scan_range_lower: 22.0e-6
+  angular_scan_range_upper: 33.0e-6
   angular_scan_step: 1.1e-6
   run_local: False
   dryrun: False
