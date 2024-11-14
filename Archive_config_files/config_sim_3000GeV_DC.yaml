@@ -19,6 +19,9 @@ run:
   TCCS_align_angle_step:  0 
   TCCP_align_angle_step:  3.226808636011617e-05 
 
+  TCCS_potential: default # 16 default
+  TCCP_potential: default # default
+
   TCCS_gap: 5.0 
   TARGET_gap: None
   TCCP_gap:  19.3

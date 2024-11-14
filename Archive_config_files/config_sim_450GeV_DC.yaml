@@ -19,6 +19,10 @@ run:
   TCCS_align_angle_step:  0 
   TCCP_align_angle_step: 2.2251710113544777e-05 
   
+  TCCS_potential: default # 16 default
+  TCCP_potential: default # default
+
+  
   TCCS_gap: 5.0 
   TARGET_gap: None
   TCCP_gap: 9.4 
@@ -28,7 +32,7 @@ run:
   TCLA_gap: 9.0
 
   epsilon_TCCS: 0 
-  epsilon_TCCP: 2.0e-3
+  epsilon_TCCP: 5.0e-3
   epsilon_TARGET: 0 
   epsilon_PIXEL: 0 
   epsilon_TFT: 0.6e-3

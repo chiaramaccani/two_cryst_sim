@@ -340,10 +340,10 @@ def main():
     print("TCCP final alignment angle: ", line[TCCP_name].tilt)
 
     if TCCS_potential is not None:
-        print(f'\n---- changing TCCS potential to {TCCS_potential} ----')
+        print('\n---- changing TCCS potential ----')
         line[TCCS_name].material.crystal_potential = TCCS_potential
     if TCCP_potential is not None:
-        print(f'\n---- changing TCCP potential to {TCCP_potential}----')
+        print('\n---- changing TCCP potential ----')
         line[TCCP_name].material.crystal_potential = TCCP_potential
 
 
@@ -356,6 +356,8 @@ def main():
 
     # ---------------------------- CALCULATE TWISS ----------------------------
     tw = line.twiss()
+
+
 
     # ---------------------------- SETUP MONITORS ----------------------------
     line.discard_tracker()
@@ -674,6 +676,7 @@ def main():
     pd.DataFrame(list(metadata.values()), index=metadata.keys()).to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='metadata', format='table', mode='a',
             complevel=9, complib='blosc')
 
+    #embed()
 
     if 'TCCS_impacts' in save_list:
         # SAVE IMPACTS ON TCCS
