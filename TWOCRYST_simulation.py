@@ -475,6 +475,19 @@ def main():
             idx_monitor = line.element_names.index(TCCS_name)
         part.at_element = idx_monitor 
         part.start_tracking_at_element = idx_monitor
+    
+    elif input_mode == 'pencil_TCCP':
+        print("\n... Generating initial particles on TCCP\n")
+        #transverse_spread_sigma = 1
+        #part = xc.generate_pencil_on_collimator(TCCS_name, num_particles=num_particles, transverse_spread_sigma=transverse_spread_sigma)
+        part = line[TCCP_name].generate_pencil(num_particles = num_particles)
+        #part = xc.generate_pencil_on_collimator(name = TCCS_name, line=line, num_particles=num_particles)
+        if 'TCCP_monitor' in line.element_names:
+            idx_monitor = line.element_names.index('TCCP_monitor')
+        else:
+            idx_monitor = line.element_names.index(TCCP_name)
+        part.at_element = idx_monitor 
+        part.start_tracking_at_element = idx_monitor
 
     elif input_mode == 'circular_halo':
         print("\n... Generating 2D uniform circular sector\n")
