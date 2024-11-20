@@ -10,36 +10,37 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 
-  nparticles: 50000  #100000 #1000 50000
+  nparticles: 5000  #100000 #1000 50000
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
   energy:  450e9 # 450e9 1000e9 3000e9 5000e9 6800e9 None
 
+  TCCS_align_angle_step:  0 
+  TCCP_align_angle_step: 2.2251710113544777e-05 
+  
   TCCS_potential: default # 16 default
   TCCP_potential: default # default
- 
-  TCCS_align_angle_step:  0 
-  TCCP_align_angle_step: 0
+
   
   TCCS_gap: 5.0 
   TARGET_gap: None
-  TCCP_gap: None
-  PIXEL_gap: None
-  TFT_gap: None
+  TCCP_gap: 9.4 
+  PIXEL_gap: 5.5
+  TFT_gap: 6.4 
   TCP_gap: 6.0
-  TCLA_gap: 5.5
+  TCLA_gap: 9.0
 
   epsilon_TCCS: 0 
-  epsilon_TCCP: 2.0e-3
+  epsilon_TCCP: 5.0e-3
   epsilon_TARGET: 0 
-  epsilon_PIXEL: 0.8e-3
-  epsilon_TFT: 1.4e-3
-  epsilon_TCLA: 0.3e-3
+  epsilon_PIXEL: 0 
+  epsilon_TFT: 0.6e-3
+  epsilon_TCLA: 0
 
-  save_list: ['TCCS_impacts', 'TCLA_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: [ 'TCCS_impacts', 'TCCP_impacts', 'PIXEL_impacts_ALL', 'TFT_impacts' ] 
   target_mode: ''   
-  input_mode: 'pencil_TCCS'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
+  input_mode: 'gaussian_halo'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
   output_mode:  '' # reduced
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
@@ -59,5 +60,6 @@ jobsubmission:
 
 
 input_files:
-  line_b2: ${HOME_TWOCRYST}/MadX/2024/track_injection_b2.json
-  collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb.yaml
+  line_b2: ${HOME_TWOCRYST}/MadX/2025/injection/track_injection_b2.json
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_1-3TeV.yaml 
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_450GeV.yaml 
