@@ -40,13 +40,13 @@ run:
 
   save_list: [ 'TCCS_impacts', 'TCCP_impacts', 'PIXEL_impacts_ALL', 'TFT_impacts' ] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''           
-  input_mode: 'pencil_TCCS' 
+  input_mode: 'gaussian_halo' 
   output_mode: 'reduced' 
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_450GeV_DC_v0_
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_450GeV_DC_2025opt_halo
   num_jobs: 200 
   angular_scan: None
   angular_scan_range_lower: 0
@@ -60,5 +60,5 @@ jobsubmission:
 
 
 input_files:
-  line_b2: ${HOME_TWOCRYST}/MadX/2024/track_injection_b2.json
-  collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb.yaml
+  line_b2: ${HOME_TWOCRYST}/MadX/2025/injection/track_injection_b2.json
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_450GeV.yaml
