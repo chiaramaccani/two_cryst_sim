@@ -26,7 +26,7 @@ from xcoll.interaction_record.interaction_types import shortcuts
 
 
 # ---------------------------- LOADING FUNCTIONS ----------------------------
-def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsilon = 0, x_dim = None, y_dim = None, jaw_L = None):
+def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsilon = 0, x_dim = None, y_dim = None, jaw_L = None, plane = 'V'):
 
     float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta']
     int_variables = ['at_turn', 'particle_id', 'state']
@@ -45,10 +45,16 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsil
     for key in var_dict.keys():
         impact_part_dict[key] = []
 
-    abs_y_low = jaw_L if jaw_L is not None else -0.04
-    abs_y_up = jaw_L + y_dim if y_dim is not None else 0.04
-    abs_x_low = -x_dim/2 if x_dim is not None else -0.04
-    abs_x_up = x_dim/2 if x_dim is not None else 0.04
+    if plane == 'V':
+        abs_y_low = jaw_L if jaw_L is not None else -0.04
+        abs_y_up = jaw_L + y_dim if y_dim is not None else 0.04
+        abs_x_low = -x_dim/2 if x_dim is not None else -0.04
+        abs_x_up = x_dim/2 if x_dim is not None else 0.04
+    elif plane == 'H':
+        abs_x_low = jaw_L if jaw_L is not None else -0.04
+        abs_x_up = jaw_L + x_dim if x_dim is not None else 0.04
+        abs_y_low = -y_dim/2 if y_dim is not None else -0.04
+        abs_y_up = y_dim/2 if y_dim is not None else 0.04
     
     for part in range(num_particles):
         for turn in range(num_turns):
@@ -73,8 +79,7 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsil
     impact_part_df.drop('state', axis=1, inplace=True)
     impact_part_df['this_turn'] = impact_part_df['this_turn'].astype('int32')
 
-    for col in ['TCCS_turn', 'TCCP_turn', 'TCP_turn']:
-        impact_part_df[col] = impact_part_df[col].apply(lambda x: ','.join(map(str, x)))
+    impact_part_df['CRY_turn'] = impact_part_df['CRY_turn'].apply(lambda x: ','.join(map(str, x)))
 
     if df_imp is not None:
         df_imp.rename(columns={'turn': 'this_turn'}, inplace=True)
@@ -117,6 +122,8 @@ def main():
     fixed_seed    = bool(run_dict['fixed_seed'])
     seed          = run_dict['seed']
 
+    adt_amplitude    =  None if run_dict['adt_amplitude']== 'None' else float(run_dict['adt_amplitude'])
+
     if fixed_seed:
         np.random.seed(seed=seed)
         print('\n----- Seed set to: ', seed)
@@ -132,7 +139,6 @@ def main():
     target_mode = run_dict['target_mode']
     input_mode = run_dict['input_mode']
     output_mode = run_dict['output_mode']
-    load_input_path = run_dict['load_input_path']
     turn_on_cavities = bool(run_dict['turn_on_cavities'])
     print('\nTarget mode: ', target_mode, '\t', 'input mode: ', input_mode, '\t', 'output mode: ', output_mode, '\t',  'Seed: ', seed, '\tCavities on: ', turn_on_cavities ,  '\n')
 
@@ -154,14 +160,15 @@ def main():
         sys.exit(1)
                
     gaps = {}
-    for gap_name in ['TCCS_gap', 'TCCP_gap', 'TARGET_gap', 'PIXEL_gap', 'TFT_gap', 'TCP_gap', 'TCLA_gap']:
-        gap = run_dict[gap_name]
-        if gap == 'None':
-            gaps[gap_name]= None
-        elif gap == 'default':
-            pass
-        else:
-            gaps[gap_name]= float(gap)  
+    for gap_name in ['TCCS_gap', 'TCCP_gap', 'TARGET_gap', 'PIXEL_gap', 'TFT_gap', 'TCP_gap', 'TCLA_gap', 'TCT_gap']:
+        if gap_name in run_dict.keys():
+            gap = run_dict[gap_name]
+            if gap == 'None':
+                gaps[gap_name]= None
+            elif gap == 'default':
+                pass
+            else:
+                gaps[gap_name]= float(gap)  
 
     part_energy = None if run_dict['energy'] == 'None' else float(run_dict['energy'])
 
@@ -281,6 +288,21 @@ def main():
     df_with_coll = line.check_aperture()
     assert not np.any(df_with_coll.has_aperture_problem)
 
+
+    # ---------------------------- SETUP ADT ----------------------------
+    if adt_amplitude is not None:
+        # Install ADT into line
+        # ADT kickers in LHC are named adtk[hv].[abcd]5[lr]4.b1 (with the position 5l4 (B1H or B2V) or 5r4 (B1V or B2H)
+        # These are not in the line, but their tank names are: adtk[hv].[abcd]5[lr]4.[abcd].b1  (32 markers)
+        print(f"\nSetting up the ADT with aplitude {adt_amplitude}\n")
+        pos = 'b5l4' if f'{beam}' == '1' and plane == 'H' else 'b5r4'
+        pos = 'b5l4' if f'{beam}' == '2' and plane == 'V' else pos
+        name = f'adtk{plane.lower()}.{pos}.b{beam}'
+        tank_start = f'adtk{plane.lower()}.{pos}.a.b{beam}'
+        tank_end   = f'adtk{plane.lower()}.{pos}.d.b{beam}'
+        adt_pos = 0.5*line.get_s_position(tank_start) + 0.5*line.get_s_position(tank_end)
+        adt = xc.BlowUp.install(line, name=f'{name}_blowup', at_s=adt_pos, plane=plane, stop_at_turn=num_turns,
+                        amplitude=adt_amplitude, use_individual_kicks=True)
     
 
 
@@ -308,6 +330,9 @@ def main():
     if 'TCLA_gap' in gaps.keys():
         line[TCLA_name].gap = gaps['TCLA_gap']
         print('TCLA gap set to: ', line[TCLA_name].gap)
+    if 'TCT_gap' in gaps.keys():
+        line['tctpv.4r5.b2'].gap = gaps['TCT_gap']
+        print('TCT gap set to: ', line['tctpv.4r5.b2'].gap)
 
     print('\n---- Crystal alignment ----')
     if 'miscut' in  coll_dict[TCCS_name].keys():
@@ -356,6 +381,12 @@ def main():
 
     # ---------------------------- CALCULATE TWISS ----------------------------
     tw = line.twiss()
+
+    if adt_amplitude is not None:
+        if plane == 'H':
+            adt.calibrate_by_emittance(nemitt=normalized_emittance, twiss=tw)
+        else:
+            adt.calibrate_by_emittance(nemitt=normalized_emittance, twiss=tw)
 
     # ---------------------------- SETUP MONITORS ----------------------------
     line.discard_tracker()
@@ -452,8 +483,6 @@ def main():
     print("\n... Setting up impacts\n")
     impacts = xc.InteractionRecord.start(line= line)  #capacity=int(2e7)
 
-
-
     # ---------------------------- INPUT GENERATION ----------------------------
     if input_mode == 'pencil_TCP':
         print("\n... Generating initial particles on TCP \n")
@@ -497,7 +526,7 @@ def main():
         (y_in_sigmas, py_in_sigmas, r_points, theta_points
             )= xp.generate_2D_uniform_circular_sector(
                                                 num_particles=num_particles,
-                                                r_range=(gaps[TCCS_name] - 0.003,  gaps[TCCS_name]+0.002), # sigmas
+                                                r_range=(gaps['TCCS_gap'] - 0.003, gaps['TCCS_gap']+0.002), # sigmas
                                                 )
 
         x_in_sigmas, px_in_sigmas = xp.generate_2D_gaussian(num_particles)
@@ -516,8 +545,9 @@ def main():
     elif input_mode == 'gaussian_halo':
         chi_dist = chi(2)
 
-        sigma_min = gaps['TCCS_gap']
-        sigma_max = gaps['TCCS_gap'] + 0.5
+        at_element = TCCS_name
+        sigma_min = gaps['TCCS_gap'] - 0.003
+        sigma_max = gaps['TCCS_gap'] + 0.002
         cdf_min = chi_dist.cdf(sigma_min)
         cdf_max = chi_dist.cdf(sigma_max)
 
@@ -539,7 +569,7 @@ def main():
             py_norm=py_norm,
             nemitt_x=normalized_emittance,
             nemitt_y=normalized_emittance, 
-            at_element=TCCS_name
+            at_element=at_element
         )
 
 
@@ -558,7 +588,11 @@ def main():
     # ---------------------------- TRACKING ----------------------------
     #line.optimize_for_tracking()
     line.scattering.enable() 
+    if adt_amplitude is not None:
+        adt.activate()
     line.track(part, num_turns=num_turns, time=True)
+    if adt_amplitude is not None:
+        adt.deactivate()
     print("\nTCCS critical angle: ", line[idx_TCCS].critical_angle)
     print("TCCP critical angle: ", line[idx_TCCP].critical_angle)
     line.scattering.disable()
@@ -630,7 +664,7 @@ def main():
         summary_int.int = summary_int.int.astype(str)
         if "['CH']" in summary_int.int.to_list():
             tccs_sim_chann_eff = summary_int[summary_int['int'] == "['CH']"].counts.iloc[0] / sum((impacts.at_element == idx_TCCS) & (impacts.interaction_type == "Enter Jaw L") 
-                                                                                             & (impacts.px_before < calculate_xpcrit(TCCS_name))&(impacts.px_before> - calculate_xpcrit(TCCS_name)))
+                                                                                             & (impacts.px_before  - miscut_TCCS < calculate_xpcrit(TCCS_name))&(impacts.px_before - miscut_TCCS > - calculate_xpcrit(TCCS_name)))
     print("TCCS channeling efficiency: ", tccs_sim_chann_eff, '\n')
     tccs_imp = tccs_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
     tccs_imp.rename(columns={'turn': 'TCCS_turn', 'pid':'particle_id'}, inplace=True)
@@ -648,7 +682,7 @@ def main():
         summary_int.int = summary_int.int.astype(str)
         if "['CH']" in summary_int.int.to_list():
             tccp_sim_chann_eff = summary_int[summary_int['int'] == "['CH']"].counts[0] /  sum((impacts.at_element == idx_TCCP) & (impacts.interaction_type == "Enter Jaw L") 
-                                                                                             & (impacts.px_before < calculate_xpcrit(TCCP_name))&(impacts.px_before> - calculate_xpcrit(TCCP_name)))
+                                                                                             & (impacts.px_before - miscut_TCCP < calculate_xpcrit(TCCP_name))&(impacts.px_before - miscut_TCCP > - calculate_xpcrit(TCCP_name)))
     print("TCCP channeling efficiency: ", tccp_sim_chann_eff, '\n')
     tccp_imp = tccp_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
     tccp_imp.rename(columns={'turn': 'TCCP_turn', 'pid':'particle_id'}, inplace=True)

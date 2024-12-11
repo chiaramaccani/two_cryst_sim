@@ -15,6 +15,8 @@ run:
   turn_on_cavities: False 
 
   energy:  450e9 
+  
+  adt_amplitude: None
  
   TCCS_align_angle_step: -60.5e-6
   TCCP_align_angle_step: 0 
@@ -59,5 +61,5 @@ jobsubmission:
 
 
 input_files:
-  line_b2:${HOME_TWOCRYST}/MadX/2025/injection/track_injection_b2.json
+  line_b2: ${HOME_TWOCRYST}/MadX/2025/injection/track_injection_b2.json
   collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_450GeV.yaml

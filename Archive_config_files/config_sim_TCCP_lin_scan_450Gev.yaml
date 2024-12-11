@@ -10,51 +10,53 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 
-  nparticles: 50000  #100000 #1000 50000
+  nparticles:  50000
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
-  energy:  450e9 # 450e9 1000e9 3000e9 5000e9 6800e9 None
-
-  TCCS_potential: default # 16 default
-  TCCP_potential: default # default
+  energy:  450e9 
  
   TCCS_align_angle_step:  0 
-  TCCP_align_angle_step: 0
+  TCCP_align_angle_step: 2.2251710113544777e-05 
   
-  TCCS_gap: None
+  TCCS_potential: default # 16 default
+  TCCP_potential: default # default
+
+  adt_amplitude: None
+  
+  TCCS_gap: 5.0 
   TARGET_gap: None
-  TCCP_gap: 5.0
-  PIXEL_gap: 5.0
-  TFT_gap: 6.0
+  TCCP_gap: 9.4 
+  PIXEL_gap: 5.5
+  TFT_gap: 6.4 
   TCP_gap: 6.0
-  TCLA_gap: default
+  TCLA_gap: 9.0
 
   epsilon_TCCS: 0 
-  epsilon_TCCP: 2.0e-3
+  epsilon_TCCP: 5.0e-3
   epsilon_TARGET: 0 
-  epsilon_PIXEL: 1.0e-3
-  epsilon_TFT: 1.4e-3
+  epsilon_PIXEL: 0 
+  epsilon_TFT: 0.6e-3
   epsilon_TCLA: 0
 
-  save_list: ['TCCP_impacts', 'PIXEL_impacts_ALL', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
-  target_mode: ''   
-  input_mode: 'pencil_TCCP'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
-  output_mode:  '' # reduced
+  save_list: [ 'TCCS_impacts', 'TCCP_impacts', 'PIXEL_impacts_ALL', 'TFT_impacts' ] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
+  target_mode: ''           
+  input_mode: 'pencil_TCCS'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
+  output_mode: 'reduced' 
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCP_lin_scan_450GeV_all_pix
-  num_jobs: 200
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_450GeV_DC_2025opt_halo
+  num_jobs: 200 
   angular_scan: None
   angular_scan_range_lower: 0
   angular_scan_range_upper: 0
-  angular_scan_step: 0  
+  angular_scan_step: 0
   run_local: False
   dryrun: False
-  jobflavour: 'testmatch' #'espresso' testmatch
-  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '10240M'}  
+  jobflavour: 'workday'  
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"'}  # 10240M 5120M , 'request_memory': '10240M'
   mask: ${HOME_TWOCRYST}/mask_condor_script.sh
 
 
