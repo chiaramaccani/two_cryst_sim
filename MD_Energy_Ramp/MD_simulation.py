@@ -26,8 +26,7 @@ from xcoll.interaction_record.interaction_types import shortcuts
 
 
 # ---------------------------- LOADING FUNCTIONS ----------------------------
-
-def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsilon = 0, start = False, x_dim = None, y_dim = None, jaw_L = None):
+def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsilon = 0, x_dim = None, y_dim = None, jaw_L = None, plane = 'V'):
 
     float_variables = ['zeta', 'x', 'px', 'y', 'py', 'delta']
     int_variables = ['at_turn', 'particle_id', 'state']
@@ -46,33 +45,22 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsil
     for key in var_dict.keys():
         impact_part_dict[key] = []
 
-    if x_dim is not None and jaw_L is not None and y_dim is not None:
-
-        """abs_y_low = jaw_L
-        abs_y_up = jaw_L + y_dim
-        abs_x_low = -x_dim/2
-        abs_x_up = x_dim/2"""
-
-        abs_y_low = -y_dim/2
-        abs_y_up = y_dim/2
-        abs_x_low = jaw_L
-        abs_x_up = jaw_L + x_dim
-
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                #if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low - epsilon) and var_dict['x'][part, turn] < (abs_x_up + epsilon) and var_dict['y'][part, turn] > (abs_y_low - epsilon) and var_dict['y'][part, turn] < (abs_y_up + epsilon):
-                if var_dict['state'][part, turn] > 0:    
-                    for key in var_dict.keys():
-                        impact_part_dict[key].append(var_dict[key][part, turn])
-
-    elif x_dim is None and y_dim is None and jaw_L is not None:
-        abs_x_low = jaw_L
-
-        for part in range(num_particles):
-            for turn in range(num_turns):
-                if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low - epsilon):
-                    for key in var_dict.keys():
-                        impact_part_dict[key].append(var_dict[key][part, turn])
+    if plane == 'V':
+        abs_y_low = jaw_L if jaw_L is not None else -0.04
+        abs_y_up = jaw_L + y_dim if y_dim is not None else 0.04
+        abs_x_low = -x_dim/2 if x_dim is not None else -0.04
+        abs_x_up = x_dim/2 if x_dim is not None else 0.04
+    elif plane == 'H':
+        abs_x_low = jaw_L if jaw_L is not None else -0.04
+        abs_x_up = jaw_L + x_dim if x_dim is not None else 0.04
+        abs_y_low = -y_dim/2 if y_dim is not None else -0.04
+        abs_y_up = y_dim/2 if y_dim is not None else 0.04
+    
+    for part in range(num_particles):
+        for turn in range(num_turns):
+            if var_dict['state'][part, turn] > 0 and var_dict['x'][part, turn] > (abs_x_low - epsilon) and var_dict['x'][part, turn] < (abs_x_up + epsilon) and var_dict['y'][part, turn] > (abs_y_low - epsilon) and var_dict['y'][part, turn] < (abs_y_up + epsilon ):
+                for key in var_dict.keys():
+                    impact_part_dict[key].append(var_dict[key][part, turn])
 
     del var_dict
     gc.collect()
@@ -99,7 +87,6 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsil
         df_imp.rename(columns={'int': 'interactions'}, inplace=True)
         df_imp['interactions'] = df_imp['interactions'].apply(lambda x: ','.join(map(str, x)))
         impact_part_df = pd.merge(impact_part_df, df_imp, on=['particle_id', 'this_turn'], how='left')
-    
     return impact_part_df
     
 
@@ -131,19 +118,23 @@ def main():
 
     num_turns     = run_dict['turns']
     num_particles = run_dict['nparticles']
-    
-    seed          = run_dict['seed']
 
-    normalized_emittance = 3.5e-6 
-    energy = f'{run_dict["energy"]}'
+    fixed_seed    = bool(run_dict['fixed_seed'])
+    seed          = run_dict['seed']
+    adt_amplitude    =  None if run_dict['adt_amplitude']== 'None' else float(run_dict['adt_amplitude'])
+
+    if fixed_seed:
+        np.random.seed(seed=seed)
+        print('\n----- Seed set to: ', seed)
+
+    normalized_emittance = run_dict['normalized_emittance']
+    run_mode = run_dict['run_mode']
 
     input_mode = run_dict['input_mode']
     output_mode = run_dict['output_mode']
-    run_mode = run_dict['run_mode']     
+    print( '\t', 'input mode: ', input_mode, '\t', 'output mode: ', output_mode, '\t',  'Seed: ', seed,   '\n')
+
     save_list = run_dict['save_list']
-
-
-
     # Setup input files
     file_dict = config_dict['input_files']
 
@@ -153,16 +144,19 @@ def main():
     
     print('\nInput files:\n', line_file, '\n', coll_file, '\n')
 
-    with open(coll_file, 'r') as stream:
-        coll_dict = yaml.safe_load(stream)['collimators']['b'+config_dict['run']['beam']]
+    if coll_file.endswith('.yaml'):
+        with open(coll_file, 'r') as stream:
+            coll_dict = yaml.safe_load(stream)['collimators']['b'+config_dict['run']['beam']]
+    if coll_file.endswith('.data'):
+        print("Please convert and use the yaml file for the collimator settings")
+        sys.exit(1)
 
+    energy = f'{run_dict["energy"]}'
     with open(sim_dict, 'r') as f:
         data = json.load(f)
 
     part_energy = data[energy]['energy'] 
     gaps = data[energy]['gap']
-
-
     epsilon_CRY = float(run_dict['epsilon_CRY'])
     epsilon_LIN = float(run_dict['epsilon_LIN'])
     CRY_align_angle_step = float(run_dict['CRY_align_angle_step'])
@@ -186,8 +180,7 @@ def main():
                                  q0=1, mass0=xt.PROTON_MASS_EV)
 
 
-    print("\nProton energy: ", part_energy)
-    print('Mode: ', run_mode, '\n')
+    print(f'\nParticle energy: {float(line.particle_ref.p0c)/1e9:} GeV\n')
 
     end_s = line.get_length()
 
@@ -210,39 +203,46 @@ def main():
     colldb = xc.CollimatorDatabase.from_yaml(coll_file, beam=beam, ignore_crystals=False)
 
     coll_names = colldb.collimator_names
+
     black_absorbers = []
+
     everest_colls = [name for name in coll_names if name not in black_absorbers]
 
     colldb.install_everest_collimators(line = line, names=everest_colls,verbose=True)
     colldb.install_black_absorbers(line = line, names = black_absorbers, verbose=True)
-
-
-
-    if 'CRY_impacts' in save_list:
-        CRY_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = CRY_loc - coll_dict[CRY_name]["length"]/2 - dx, element=CRY_monitor, name='CRY_monitor') 
-        print('\n... CRY monitor inserted')
-
-    if 'LIN_SCAN_impacts' in save_list:
-        LIN_SCAN_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
-        line.insert_element(at_s = LIN_loc - coll_dict[LIN_name]["length"]/2 - dx, element=LIN_SCAN_monitor, name='LIN_monitor') 
-        print('\n... TCSG (LIN SCAN) monitor inserted')
 
     # Aperture model check
     print('\nAperture model check after introducing collimators:')
     df_with_coll = line.check_aperture()
     assert not np.any(df_with_coll.has_aperture_problem)
 
-    # ---------------------------- SETUP IMPACTS ----------------------------
 
-
-    print("\n... Setting up impacts\n")
-    impacts = xc.InteractionRecord.start(line= line)  #capacity=int(2e7)
+    # ---------------------------- SETUP ADT ----------------------------
+    if adt_amplitude is not None:
+        # Install ADT into line
+        # ADT kickers in LHC are named adtk[hv].[abcd]5[lr]4.b1 (with the position 5l4 (B1H or B2V) or 5r4 (B1V or B2H)
+        # These are not in the line, but their tank names are: adtk[hv].[abcd]5[lr]4.[abcd].b1  (32 markers)
+        print(f"\nSetting up the ADT with aplitude {adt_amplitude}\n")
+        pos = 'b5l4' if f'{beam}' == '1' and plane == 'H' else 'b5r4'
+        pos = 'b5l4' if f'{beam}' == '2' and plane == 'V' else pos
+        name = f'adtk{plane.lower()}.{pos}.b{beam}'
+        tank_start = f'adtk{plane.lower()}.{pos}.a.b{beam}'
+        tank_end   = f'adtk{plane.lower()}.{pos}.d.b{beam}'
+        adt_pos = 0.5*line.get_s_position(tank_start) + 0.5*line.get_s_position(tank_end)
+        adt = xc.BlowUp.install(line, name=f'{name}_blowup', at_s=adt_pos, plane=plane, stop_at_turn=num_turns,
+                        amplitude=adt_amplitude, use_individual_kicks=False)
     
+
+
+    # ---------------------------- SETUP OPTICS ----------------------------
     # Build the tracker
     line.build_tracker()
-    xc.assign_optics_to_collimators(line=line)
+    line.collimators.assign_optics()
 
+
+
+    # ---------------------------- SETUP COLLIMATORS ----------------------------
+    # Set the collimator gaps
     print('\n---- Collimators alignment ----\n')
     if  run_mode == 'linear_scan': 
         LIN_gap = run_dict['LIN_gap']
@@ -278,13 +278,40 @@ def main():
     print('\nAperture model check after introducing collimators:')
     df_with_coll = line.check_aperture()
     assert not np.any(df_with_coll.has_aperture_problem)
-    
+
+
+
+    # ---------------------------- CALCULATE TWISS ----------------------------
+    tw = line.twiss()
+
+    if adt_amplitude is not None:
+        if plane == 'H':
+            adt.calibrate_by_emittance(nemitt=normalized_emittance, twiss=tw)
+        else:
+            adt.calibrate_by_emittance(nemitt=normalized_emittance, twiss=tw)
+
+    # ---------------------------- SETUP MONITORS ----------------------------
+    line.discard_tracker()
+
+    if 'CRY_impacts' in save_list:
+        CRY_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        tilt_face_shift_CRY = 0#coll_dict[CRY_name]["width"]*np.sin(line[CRY_name].tilt) if tw['alfx', CRY_name] < 0 else 0
+        line.insert_element(at_s = CRY_loc - coll_dict[CRY_name]["length"]/2 -tilt_face_shift_CRY, element=CRY_monitor, name='CRY_monitor')
+        print('\n... CRY monitor inserted')
+
+    if 'LIN_SCAN_impacts' in save_list:
+        LIN_SCAN_monitor = xt.ParticlesMonitor(num_particles=num_particles, start_at_turn=0, stop_at_turn=num_turns)
+        line.insert_element(at_s = LIN_loc - coll_dict[LIN_name]["length"]/2 - dx, element=LIN_SCAN_monitor, name='LIN_monitor') 
+        print('\n... TCSG (LIN SCAN) monitor inserted')
+
+    # ---------------------------- CALCULATE INFO ----------------------------
+    line.build_tracker(_context=xo.ContextCpu(omp_num_threads='auto'))
+
     # Printout useful informations
     idx_CRY = line.element_names.index(CRY_name)
     idx_TCP = line.element_names.index(TCP_name)
     idx_LIN = line.element_names.index(LIN_name)
 
-    tw = line.twiss()
     beta_rel = float(line.particle_ref.beta0)
     gamma = float(line.particle_ref.gamma0)
     emittance_phy = normalized_emittance/(beta_rel*gamma)
@@ -297,20 +324,26 @@ def main():
         f"bending_radius={coll_dict[ CRY_name]['bending_radius']}, align_angle={ line.elements[idx_CRY].tilt}, miscut = {miscut},sigma={sigma_CRY}, jaw_L={line.elements[idx_CRY].jaw_U })")
     print(f"LIN_SCAN\nTargetAnalysis(plane='H', n_sigma={line.elements[idx_LIN].gap}, target_type='collimator', length={ coll_dict[LIN_name]['length']},"+
         f"sigma={sigma_LIN}, jaw_L={line.elements[idx_LIN].jaw_LU })")
+    # ---------------------------- SETUP IMPACTS ----------------------------
+    print("\n... Setting up impacts\n")
+    impacts = xc.InteractionRecord.start(line= line)  #capacity=int(2e7)
 
-    # ---------------------------- TRACKING ----------------------------
+    # ---------------------------- INPUT GENERATION ----------------------------
     if input_mode == 'pencil_TCP':
-        print("\n... Generating initial particles\n")
+        print("\n... Generating initial particles on TCP \n")
         # Generate initial pencil distribution on horizontal collimator
-        part = xc.generate_pencil_on_collimator(name = TCP_name, line = line, num_particles=num_particles)
+        part = line[TCP_name].generate_pencil(num_particles = num_particles)
         part.at_element = idx_TCP 
         part.start_tracking_at_element = idx_TCP 
 
     elif input_mode == 'pencil_CRY':
-        print("\n... Generating initial particles\n")
+        print("\n... Generating initial particles on CRY\n")
         #idx = line.element_names.index(CRY_name)
-        part = xc.generate_pencil_on_collimator(name = CRY_name, line=line, num_particles=num_particles)
-        idx_monitor = line.element_names.index('CRY_monitor')
+        part= line[CRY_name].generate_pencil(num_particles = num_particles)
+        if 'CRY_monitor' in line.element_names:
+            idx_monitor = line.element_names.index('CRY_monitor')
+        else:
+            idx_monitor = line.element_names.index(CRY_name)
         part.at_element = idx_monitor 
         part.start_tracking_at_element = idx_monitor
 
@@ -324,7 +357,7 @@ def main():
                                                 num_particles=num_particles,
                                                 r_range=(gaps[CRY_name] - 0.003,  gaps[CRY_name]+0.002), # sigmas
                                                 )
-        
+
         y_in_sigmas, py_in_sigmas = xp.generate_2D_gaussian(num_particles)
         #transverse_spread_sigma = 1 #0.01
         #x_in_sigmas   = np.random.normal(loc=3.45e-7, scale=transverse_spread_sigma, size=num_particles)
@@ -336,24 +369,39 @@ def main():
             x_norm=x_in_sigmas, px_norm=px_in_sigmas,
             y_norm=y_in_sigmas, py_norm=py_in_sigmas,
             nemitt_x=normalized_emittance, nemitt_y=normalized_emittance, match_at_s=at_s, at_element=ip1_idx)
-            #nemitt_x=normalized_emittance, nemitt_y=normalized_emittance, match_at_s=line.get_s_position(idx_CRY), at_element=idx_CRY)
         
         part.at_element = ip1_idx 
         part.start_tracking_at_element = ip1_idx
- 
 
-    # Track
-    xc.enable_scattering(line)
-    print(line[idx_CRY].critical_angle)
+    # ---------------------------- SEED FIXING ----------------------------
+  
+    if fixed_seed:
+        print("\n... Fixing seed of particles\n")
+        random_array = np.random.randint(0, 4291630464,  size = num_particles*4)
+        part._rng_s1 = random_array[0:num_particles]
+        part._rng_s2 = random_array[num_particles:num_particles*2]
+        part._rng_s3 = random_array[num_particles*2:num_particles*3]
+        part._rng_s4 = random_array[num_particles*3:num_particles*4]
+
+
+
+    # ---------------------------- TRACKING ----------------------------
+    #line.optimize_for_tracking()
+    line.scattering.enable() 
+    if adt_amplitude is not None:
+        adt.activate()
     line.track(part, num_turns=num_turns, time=True)
-    xc.disable_scattering(line)
-    print(f"Done tracking in {line.time_last_track:.1f}s.")
-
-
+    if adt_amplitude is not None:
+        adt.deactivate()
+    line.scattering.disable()
+    impacts.stop()
+    print(f"\nDone tracking in {line.time_last_track:.1f}s.")
 
 
     # ---------------------------- LOSSMAPS ----------------------------    
     if 'losses' in save_list:
+        line.discard_tracker()
+        line.build_tracker(_context=xo.ContextCpu())
         line_is_reversed = True if f'{beam}' == '2' else False
         ThisLM = xc.LossMap(line, line_is_reversed=line_is_reversed, part=part)
         print(ThisLM.summary, '\n')
@@ -388,9 +436,27 @@ def main():
         del elements_idx
         gc.collect()
 
+    def calculate_xpcrit(name):
+        bending_radius = line[name].bending_radius
+        dp = 1.92e-10 
+        pot_crit = 21.34
+        eta = 0.9
+        Rcrit = line.particle_ref.p0c/(2*np.sqrt(eta)*pot_crit) * (dp/2)
+        xp_crit = np.sqrt(2*eta*pot_crit/line.particle_ref.p0c)*(1 - Rcrit/bending_radius)
+        return xp_crit[0]
+
     CRY_imp = impacts.interactions_per_collimator(CRY_name).reset_index()
     n_CRY_abs = CRY_imp['int'].apply(lambda x: 'A'  in x).sum()
     print(f"\nCRY: {n_CRY_abs} particles absorbed\n")
+    cry_sim_chann_eff = None
+    if len(CRY_imp) > 0:
+        unique_values, counts = np.unique(CRY_imp['int'], return_counts=True)
+        summary_int = pd.DataFrame({'int': unique_values,'counts': counts})
+        summary_int.int = summary_int.int.astype(str)
+        if "['CH']" in summary_int.int.to_list():
+            cry_sim_chann_eff = summary_int[summary_int['int'] == "['CH']"].counts.iloc[0] / sum((impacts.at_element == idx_CRY) & (impacts.interaction_type == "Enter Jaw L") 
+                                                                                             & (impacts.px_before - miscut < calculate_xpcrit(CRY_name))&(impacts.px_before - miscut > - calculate_xpcrit(CRY_name)))
+    print("CRY channeling efficiency: ", cry_sim_chann_eff, '\n')
     CRY_imp = CRY_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
     CRY_imp.rename(columns={'turn': 'CRY_turn', 'pid':'particle_id'}, inplace=True)
     df_part = pd.merge(df_part, CRY_imp, on='particle_id', how='left')
@@ -398,10 +464,13 @@ def main():
     gc.collect()
     
     for column in ['CRY_turn']:
-        df_part[column] = df_part[column].apply(lambda x: x if isinstance(x, list) else [])
+        df_part[column] = df_part[column].apply(lambda x: x if isinstance(x, list) else [None])
+
 
     print("... Saving metadata\n")
-    metadata = {'p0c': line.particle_ref.p0c[0], 'mass0': line.particle_ref.mass0, 'q0': line.particle_ref.q0, 'gamma0': line.particle_ref.gamma0[0], 'beta0': line.particle_ref.beta0[0], 'CRY_absorbed': n_CRY_abs}
+    metadata = {'p0c': line.particle_ref.p0c[0], 'mass0': line.particle_ref.mass0, 'q0': line.particle_ref.q0, 'gamma0': line.particle_ref.gamma0[0], 'beta0': line.particle_ref.beta0[0], 
+                'CRY_absorbed': n_CRY_abs,
+                'CRY_sim_chann_eff': cry_sim_chann_eff}
     pd.DataFrame(list(metadata.values()), index=metadata.keys()).to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='metadata', format='table', mode='a',
             complevel=9, complib='blosc')
 
@@ -412,13 +481,11 @@ def main():
 
         CRY_monitor_dict = CRY_monitor.to_dict()
         
-        ydim_CRY = coll_dict[CRY_name]['width']
-        xdim_CRY =  coll_dict[CRY_name]['height']
         jaw_L_CRY = line.elements[idx_CRY].jaw_U
         
-        impact_part_df = get_df_to_save(CRY_monitor_dict, df_part, x_dim = xdim_CRY, y_dim = ydim_CRY, jaw_L = jaw_L_CRY, 
+        impact_part_df = get_df_to_save(CRY_monitor_dict, df_part,  jaw_L = jaw_L_CRY, 
                 epsilon = epsilon_CRY, num_particles=num_particles, num_turns=num_turns, 
-                df_imp = impacts.interactions_per_collimator(CRY_name).reset_index())
+                df_imp = impacts.interactions_per_collimator(CRY_name).reset_index(), plane = 'H')
         
         del CRY_monitor_dict
         gc.collect()
@@ -442,7 +509,7 @@ def main():
         
         impact_part_df = get_df_to_save(LIN_SCAN_monitor_dict, df_part, jaw_L = jaw_L_LIN_SCAN, 
                 epsilon = epsilon_LIN, num_particles=num_particles, num_turns=num_turns, 
-                df_imp = impacts.interactions_per_collimator(LIN_name).reset_index())
+                df_imp = impacts.interactions_per_collimator(LIN_name).reset_index(), plane = 'H')
         
         del LIN_SCAN_monitor_dict
         gc.collect()

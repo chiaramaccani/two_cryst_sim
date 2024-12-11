@@ -22,6 +22,8 @@ run:
   TCCS_potential: default # 16 default
   TCCP_potential: default # default
 
+  adt_amplitude: None
+
   TCCS_gap: 5.0 
   TARGET_gap: None
   TCCP_gap:  19.3

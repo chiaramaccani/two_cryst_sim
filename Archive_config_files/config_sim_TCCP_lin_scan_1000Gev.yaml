@@ -21,6 +21,8 @@ run:
  
   TCCS_align_angle_step:  0 
   TCCP_align_angle_step: 0
+
+  adt_amplitude: None
   
   TCCS_gap: None
   TARGET_gap: None

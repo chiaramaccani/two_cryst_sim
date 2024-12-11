@@ -14,6 +14,8 @@ run:
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
+  adt_amplitude: None
+
   energy:  1000e9
  
   TCCS_align_angle_step:  0 
