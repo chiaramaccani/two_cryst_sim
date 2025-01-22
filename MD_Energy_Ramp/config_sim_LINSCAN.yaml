@@ -1,0 +1,48 @@
+%YAML 1.2
+---
+
+run: 
+
+  engine: 'everest'
+  seed: 1
+  fixed_seed: True
+
+  beam: '2'
+  plane: 'H'
+  turns: 200 #200
+  nparticles: 10000  #100000 #1000 50000
+  normalized_emittance: 3.5e-6  
+  energy: 1000 #450 1000 3000 5000
+
+  adt_amplitude: None  #0.9 #0.9 #0.75
+
+  CRY_align_angle_step: 0
+  LIN_gap: closed # None closed
+
+  epsilon_CRY: 0
+  epsilon_LIN: 5.0e-1
+
+  save_list: ['CRY_impacts', 'LIN_SCAN_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'ALFA_impacts','PIXEL_impacts', 'TCP_generated', TCLA_impacts, BLM_impacts]        
+  input_mode: 'pencil_CRY'  # load  pencil_CRY pencil_TCP circular_halo
+  output_mode: '' # reduced
+  run_mode: 'linear_scan' # angular_scan linear_scan
+
+  
+jobsubmission:
+  working_directory: ${HOME_TWOCRYST}/Condor/MD_1000GeV_ANG_SCAN_NOTRANS_HALO_
+  num_jobs: 200 # 100  
+  angular_scan: None
+  angular_scan_range_lower: 0
+  angular_scan_range_upper: 0
+  angular_scan_step: 0
+  run_local: False
+  dryrun: False
+  jobflavour: 'workday'  #'workday' #'espresso' testmatch
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '10240M'}  # 10240M 5120M
+  mask: ${HOME_TWOCRYST}/MD_Energy_Ramp/mask_condor_MD.sh
+
+
+input_files:
+  line_b2: ${HOME_TWOCRYST}/MD_Energy_Ramp/track_injection_b2.json
+  collimators: ${HOME_TWOCRYST}/MD_Energy_Ramp/collimators_MD.yaml 
+  sim_dict: ${HOME_TWOCRYST}/MD_Energy_Ramp/MD_dict.json

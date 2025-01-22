@@ -10,7 +10,7 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 
-  nparticles:  50000 
+  nparticles:  10000 
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
@@ -39,23 +39,23 @@ run:
   epsilon_TFT: 0.6e-3
   epsilon_TCLA: 3.5e-3
 
-  save_list: ['TCCS_impacts'] 
+  save_list: [] 
   target_mode: ''   
-  input_mode: 'pencil_TCCS' 
+  input_mode: 'circular_halo' 
   output_mode: '' 
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_ang_scan_NOTRANS_test_-60.5_
-  num_jobs: 4 
-  angular_scan: None 
-  angular_scan_range_lower: 22.0e-6
-  angular_scan_range_upper: 33.0e-6
-  angular_scan_step: 1.1e-6
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_ang_scan_HALO_
+  num_jobs: 100
+  angular_scan: TCCS 
+  angular_scan_range_lower: -81.4e-6
+  angular_scan_range_upper: 31.9e-6
+  angular_scan_step: 2.2e-6
   run_local: False
   dryrun: False
-  jobflavour: 'workday'  
+  jobflavour: 'longlunch'  
   htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"'}  # 10240M 5120M , 'request_memory': '10240M'
   mask: ${HOME_TWOCRYST}/mask_condor_script.sh
 

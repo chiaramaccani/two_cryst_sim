@@ -79,7 +79,8 @@ def get_df_to_save(dict, df_part, num_particles, num_turns, df_imp = None, epsil
     impact_part_df.drop('state', axis=1, inplace=True)
     impact_part_df['this_turn'] = impact_part_df['this_turn'].astype('int32')
 
-    impact_part_df['CRY_turn'] = impact_part_df['CRY_turn'].apply(lambda x: ','.join(map(str, x)))
+    for col in ['TCCS_turn', 'TCCP_turn', 'TCP_turn']:
+        impact_part_df[col] = impact_part_df[col].apply(lambda x: ','.join(map(str, x)))
 
     if df_imp is not None:
         df_imp.rename(columns={'turn': 'this_turn'}, inplace=True)
@@ -140,7 +141,7 @@ def main():
     input_mode = run_dict['input_mode']
     output_mode = run_dict['output_mode']
     turn_on_cavities = bool(run_dict['turn_on_cavities'])
-    print('\nTarget mode: ', target_mode, '\t', 'input mode: ', input_mode, '\t', 'output mode: ', output_mode, '\t',  'Seed: ', seed, '\tCavities on: ', turn_on_cavities ,  '\n')
+    print('\nTarget mode: ', target_mode, '\t', 'input mode: ', input_mode, '\t', 'output mode: ', output_mode, '\t',  'Seed: ', seed, '\tCavities on: ', turn_on_cavities , '\t ADT: ', adt_amplitude, '\n')
 
     save_list = run_dict['save_list']
 
@@ -487,7 +488,8 @@ def main():
     if input_mode == 'pencil_TCP':
         print("\n... Generating initial particles on TCP \n")
         # Generate initial pencil distribution on horizontal collimator
-        part = line[TCP_name].generate_pencil(num_particles = num_particles)
+        impact_parameter = 0 
+        part = line[TCP_name].generate_pencil(num_particles = num_particles, impact_parameter = impact_parameter)
         #part = xc.generate_pencil_on_collimator(name = TCP_name, line = line, num_particles=num_particles)
         part.at_element = idx_TCP 
         part.start_tracking_at_element = idx_TCP 
@@ -522,11 +524,12 @@ def main():
         print("\n... Generating 2D uniform circular sector\n")
         ip1_idx = line.element_names.index('ip1')
         at_s = line.get_s_position(ip1_idx)
+        gap = 5 
         # Vertical plane: generate cut halo distribution
         (y_in_sigmas, py_in_sigmas, r_points, theta_points
             )= xp.generate_2D_uniform_circular_sector(
                                                 num_particles=num_particles,
-                                                r_range=(gaps['TCCS_gap'] - 0.003, gaps['TCCS_gap']+0.002), # sigmas
+                                                r_range=(gap - 0.003, gap+0.002), # sigmas
                                                 )
 
         x_in_sigmas, px_in_sigmas = xp.generate_2D_gaussian(num_particles)
@@ -584,12 +587,12 @@ def main():
         part._rng_s4 = random_array[num_particles*3:num_particles*4]
 
 
-
     # ---------------------------- TRACKING ----------------------------
     #line.optimize_for_tracking()
     line.scattering.enable() 
     if adt_amplitude is not None:
         adt.activate()
+  
     line.track(part, num_turns=num_turns, time=True)
     if adt_amplitude is not None:
         adt.deactivate()
@@ -644,7 +647,7 @@ def main():
         del elements_idx
         gc.collect()
 
-    def calculate_xpcrit(name):
+    def calculate_xpcrit(name, line=line):
         bending_radius = line[name].bending_radius
         dp = 1.92e-10 
         pot_crit = 21.34
@@ -673,20 +676,24 @@ def main():
     gc.collect()
     
     tccp_imp = impacts.interactions_per_collimator(TCCP_name).reset_index()
+    tccp_imp.rename(columns={'turn': 'this_turn', 'pid':'particle_id'}, inplace=True)
+    m_entry =(impacts.at_element == idx_TCCP) & (impacts.interaction_type == "Enter Jaw L")
+    tccp_imp = pd.merge(tccp_imp, pd.DataFrame({'this_turn':  impacts.at_turn[m_entry],'particle_id': impacts.id_before[m_entry],'py': impacts.px_before[m_entry]}),
+                        on=['this_turn', 'particle_id'], how='left')
     n_TCCP_abs = tccp_imp['int'].apply(lambda x: 'A'  in x).sum()
+    n_TCCP_abs_xp = tccp_imp[(tccp_imp.py - miscut_TCCP < calculate_xpcrit(TCCP_name))&(tccp_imp.py - miscut_TCCP > - calculate_xpcrit(TCCP_name))].int.apply(lambda x: 'A'  in x).sum()
+    n_TCCP_abs_xp_2 =  tccp_imp[(tccp_imp.py - miscut_TCCP < calculate_xpcrit(TCCP_name)/2)&(tccp_imp.py - miscut_TCCP > - calculate_xpcrit(TCCP_name)/2)].int.apply(lambda x: 'A'  in x).sum()
     print(f"\nTCCP: {n_TCCP_abs} particles absorbed")
     tccp_sim_chann_eff = None
     if len(tccp_imp) > 0:
-        unique_values, counts = np.unique(tccp_imp['int'], return_counts=True)
-        summary_int = pd.DataFrame({'int': unique_values,'counts': counts})
-        summary_int.int = summary_int.int.astype(str)
-        if "['CH']" in summary_int.int.to_list():
-            tccp_sim_chann_eff = summary_int[summary_int['int'] == "['CH']"].counts[0] /  sum((impacts.at_element == idx_TCCP) & (impacts.interaction_type == "Enter Jaw L") 
-                                                                                             & (impacts.px_before - miscut_TCCP < calculate_xpcrit(TCCP_name))&(impacts.px_before - miscut_TCCP > - calculate_xpcrit(TCCP_name)))
+        if len(tccp_imp[tccp_imp.int.astype(str) == "['CH']"]) > 0:
+            tccp_sim_chann_eff = len(tccp_imp[tccp_imp.int.astype(str) == "['CH']"]) /  len(tccp_imp[(tccp_imp["py"] - miscut_TCCP < calculate_xpcrit(TCCP_name)) &(tccp_imp["py"] - miscut_TCCP > -calculate_xpcrit(TCCP_name))])
     print("TCCP channeling efficiency: ", tccp_sim_chann_eff, '\n')
-    tccp_imp = tccp_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
-    tccp_imp.rename(columns={'turn': 'TCCP_turn', 'pid':'particle_id'}, inplace=True)
+    
+    tccp_imp = tccp_imp.groupby('particle_id').agg(list).reset_index()[['particle_id', 'this_turn']]
+    tccp_imp.rename(columns={'this_turn': 'TCCP_turn'}, inplace=True)
     df_part = pd.merge(df_part, tccp_imp, on='particle_id', how='left')
+
     del tccp_imp
     gc.collect()
 
@@ -715,11 +722,15 @@ def main():
     print("... Saving metadata\n")
     metadata = {'p0c': line.particle_ref.p0c[0], 'mass0': line.particle_ref.mass0, 'q0': line.particle_ref.q0, 'gamma0': line.particle_ref.gamma0[0], 'beta0': line.particle_ref.beta0[0], 
                 'TCCS_absorbed': n_TCCS_abs, 'TCCP_absorbed': n_TCCP_abs, 
+                'TCCP_absorbed_xp': n_TCCP_abs_xp, 'TCCP_absorbed_xp_2': n_TCCP_abs_xp_2,
                 'TCCS_sim_chann_eff': tccs_sim_chann_eff, 'TCCP_sim_chann_eff': tccp_sim_chann_eff,
+                'TCCP_jaw_U': line.elements[idx_TCCP].jaw_U, 'TCCP_jaw_D':line.elements[idx_TCCP].jaw_D,
+                'TCCP_sigma': sigma_TCCP,
                 'TCCS_gap': gaps['TCCS_gap'], 'TCCP_gap': gaps['TCCP_gap'], 'TARGET_gap': gaps['TARGET_gap'], 'PIXEL_gap': gaps['PIXEL_gap'], 'TFT_gap': gaps['TFT_gap'], 'TCP_gap': gaps['TCP_gap'],
                 'TCCS_align_angle': line.elements[idx_TCCS].tilt, 'TCCP_align_angle': line.elements[idx_TCCP].tilt, 'TCCS_miscut': miscut_TCCS, 'TCCP_miscut': miscut_TCCP,}
     pd.DataFrame(list(metadata.values()), index=metadata.keys()).to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='metadata', format='table', mode='a',
             complevel=9, complib='blosc')
+
 
 
     if 'TCCS_impacts' in save_list:
@@ -810,8 +821,16 @@ def main():
         jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_1'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
-        
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns, 
+                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
+
+        if output_mode == 'packed':
+            imp_TCCP_py  =  pd.DataFrame({'this_turn':  impacts.at_turn[m_entry],'particle_id': impacts.id_before[m_entry],'py': impacts.px_before[m_entry]})
+            imp_TCCP_py['xp_crit']= np.where((imp_TCCP_py["py"] - miscut_TCCP < calculate_xpcrit(TCCP_name) / 2) &(imp_TCCP_py["py"] - miscut_TCCP > -calculate_xpcrit(TCCP_name) / 2), 2,
+                np.where((imp_TCCP_py["py"] - miscut_TCCP < calculate_xpcrit(TCCP_name)) &(imp_TCCP_py["py"] - miscut_TCCP> -calculate_xpcrit(TCCP_name)),1,0)).astype('int32')
+            impact_part_df = pd.merge(impact_part_df, imp_TCCP_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
+            impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn'])
+
         del PIXEL_monitor_dict
         gc.collect()
 
@@ -827,6 +846,7 @@ def main():
 
 
 
+
     if 'PIXEL_impacts_2' in save_list or 'PIXEL_impacts_ALL' in save_list:
 
         print("... Saving impacts on PIXEL 2\n(epsilon: ", epsilon_PIXEL, ")\n")
@@ -836,7 +856,8 @@ def main():
         jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns,   
+                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -862,7 +883,8 @@ def main():
         jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns,
+                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -889,10 +911,18 @@ def main():
         jaw_L_TFT = sigma_TFT * gaps['TFT_gap'] + tw['y',TFT_name] 
 
         impact_part_df = get_df_to_save(TFT_monitor_dict, df_part,  jaw_L = jaw_L_TFT,  #x_dim = xdim_TFT, y_dim = ydim_TFT,
-                epsilon = epsilon_TFT, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_TFT, num_particles=num_particles, num_turns=num_turns, 
+                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
         
         del TFT_monitor_dict
         gc.collect()
+
+        if output_mode == 'packed':
+            imp_TCCP_py  =  pd.DataFrame({'this_turn':  impacts.at_turn[m_entry],'particle_id': impacts.id_before[m_entry],'py': impacts.px_before[m_entry]})
+            imp_TCCP_py['xp_crit']= np.where((imp_TCCP_py["py"] - miscut_TCCP < calculate_xpcrit(TCCP_name) / 2) &(imp_TCCP_py["py"] - miscut_TCCP > -calculate_xpcrit(TCCP_name) / 2), 2,
+                np.where((imp_TCCP_py["py"] - miscut_TCCP < calculate_xpcrit(TCCP_name)) &(imp_TCCP_py["py"] - miscut_TCCP> -calculate_xpcrit(TCCP_name)),1,0)).astype('int32')
+            impact_part_df = pd.merge(impact_part_df, imp_TCCP_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
+            impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn'])
 
         if output_mode == 'reduced':
             impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]
