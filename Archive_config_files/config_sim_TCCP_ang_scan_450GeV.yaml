@@ -1,0 +1,65 @@
+%YAML 1.2
+---
+
+run: 
+
+  engine: 'everest'
+  seed: 0
+  fixed_seed: True
+
+  beam: '2'
+  plane: 'V'
+  turns: 200 
+  nparticles:  10000 
+  normalized_emittance: 3.5e-6  
+  turn_on_cavities: False 
+
+  energy:  450e9 
+  
+  adt_amplitude: None
+ 
+  TCCS_align_angle_step: 0
+  TCCP_align_angle_step: 0 
+  
+  TCCS_potential: default # 16 default
+  TCCP_potential: default # default
+  
+  TCCS_gap: None
+  TARGET_gap: None
+  TCCP_gap:   5.0
+  PIXEL_gap: None
+  TFT_gap: None
+  TCP_gap: 6.0
+  TCLA_gap: None
+
+  epsilon_TCCS: 0
+  epsilon_TCCP: 3.0e-3
+  epsilon_TARGET: 0 
+  epsilon_PIXEL: 0 
+  epsilon_TFT: 0.6e-3
+  epsilon_TCLA: 3.5e-3
+
+  save_list: [] 
+  target_mode: ''   
+  input_mode: 'circular_halo' 
+  output_mode: '' 
+  load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
+
+  
+jobsubmission:
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCP_ANG_SCAN_450GeV_
+  num_jobs: 100
+  angular_scan: TCCP 
+  angular_scan_range_lower: 0.0015312  #0.0004312 #-0.0079332 #35.2e-6  #-233.2e-6 #
+  angular_scan_range_upper: 0.0026312  #233.2e-6 #233.2e-6 #-13.2e-6 #
+  angular_scan_step: 2.2e-4
+  run_local: False
+  dryrun: False
+  jobflavour: 'longlunch'  
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"'}  # 10240M 5120M , 'request_memory': '10240M'
+  mask: ${HOME_TWOCRYST}/mask_condor_script.sh
+
+
+input_files:
+  line_b2: ${HOME_TWOCRYST}/MadX/2025/injection/track_injection_b2.json
+  collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_450GeV.yaml

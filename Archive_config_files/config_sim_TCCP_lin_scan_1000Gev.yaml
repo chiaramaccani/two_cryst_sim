@@ -10,7 +10,7 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 
-  nparticles: 20000  #100000 #1000 50000
+  nparticles: 50000  #100000 #1000 50000
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
@@ -47,8 +47,8 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCP_lin_scan_1000GeV_open
-  num_jobs: 200
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCP_lin_scan_1000GeV_NEW_
+  num_jobs: 50
   angular_scan: None
   angular_scan_range_lower: 0
   angular_scan_range_upper: 0

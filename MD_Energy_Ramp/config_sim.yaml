@@ -10,9 +10,9 @@ run:
   beam: '2'
   plane: 'H'
   turns: 200 #200
-  nparticles: 50000  #100000 #1000 50000
+  nparticles: 10000  #100000 #1000 50000
   normalized_emittance: 3.5e-6  
-  energy: 5000 #450 1000 3000 5000
+  energy: 1000 #450 1000 3000 5000
 
   adt_amplitude: None  #0.9 #0.9 #0.75
 
@@ -29,12 +29,12 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/MD_1000GeV_LIN_SCAN_full_5000
-  num_jobs: 50 # 100  
+  working_directory: ${HOME_TWOCRYST}/Condor/MD_1000GeV_ANG_SCAN_NOTRANS_HALO_
+  num_jobs: 200 # 100  
   angular_scan: None
   angular_scan_range_lower: 0
   angular_scan_range_upper: 0
-  angular_scan_step: 0  
+  angular_scan_step: 0
   run_local: False
   dryrun: False
   jobflavour: 'workday'  #'workday' #'espresso' testmatch

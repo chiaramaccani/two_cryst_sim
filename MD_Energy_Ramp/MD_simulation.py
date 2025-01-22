@@ -250,6 +250,8 @@ def main():
             gaps[LIN_name]= None
         elif LIN_gap == 'closed':
             gaps[LIN_name]=  gaps[CRY_name]
+        elif LIN_gap == 'default':
+            pass
         else:
             gaps[LIN_name]= float(LIN_gap)  
         
@@ -351,11 +353,13 @@ def main():
         print("\n... Generating 2D uniform circular sector\n")
         ip1_idx = line.element_names.index('ip1')
         at_s = line.get_s_position(ip1_idx)
+        #ip1_idx = idx_CRY
+        #at_s = line.get_s_position(ip1_idx)
         # Vertical plane: generate cut halo distribution
         (x_in_sigmas, px_in_sigmas, r_points, theta_points
             )= xp.generate_2D_uniform_circular_sector(
                                                 num_particles=num_particles,
-                                                r_range=(gaps[CRY_name] - 0.003,  gaps[CRY_name]+0.002), # sigmas
+                                                r_range=(gaps[CRY_name] - 0.5,  gaps[CRY_name]+0.5), # sigmas
                                                 )
 
         y_in_sigmas, py_in_sigmas = xp.generate_2D_gaussian(num_particles)
@@ -473,7 +477,6 @@ def main():
                 'CRY_sim_chann_eff': cry_sim_chann_eff}
     pd.DataFrame(list(metadata.values()), index=metadata.keys()).to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='metadata', format='table', mode='a',
             complevel=9, complib='blosc')
-
 
     if 'CRY_impacts' in save_list:
         # SAVE IMPACTS ON CRY

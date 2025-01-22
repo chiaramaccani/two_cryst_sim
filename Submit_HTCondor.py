@@ -105,6 +105,10 @@ def main():
                 config_dict_to_submit['run']['TCCS_align_angle_step'] = float(angle)
             elif sub_dict['angular_scan'] == 'TCCP':    
                 config_dict_to_submit['run']['TCCP_align_angle_step'] = float(angle)
+            elif sub_dict['angular_scan'] == 'CRY':
+                config_dict_to_submit['run']['CRY_align_angle_step'] = float(angle)
+            else:
+                raise ValueError('angular_scan must be TCCS, TCCP or CRY')
             config_dict_to_submit['jobsubmission']['working_directory'] = sub_dict['working_directory'] + f'_{angle*1e6:.{1}f}_'
             for key in keys_to_drop:
                 if key in config_dict_to_submit['jobsubmission']:

@@ -15,7 +15,7 @@ run:
   turn_on_cavities: False 
 
   energy:  450e9 # 450e9 1000e9 3000e9 5000e9 6800e9 None
-  adt_amplitude: None
+  adt_amplitude: 0.9
 
   TCCS_potential: default # 16 default
   TCCP_potential: default # default
@@ -29,7 +29,7 @@ run:
   PIXEL_gap: None
   TFT_gap: 6.4
   TCP_gap: 6.0
-  TCLA_gap: 8.0 #5.0
+  TCLA_gap: None #8.0 #5.0
   TCT_gap: default
 
   epsilon_TCCS: 0 
@@ -46,7 +46,7 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_450GeV_losses_closedTCLA
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_450GeV_losses_openTCLA_ADT
   num_jobs: 200
   angular_scan: None
   angular_scan_range_lower: 0
