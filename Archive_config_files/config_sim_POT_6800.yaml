@@ -42,7 +42,7 @@ run:
   save_list: [ 'TCCS_impacts', 'PIXEL_impacts_1', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''           
   input_mode: 'pencil_TCP'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
-  output_mode: '' 
+  output_mode: 'packed_TCCS' 
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   

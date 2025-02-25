@@ -56,7 +56,7 @@ families:
   - &TCCS3    { <<: *ALL,  gap: null,  stage: special,    material: Si,   side: left, angle: 90, crystal: strip, active: true }  #crystal: strip,
   - &TCCP3    { <<: *ALL,  gap: null,  stage: special,    material: Si,   side: left, angle: 90, crystal: strip,  active: true }  #crystal: strip,
   - &TARGET3  { <<: *ALL,  gap: null,  stage: special,    material: Iner, side: left, angle: 90, active: true }
-  - &PIX3     { <<: *ALL,  gap: null,  stage: special,    material: Al,  length: 0.001,   angle: 90}
+  - &PIX3     { <<: *ALL,  gap: null,  stage: special,    material: Al,  length: 0.001,   angle: 90, side: left}
 
 emittance:
   x: 3.5e-6

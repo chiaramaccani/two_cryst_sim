@@ -10,7 +10,7 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 
-  nparticles: 50000  #100000 #1000 50000
+  nparticles: 10000  #100000 #1000 50000
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
@@ -28,7 +28,7 @@ run:
   TARGET_gap: None
   TCCP_gap: 5.0
   PIXEL_gap: 5.0
-  TFT_gap: 6.0
+  TFT_gap: 5.0
   TCP_gap: 6.0
   TCLA_gap: default
 
@@ -36,18 +36,18 @@ run:
   epsilon_TCCP: 2.0e-3
   epsilon_TARGET: 0 
   epsilon_PIXEL: 1.0e-3
-  epsilon_TFT: 1.4e-3
+  epsilon_TFT: 1.0e-3
   epsilon_TCLA: 0
 
-  save_list: ['TCCP_impacts', 'PIXEL_impacts_1', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: ['PIXEL_impacts_1', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   
   input_mode: 'pencil_TCCP'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
-  output_mode:  '' # reduced
+  output_mode:  'packed' # reduced
   load_input_path: '/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/INPUT_PARTICLES_HL_TCP_at_6.7____20240319-1209'                                         
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCP_lin_scan_1000GeV_NEW_
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCP_lin_scan_1000GeV_NEW_PENCIL_
   num_jobs: 50
   angular_scan: None
   angular_scan_range_lower: 0

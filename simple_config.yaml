@@ -1,0 +1,16 @@
+%YAML 1.2
+---
+
+run:                                  
+
+  
+jobsubmission:
+  working_directory: ${HOME_TWOCRYST}/Condor/DC_ANA_450_
+  run_local: False
+  dryrun: False
+  num_jobs: 1
+  jobflavour: 'testmatch' #'espresso' testmatch
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '10240M'}  
+  mask: ${HOME_TWOCRYST}/mask_simple_condor.sh
+  program_name: ${HOME_TWOCRYST}/DC_data/DataForML.py
+

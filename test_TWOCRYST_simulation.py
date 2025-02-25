@@ -131,6 +131,7 @@ def main():
 
     TCCS_align_angle_step = float(run_dict['TCCS_align_angle_step'])
     TCCP_align_angle_step = float(run_dict['TCCP_align_angle_step'])
+    TCCP_align_angle_additional = float(run_dict['TCCP_align_angle_additional']) if 'TCCP_align_angle_additional' in run_dict.keys() else 0
 
     TCCS_potential = None if run_dict['TCCS_potential'] == 'default' else float(run_dict['TCCS_potential'])
     TCCP_potential = None if run_dict['TCCP_potential'] == 'default' else float(run_dict['TCCP_potential'])
@@ -349,20 +350,21 @@ def main():
     if gaps['TCCS_gap'] is not None: 
         line[TCCS_name].align_to_beam_divergence()
     if gaps['TCCP_gap'] is not None:
-        line[TCCP_name].align_to_beam_divergence()
+        if isinstance(line[TCCP_name],xc.beam_elements.EverestCrystal):
+            line[TCCP_name].align_to_beam_divergence()
 
     print("\nTCCS aligned to beam: ", line[TCCS_name].tilt)
     line[TCCS_name].tilt = line[TCCS_name].tilt - miscut_TCCS
     print("TCCS corrected by miscut: ", line[TCCS_name].tilt)
     print("TCCS align angle incremented by step: ", TCCS_align_angle_step)
-    line[TCCS_name].tilt = line[TCCS_name].tilt + TCCS_align_angle_step
+    line[TCCS_name].tilt = line[TCCS_name].tilt + TCCS_align_angle_step 
     print("TCCS final alignment angle: ", line[TCCS_name].tilt)
     
     print("\nTCCP aligned to beam: ", line[TCCP_name].tilt)
     line[TCCP_name].tilt = line[TCCP_name].tilt - miscut_TCCP
     print("TCCP corrected by miscut: ", line[TCCP_name].tilt)
-    print("TCCP align angle incremented by step: ", TCCP_align_angle_step)
-    line[TCCP_name].tilt = line[TCCP_name].tilt + TCCP_align_angle_step
+    print("TCCP align angle incremented by step: ", TCCP_align_angle_step, 'and additional: ', TCCP_align_angle_additional)
+    line[TCCP_name].tilt = line[TCCP_name].tilt + TCCP_align_angle_step + TCCP_align_angle_additional
     print("TCCP final alignment angle: ", line[TCCP_name].tilt)
 
     if TCCS_potential is not None:
@@ -467,8 +469,7 @@ def main():
         f"bending_radius={coll_dict[ TCCS_name]['bending_radius']}, align_angle={ line.elements[idx_TCCS].tilt}, miscut = {miscut_TCCS}, sigma={sigma_TCCS}, jaw_L={line.elements[idx_TCCS].jaw_U })")
     print(f"TARGET\nTargetAnalysis(n_sigma={line.elements[idx_TARGET].gap}, target_type='target', length={ coll_dict[ TARGET_name]['length']}, ydim={ coll_dict[ TARGET_name]['width']}, xdim={ coll_dict[ TARGET_name]['height']},"+
         f"sigma={sigma_TARGET}, jaw_L={line.elements[idx_TARGET].jaw_LU })")
-    print(f"TCCP\nCrystalAnalysis(n_sigma={line.elements[idx_TCCP].gap}, length={ coll_dict[ TCCP_name]['length']}, ydim={ coll_dict[ TCCP_name]['width']}, xdim={ coll_dict[ TCCP_name]['height']},"+ 
-        f"bending_radius={ coll_dict[ TCCP_name]['bending_radius']}, align_angle={line.elements[idx_TCCP].tilt}, miscut = {miscut_TCCP}, sigma={sigma_TCCP}, jaw_L={line.elements[idx_TCCP].jaw_U })")
+   
     print(f"TCP\nTargetAnalysis(n_sigma={line.elements[idx_TCP].gap}, target_type='collimator', length={coll_dict[ TCP_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
         f"sigma={sigma_TCP}, jaw_L={line.elements[idx_TCP].jaw_LU })")
     print(f"TCLA\nTargetAnalysis(n_sigma={line.elements[idx_TCLA].gap}, target_type='collimator', length={coll_dict[ TCLA_name]['length']}, ydim={0.025}, xdim={0.025},"+ 
@@ -529,7 +530,7 @@ def main():
         (y_in_sigmas, py_in_sigmas, r_points, theta_points
             )= xp.generate_2D_uniform_circular_sector(
                                                 num_particles=num_particles,
-                                                r_range=(gap - 0.002, gap+0.005), # sigmas
+                                                r_range=(gap - 0.003, gap+0.002), # sigmas
                                                 )
 
         x_in_sigmas, px_in_sigmas = xp.generate_2D_gaussian(num_particles)
@@ -597,7 +598,7 @@ def main():
     if adt_amplitude is not None:
         adt.deactivate()
     print("\nTCCS critical angle: ", line[idx_TCCS].critical_angle)
-    print("TCCP critical angle: ", line[idx_TCCP].critical_angle)
+   
     line.scattering.disable()
     impacts.stop()
     print(f"\nDone tracking in {line.time_last_track:.1f}s.")
@@ -647,7 +648,7 @@ def main():
         del elements_idx
         gc.collect()
 
-    def calculate_xpcrit(name):
+    def calculate_xpcrit(name, line=line):
         bending_radius = line[name].bending_radius
         dp = 1.92e-10 
         pot_crit = 21.34
@@ -676,20 +677,24 @@ def main():
     gc.collect()
     
     tccp_imp = impacts.interactions_per_collimator(TCCP_name).reset_index()
+    tccp_imp.rename(columns={'turn': 'this_turn', 'pid':'particle_id'}, inplace=True)
+    m_entry =(impacts.at_element == idx_TCCP) & (impacts.interaction_type == "Enter Jaw L")
+    tccp_imp = pd.merge(tccp_imp, pd.DataFrame({'this_turn':  impacts.at_turn[m_entry],'particle_id': impacts.id_before[m_entry],'py': impacts.px_before[m_entry]}),
+                        on=['this_turn', 'particle_id'], how='left')
     n_TCCP_abs = tccp_imp['int'].apply(lambda x: 'A'  in x).sum()
+    n_TCCP_abs_xp = 0 #tccp_imp[(tccp_imp.py - miscut_TCCP < calculate_xpcrit(TCCP_name))&(tccp_imp.py - miscut_TCCP > - calculate_xpcrit(TCCP_name))].int.apply(lambda x: 'A'  in x).sum()
+    n_TCCP_abs_xp_2 =  0#tccp_imp[(tccp_imp.py - miscut_TCCP < calculate_xpcrit(TCCP_name)/2)&(tccp_imp.py - miscut_TCCP > - calculate_xpcrit(TCCP_name)/2)].int.apply(lambda x: 'A'  in x).sum()
     print(f"\nTCCP: {n_TCCP_abs} particles absorbed")
     tccp_sim_chann_eff = None
     if len(tccp_imp) > 0:
-        unique_values, counts = np.unique(tccp_imp['int'], return_counts=True)
-        summary_int = pd.DataFrame({'int': unique_values,'counts': counts})
-        summary_int.int = summary_int.int.astype(str)
-        if "['CH']" in summary_int.int.to_list():
-            tccp_sim_chann_eff = summary_int[summary_int['int'] == "['CH']"].counts[0] /  sum((impacts.at_element == idx_TCCP) & (impacts.interaction_type == "Enter Jaw L") 
-                                                                                             & (impacts.px_before - miscut_TCCP < calculate_xpcrit(TCCP_name))&(impacts.px_before - miscut_TCCP > - calculate_xpcrit(TCCP_name)))
+        if len(tccp_imp[tccp_imp.int.astype(str) == "['CH']"]) > 0:
+            tccp_sim_chann_eff = 0 #len(tccp_imp[tccp_imp.int.astype(str) == "['CH']"]) /  len(tccp_imp[(tccp_imp["py"] - miscut_TCCP < calculate_xpcrit(TCCP_name)) &(tccp_imp["py"] - miscut_TCCP > -calculate_xpcrit(TCCP_name))])
     print("TCCP channeling efficiency: ", tccp_sim_chann_eff, '\n')
-    tccp_imp = tccp_imp.groupby('pid').agg(list).reset_index()[['pid', 'turn']]
-    tccp_imp.rename(columns={'turn': 'TCCP_turn', 'pid':'particle_id'}, inplace=True)
+    
+    tccp_imp = tccp_imp.groupby('particle_id').agg(list).reset_index()[['particle_id', 'this_turn']]
+    tccp_imp.rename(columns={'this_turn': 'TCCP_turn'}, inplace=True)
     df_part = pd.merge(df_part, tccp_imp, on='particle_id', how='left')
+
     del tccp_imp
     gc.collect()
 
@@ -718,11 +723,15 @@ def main():
     print("... Saving metadata\n")
     metadata = {'p0c': line.particle_ref.p0c[0], 'mass0': line.particle_ref.mass0, 'q0': line.particle_ref.q0, 'gamma0': line.particle_ref.gamma0[0], 'beta0': line.particle_ref.beta0[0], 
                 'TCCS_absorbed': n_TCCS_abs, 'TCCP_absorbed': n_TCCP_abs, 
+                'TCCP_absorbed_xp': n_TCCP_abs_xp, 'TCCP_absorbed_xp_2': n_TCCP_abs_xp_2,
                 'TCCS_sim_chann_eff': tccs_sim_chann_eff, 'TCCP_sim_chann_eff': tccp_sim_chann_eff,
+                'TCCP_jaw_U': line.elements[idx_TCCP].jaw_LU, 'TCCP_jaw_D':line.elements[idx_TCCP].jaw_LD,
+                'TCCP_sigma': sigma_TCCP,
                 'TCCS_gap': gaps['TCCS_gap'], 'TCCP_gap': gaps['TCCP_gap'], 'TARGET_gap': gaps['TARGET_gap'], 'PIXEL_gap': gaps['PIXEL_gap'], 'TFT_gap': gaps['TFT_gap'], 'TCP_gap': gaps['TCP_gap'],
                 'TCCS_align_angle': line.elements[idx_TCCS].tilt, 'TCCP_align_angle': line.elements[idx_TCCP].tilt, 'TCCS_miscut': miscut_TCCS, 'TCCP_miscut': miscut_TCCP,}
     pd.DataFrame(list(metadata.values()), index=metadata.keys()).to_hdf(Path(path_out, f'particles_B{beam}{plane}.h5'), key='metadata', format='table', mode='a',
             complevel=9, complib='blosc')
+
 
 
     if 'TCCS_impacts' in save_list:
@@ -813,8 +822,14 @@ def main():
         jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_1'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
-        
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns, 
+                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
+
+        if output_mode == 'packed':
+            imp_TCCP_py  =  pd.DataFrame({'this_turn':  impacts.at_turn[m_entry],'particle_id': impacts.id_before[m_entry],'py': impacts.px_before[m_entry]})
+            impact_part_df = pd.merge(impact_part_df, imp_TCCP_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
+            impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn'])
+
         del PIXEL_monitor_dict
         gc.collect()
 
@@ -830,6 +845,7 @@ def main():
 
 
 
+
     if 'PIXEL_impacts_2' in save_list or 'PIXEL_impacts_ALL' in save_list:
 
         print("... Saving impacts on PIXEL 2\n(epsilon: ", epsilon_PIXEL, ")\n")
@@ -839,7 +855,8 @@ def main():
         jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns,   
+                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -865,7 +882,8 @@ def main():
         jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_2'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
-                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns,
+                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -892,10 +910,16 @@ def main():
         jaw_L_TFT = sigma_TFT * gaps['TFT_gap'] + tw['y',TFT_name] 
 
         impact_part_df = get_df_to_save(TFT_monitor_dict, df_part,  jaw_L = jaw_L_TFT,  #x_dim = xdim_TFT, y_dim = ydim_TFT,
-                epsilon = epsilon_TFT, num_particles=num_particles, num_turns=num_turns)
+                epsilon = epsilon_TFT, num_particles=num_particles, num_turns=num_turns, 
+                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
         
         del TFT_monitor_dict
         gc.collect()
+
+        if output_mode == 'packed':
+            imp_TCCP_py  =  pd.DataFrame({'this_turn':  impacts.at_turn[m_entry],'particle_id': impacts.id_before[m_entry],'py': impacts.px_before[m_entry]})
+            impact_part_df = pd.merge(impact_part_df, imp_TCCP_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
+            impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn'])
 
         if output_mode == 'reduced':
             impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]

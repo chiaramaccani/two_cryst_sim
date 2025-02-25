@@ -131,6 +131,7 @@ def main():
 
     TCCS_align_angle_step = float(run_dict['TCCS_align_angle_step'])
     TCCP_align_angle_step = float(run_dict['TCCP_align_angle_step'])
+    TCCP_align_angle_additional = float(run_dict['TCCP_align_angle_additional']) if 'TCCP_align_angle_additional' in run_dict.keys() else 0
 
     TCCS_potential = None if run_dict['TCCS_potential'] == 'default' else float(run_dict['TCCS_potential'])
     TCCP_potential = None if run_dict['TCCP_potential'] == 'default' else float(run_dict['TCCP_potential'])
@@ -355,14 +356,14 @@ def main():
     line[TCCS_name].tilt = line[TCCS_name].tilt - miscut_TCCS
     print("TCCS corrected by miscut: ", line[TCCS_name].tilt)
     print("TCCS align angle incremented by step: ", TCCS_align_angle_step)
-    line[TCCS_name].tilt = line[TCCS_name].tilt + TCCS_align_angle_step
+    line[TCCS_name].tilt = line[TCCS_name].tilt + TCCS_align_angle_step 
     print("TCCS final alignment angle: ", line[TCCS_name].tilt)
     
     print("\nTCCP aligned to beam: ", line[TCCP_name].tilt)
     line[TCCP_name].tilt = line[TCCP_name].tilt - miscut_TCCP
     print("TCCP corrected by miscut: ", line[TCCP_name].tilt)
-    print("TCCP align angle incremented by step: ", TCCP_align_angle_step)
-    line[TCCP_name].tilt = line[TCCP_name].tilt + TCCP_align_angle_step
+    print("TCCP align angle incremented by step: ", TCCP_align_angle_step, 'and additional: ', TCCP_align_angle_additional)
+    line[TCCP_name].tilt = line[TCCP_name].tilt + TCCP_align_angle_step + TCCP_align_angle_additional
     print("TCCP final alignment angle: ", line[TCCP_name].tilt)
 
     if TCCS_potential is not None:
@@ -732,7 +733,6 @@ def main():
             complevel=9, complib='blosc')
 
 
-
     if 'TCCS_impacts' in save_list:
         # SAVE IMPACTS ON TCCS
         print("... Saving impacts on TCCS\n(epsilon: ", epsilon_TCCS, ")\n")
@@ -816,13 +816,21 @@ def main():
 
         print("... Saving impacts on PIXEL 1\n(epsilon: ", epsilon_PIXEL, ")\n")
 
+
+        if output_mode == 'packed':
+            df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index()
+        elif output_mode == 'packed_TCCS':
+            df_imp = impacts.interactions_per_collimator(TCCS_name).reset_index()
+        else:
+            df_imp = None
+
         PIXEL_monitor_dict = PIXEL_monitor_1.to_dict()
     
         jaw_L_PIXEL = sigma_PIXEL * gaps['PIXEL_gap'] + tw['y',PIXEL_name + '_1'] 
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns, 
-                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
+                df_imp = df_imp)
 
         if output_mode == 'packed':
             imp_TCCP_py  =  pd.DataFrame({'this_turn':  impacts.at_turn[m_entry],'particle_id': impacts.id_before[m_entry],'py': impacts.px_before[m_entry]})
@@ -830,6 +838,15 @@ def main():
                 np.where((imp_TCCP_py["py"] - miscut_TCCP < calculate_xpcrit(TCCP_name)) &(imp_TCCP_py["py"] - miscut_TCCP> -calculate_xpcrit(TCCP_name)),1,0)).astype('int32')
             impact_part_df = pd.merge(impact_part_df, imp_TCCP_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
             impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn'])
+
+        if output_mode == 'packed_TCCS':
+            m_entry_TCCS =(impacts.at_element == idx_TCCS) & (impacts.interaction_type == "Enter Jaw L")
+            imp_TCCS_py  =  pd.DataFrame({'this_turn':  impacts.at_turn[m_entry_TCCS],'particle_id': impacts.id_before[m_entry_TCCS],'py': impacts.px_before[m_entry_TCCS]})
+            imp_TCCS_py['xp_crit']= np.where((imp_TCCS_py["py"] - miscut_TCCS < calculate_xpcrit(TCCS_name) / 2) &(imp_TCCS_py["py"] - miscut_TCCS > -calculate_xpcrit(TCCS_name) / 2), 2,
+                np.where((imp_TCCS_py["py"] - miscut_TCCS < calculate_xpcrit(TCCS_name)) &(imp_TCCS_py["py"] - miscut_TCCS> -calculate_xpcrit(TCCS_name)),1,0)).astype('int32')
+            impact_part_df = pd.merge(impact_part_df, imp_TCCS_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
+            impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn', 'TCCP_turn', 'at_element'])
+
 
         del PIXEL_monitor_dict
         gc.collect()
@@ -857,7 +874,7 @@ def main():
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns,   
-                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
+                df_imp = df_imp)
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -884,7 +901,7 @@ def main():
 
         impact_part_df = get_df_to_save(PIXEL_monitor_dict, df_part,  jaw_L = jaw_L_PIXEL,  #x_dim = xdim_PIXEL, y_dim = ydim_PIXEL,
                 epsilon = epsilon_PIXEL, num_particles=num_particles, num_turns=num_turns,
-                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
+                df_imp = df_imp)
         
         del PIXEL_monitor_dict
         gc.collect()
@@ -903,6 +920,14 @@ def main():
 
     if 'TFT_impacts' in save_list:
 
+
+        if output_mode == 'packed':
+            df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index()
+        elif output_mode == 'packed_TCCS':
+            df_imp = impacts.interactions_per_collimator(TCCS_name).reset_index()
+        else:
+            df_imp = None
+
         # SAVE IMPACTS ON TFT
         print("... Saving impacts on TFT\n(epsilon: ", epsilon_TFT, ")\n")
 
@@ -912,7 +937,7 @@ def main():
 
         impact_part_df = get_df_to_save(TFT_monitor_dict, df_part,  jaw_L = jaw_L_TFT,  #x_dim = xdim_TFT, y_dim = ydim_TFT,
                 epsilon = epsilon_TFT, num_particles=num_particles, num_turns=num_turns, 
-                df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index())
+                df_imp = df_imp)
         
         del TFT_monitor_dict
         gc.collect()
@@ -923,6 +948,14 @@ def main():
                 np.where((imp_TCCP_py["py"] - miscut_TCCP < calculate_xpcrit(TCCP_name)) &(imp_TCCP_py["py"] - miscut_TCCP> -calculate_xpcrit(TCCP_name)),1,0)).astype('int32')
             impact_part_df = pd.merge(impact_part_df, imp_TCCP_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
             impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn'])
+
+        if output_mode == 'packed_TCCS':
+            m_entry_TCCS =(impacts.at_element == idx_TCCS) & (impacts.interaction_type == "Enter Jaw L")
+            imp_TCCS_py  =  pd.DataFrame({'this_turn':  impacts.at_turn[m_entry_TCCS],'particle_id': impacts.id_before[m_entry_TCCS],'py': impacts.px_before[m_entry_TCCS]})
+            imp_TCCS_py['xp_crit']= np.where((imp_TCCS_py["py"] - miscut_TCCS < calculate_xpcrit(TCCS_name) / 2) &(imp_TCCS_py["py"] - miscut_TCCS > -calculate_xpcrit(TCCS_name) / 2), 2,
+                np.where((imp_TCCS_py["py"] - miscut_TCCS < calculate_xpcrit(TCCS_name)) &(imp_TCCS_py["py"] - miscut_TCCS> -calculate_xpcrit(TCCS_name)),1,0)).astype('int32')
+            impact_part_df = pd.merge(impact_part_df, imp_TCCS_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
+            impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn', 'TCCP_turn', 'at_element'])
 
         if output_mode == 'reduced':
             impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]
@@ -935,6 +968,13 @@ def main():
 
     if 'TCLA_impacts' in save_list:
 
+        if output_mode == 'packed':
+            df_imp = impacts.interactions_per_collimator(TCCP_name).reset_index()
+        elif output_mode == 'packed_TCCS':
+            df_imp = impacts.interactions_per_collimator(TCCS_name).reset_index()
+        else:
+            df_imp = None
+
         # SAVE IMPACTS ON TCLA
         print("... Saving impacts on TCLA\n, epsilon: ", epsilon_TCLA)
 
@@ -943,11 +983,19 @@ def main():
         jaw_L_TCLA = line.elements[idx_TCLA].jaw_LU
 
         impact_part_df = get_df_to_save(TCLA_monitor_dict, df_part,  jaw_L = jaw_L_TCLA,
-                num_particles=num_particles, num_turns=num_turns, epsilon = epsilon_TCLA)
-        
+                num_particles=num_particles, num_turns=num_turns, epsilon = epsilon_TCLA, 
+                df_imp = df_imp)
         del TCLA_monitor
         gc.collect()
 
+        if output_mode == 'packed_TCCS':
+            m_entry_TCCS =(impacts.at_element == idx_TCCS) & (impacts.interaction_type == "Enter Jaw L")
+            imp_TCCS_py  =  pd.DataFrame({'this_turn':  impacts.at_turn[m_entry_TCCS],'particle_id': impacts.id_before[m_entry_TCCS],'py': impacts.px_before[m_entry_TCCS]})
+            imp_TCCS_py['xp_crit']= np.where((imp_TCCS_py["py"] - miscut_TCCS < calculate_xpcrit(TCCS_name) / 2) &(imp_TCCS_py["py"] - miscut_TCCS > -calculate_xpcrit(TCCS_name) / 2), 2,
+                np.where((imp_TCCS_py["py"] - miscut_TCCS < calculate_xpcrit(TCCS_name)) &(imp_TCCS_py["py"] - miscut_TCCS> -calculate_xpcrit(TCCS_name)),1,0)).astype('int32')
+            impact_part_df = pd.merge(impact_part_df, imp_TCCS_py.drop(columns=['py']), on=['particle_id', 'this_turn'], how='left')
+            impact_part_df = impact_part_df.drop(columns=['zeta', 'delta', 'TCP_turn', 'TCCP_turn', 'at_element'])
+        
         if output_mode == 'reduced':
             impact_part_df = impact_part_df[['particle_id', 'x', 'px', 'y', 'py', 'this_turn']]
 

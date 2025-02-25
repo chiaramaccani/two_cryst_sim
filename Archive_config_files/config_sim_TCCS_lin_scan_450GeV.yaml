@@ -9,7 +9,7 @@ run:
 
   beam: '2'
   plane: 'V'
-  turns: 10 #10000 
+  turns: 200 #10000 
   nparticles:  10000 #50000  #100000 #1000 50000
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
@@ -27,8 +27,8 @@ run:
   TCCS_gap: 5.0 
   TARGET_gap: None
   TCCP_gap: None
-  PIXEL_gap: None
-  TFT_gap: None
+  PIXEL_gap: 5.0
+  TFT_gap: 5.0
   TCP_gap: 6.0
   TCLA_gap: 5.0 #8.0 #5.0
   
@@ -36,18 +36,18 @@ run:
   epsilon_TCCS: 0 
   epsilon_TCCP: 2.0e-3
   epsilon_TARGET: 0 
-  epsilon_PIXEL: 0.8e-3
-  epsilon_TFT: 1.4e-3
-  epsilon_TCLA: 10.0e-2 #3.32e-3 #1.5e-3
+  epsilon_PIXEL:  0 #10.0e-3
+  epsilon_TFT:  0 #10.0e-3
+  epsilon_TCLA: 0 #10.0e-3 #3.32e-3 #1.5e-3
 
-  save_list: ['TCCS_impacts', 'TCLA_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: ['TCLA_impacts' , 'TFT_impacts','PIXEL_impacts_1'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''   
   input_mode: 'circular_halo'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
-  output_mode:  '' # reduced                                   
+  output_mode:  'packed_TCCS' # reduced                                   
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_lin_scan_450GeV_HALO
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_lin_scan_450GeV_HALO_DETECTORS_NOMARGIN_
   num_jobs: 50
   angular_scan: None
   angular_scan_range_lower: 0

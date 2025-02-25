@@ -17,20 +17,21 @@ run:
   energy:  450e9 
  
   TCCS_align_angle_step:  0 
-  TCCP_align_angle_step: -6e-5 #2.2251710113544777e-05 
+  TCCP_align_angle_step:  0 #-8e-3
+  TCCP_align_angle_additional: 2.2251710113544777e-05 
   
   TCCS_potential: default # 16 default
   TCCP_potential: default # default
 
   adt_amplitude: None #0.9
   
-  TCCS_gap: 7.0 
-  TARGET_gap: None
-  TCCP_gap:  5.5 #9.4 
+  TCCS_gap: 5.0
+  TARGET_gap: None #9.5
+  TCCP_gap:  9.5
   PIXEL_gap: 5.5
-  TFT_gap: 5.0 #6.4 
+  TFT_gap: 5.5 #6.4 
   TCP_gap: 6.0
-  TCLA_gap: 35.0 #9.0
+  TCLA_gap: 9.0
 
   epsilon_TCCS: 0 
   epsilon_TCCP: 0 #5.0e-3
@@ -39,19 +40,19 @@ run:
   epsilon_TFT: 0 #0.6e-3
   epsilon_TCLA: 0
 
-  save_list: ['PIXEL_impacts_1', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: ['TCCP_impacts', 'TFT_impacts','PIXEL_impacts_1'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''           
   input_mode: 'circular_halo'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
-  output_mode: 'packed'                                     
+  output_mode: 'reduced'                                     
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_DC_TCCP7.0_450GeV_
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_DC_450GeV_TCCP_impacts_
   num_jobs: 200 
   angular_scan: None
-  angular_scan_range_lower: 0
-  angular_scan_range_upper: 0
-  angular_scan_step: 0
+  angular_scan_range_lower: -20.9e-6
+  angular_scan_range_upper: 20.9e-6
+  angular_scan_step: 2.2e-6
   run_local: False
   dryrun: False
   jobflavour: 'testmatch'  
@@ -62,4 +63,5 @@ jobsubmission:
 input_files:
   line_b2: ${HOME_TWOCRYST}/MadX/2025/injection/track_injection_b2.json
   collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_450GeV.yaml
+  #collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_450GeV_AMORPH.yaml
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/tmp.yaml
