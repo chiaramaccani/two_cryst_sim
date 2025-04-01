@@ -9,7 +9,7 @@ import numpy as np
 import inspect
 import pickle
 import sys
-
+import os
 
 optphase_analytic = 158.521582158919/360
 
@@ -23,13 +23,28 @@ def main():
 
     #path = '/afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/generate_xtrack/out/250muradXing20cmBetaNoTCLD-ORBITBUMP-TCPBETARETUNE-OFFSETAPERir7re12c6/'
     #path = '/afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/ir7_match/'
+    
     path = './lines_ref/'
-    lhc = xt.line.Line.from_json(path+"flat_top_b2_noaper.json")  #"b4_sequence_noaper.json"
+    #line_path_noaper  = path + 'flat_top_b2_noaper.json'  #b4_sequence_patched
+    line_path_noaper = os.path.expandvars(file_dict['${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2_no_aper.json'])
+
+    #line_path_aper =  path + 'flat_top_b2_w_aper.json'  #b4_sequence_patched
+    line_path_aper = os.path.expandvars(file_dict['${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2.json'])
+
+    lhc = xt.line.Line.from_json(line_path_noaper)  #"b4_sequence_noaper.json"
     #lhcs = xt.Multiline.from_json(path+'hllhc.json')
     #lhc = lhcs.lhcb2
 
+    TCCS_loc_abs  = 6773.9428  #6773.7 #6775
+    TCCP_loc_abs  = 6653.2543  #6653.3 #6655
+    PIX1_loc_abs = 6652.7039
+    PIX2_loc_abs = 6652.6929
+    PIX3_loc_abs = 6652.6819
+    TFT_loc_abs = 6652.114
+
+
     mt_cry1 = xt.Marker()
-    s_position = lhc.get_length() - 6773.7
+    s_position = lhc.get_length() - TCCS_loc_abs
     lhc.insert_element('mt_cry1',element=mt_cry1, at_s=s_position)   
     lhc.build_tracker()   
     lhc.particle_ref = xt.Particles(mass0=xp.PROTON_MASS_EV, p0c=7000e9)
@@ -241,13 +256,12 @@ def main():
 
     print('knob values: \n', knobs)
 
-    knob_file = f'./knobs_db/knobs_{deg_name}.pkl'
+    knob_file = f'./knobs_db/knobs_{deg_name}_new.pkl'
     with open(knob_file, 'wb') as f:
         pickle.dump(knobs, f)
 
 
-    line_path = './lines_ref/flat_top_b2_w_aper.json'  #b4_sequence_patched
-    line = xt.Line.from_json(line_path)
+    line = xt.Line.from_json(line_path_aper)
 
     for k, v in knobs.items():
         line.vars[k] = v

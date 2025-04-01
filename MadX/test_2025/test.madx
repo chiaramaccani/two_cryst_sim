@@ -1,0 +1,20 @@
+System,"ln -fns /afs/cern.ch/eng/acc-models/lhc/2025 run3seq";
+
+! Load a sequence file
+call,file="run3seq/lhc.seq";
+
+BEAM, PARTICLE=PROTON, ENERGY=7000;
+
+! Select the sequence you want to use (replace SEQUENCE_NAME with the actual name)
+USE, SEQUENCE=LHCB2;
+
+TWISS, SEQUENCE=LHCB2, FILE=twiss.out;
+
+! Define beam parameters (modify as needed)
+!BEAM, PARTICLE=PROTON, ENERGY=7000;
+
+! Compute and print optics
+!TWISS;
+
+! Print TWISS table to a file (optional)
+!WRITE, TABLE=TWISS, FILE="twiss_output.txt";

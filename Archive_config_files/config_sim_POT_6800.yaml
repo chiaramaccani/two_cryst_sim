@@ -10,13 +10,13 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 
-  nparticles:  10000
+  nparticles:  5000
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
   energy:  None 
  
-  TCCS_align_angle_step:  0 
+  TCCS_align_angle_step: -3.59e-06
   TCCP_align_angle_step: 0
   
   TCCS_potential: default # 16 default
@@ -32,14 +32,14 @@ run:
   TCP_gap: 5.0
   TCLA_gap: default #35.0 #9.0
 
-  epsilon_TCCS: 1.0e-3
+  epsilon_TCCS: 0.01e-3
   epsilon_TCCP: 0
   epsilon_TARGET: 0 
-  epsilon_PIXEL: 3.0e-3
-  epsilon_TFT: 3.0e-3
+  epsilon_PIXEL: 0.5e-3
+  epsilon_TFT: 0.5e-3
   epsilon_TCLA: 0
 
-  save_list: [ 'TCCS_impacts', 'PIXEL_impacts_1', 'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
+  save_list: [ 'TCCS_impacts', 'PIXEL_impacts_1',  'TFT_impacts'] #['losses', 'TCCS_impacts', 'TARGET_impacts', 'TFT_impacts','PIXEL_impacts_1', 'PIXEL_impacts_2', 'PIXEL_impacts_3', 'PIXEL_impacts_ALL',  'TCP_generated', TCLA_impacts, BLM_impacts]        
   target_mode: ''           
   input_mode: 'pencil_TCP'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
   output_mode: 'packed_TCCS' 
@@ -47,7 +47,7 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_FLATTOP_POT_reduced
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_FLATTOP_POT_test_oldREF_
   num_jobs: 200 
   angular_scan: None
   angular_scan_range_lower: 0
@@ -61,7 +61,13 @@ jobsubmission:
 
 
 input_files:
-  line_b2: ${HOME_TWOCRYST}/MadX/2025/flat_top/track_flat_top_b2.json
-  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_150_new.json'
+  #line_b2: ${HOME_TWOCRYST}/MadX/2025/flat_top/track_flat_top_b2.json        # 174.13306384643454
+  #line_b2: ${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2.json   # 174.13293239423186
+  
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/lines_ref/flat_top_b2_w_aper.json'  #174.13293239423186
+  line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_150.json'  #150.18942088341294
   collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_6.8TeV.yaml
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/tmp.yaml
+
+
+#(float(tw['muy', TCCS_name])% 1* 2*np.pi - float(tw['muy', TCP_name])% 1* 2*np.pi)
