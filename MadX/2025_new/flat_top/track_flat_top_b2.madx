@@ -44,7 +44,7 @@ if (make_thin==1){    ! Thick lattice currently does not have full aperture mode
     call, file="run3seq/aperture/aperture_as-built.b2.madx";
     call, file="run3seq/aperture/aper_tol_as-built.b2.madx";
 };
-call, file="run3opt/RunIII_dev/Proton_2025/NomH_RPV/opticsfile.20";
+call, file="run3opt/RunIII_dev/Proton_2025/NomH_RPV/opticsfile.20"; !.20";
 
 ! Phase Knob
 phase_change.b1 = 0.0;
@@ -214,9 +214,9 @@ if (make_thin==1){
 
   ! Applying aperture offsets
   if (mylhcbeam<4){
-    call,file="extra/aperoffset_elements.madx";
+    !call,file="extra/aperoffset_elements.madx";
   } else {
-    call,file="extra/aperoffset_elements_b4.madx";
+    !call,file="extra/aperoffset_elements_b4.madx";
   };
 };
 

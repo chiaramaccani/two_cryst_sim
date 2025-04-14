@@ -1,0 +1,171 @@
+%YAML 1.2
+---
+
+All:
+  - &ALL     { parking: 0.025 }
+
+families:
+  # Momentum cleaning
+  - &tcp3            { <<: *ALL,  gap: 17.7,    stage: PRIMARY }
+  - &tcsg3           { <<: *ALL,  gap: 21.3,    stage: SECONDARY }
+  - &tcsm3           { <<: *ALL,  gap: 0.0,    stage: UNKNOWN }
+  - &tcla3           { <<: *ALL,  gap: 23.7,    stage: TERTIARY }
+  # Betatron cleaning
+  - &tcp7            { <<: *ALL,  gap: 8.5,    stage: PRIMARY }
+  - &tcsg7           { <<: *ALL,  gap: 10.1,    stage: SECONDARY }
+  - &tcsm7           { <<: *ALL,  gap: 0.0,    stage: UNKNOWN }
+  - &tcla7           { <<: *ALL,  gap: 14.0,    stage: TERTIARY }
+  # Injection protection
+  - &tcli            { <<: *ALL,  gap: null,    stage: TERTIARY }
+  - &tdi             { <<: *ALL,  gap: null,    stage: TERTIARY }
+  # Dump protection
+  - &tcdq            { <<: *ALL,  gap: 11.1,    stage: TERTIARY }
+  - &tcstcdq         { <<: *ALL,  gap: 11.1,    stage: SECONDARY }
+  # Physics background / debris
+  - &tclp            { <<: *ALL,  gap: 14.2,    stage: TERTIARY }
+  - &tcxrp           { <<: *ALL,  gap: 0.0,    stage: UNKNOWN }
+  - &tcryo           { <<: *ALL,  gap: null,    stage: TERTIARY }
+  # Other families
+  - &tcth5           { <<: *ALL,  gap: 11.4,    stage: TERTIARY }
+  - &tctv8           { <<: *ALL,  gap: 17.7,    stage: TERTIARY }
+  - &tcth2           { <<: *ALL,  gap: 43.8,    stage: TERTIARY }
+  - &tcth8           { <<: *ALL,  gap: 17.7,    stage: TERTIARY }
+  - &tctv5           { <<: *ALL,  gap: 11.4,    stage: TERTIARY }
+  - &tcth1           { <<: *ALL,  gap: 11.4,    stage: TERTIARY }
+  - &tctv1           { <<: *ALL,  gap: 11.4,    stage: TERTIARY }
+  - &tctv2           { <<: *ALL,  gap: 43.8,    stage: TERTIARY }
+  # ALADDIN SETUP in IR3
+  - &TCCS3    { <<: *ALL,  gap: null,  stage: special,    material: Si,   side: left, angle: 90, crystal: strip, active: true }  #crystal: strip,
+  - &TCCP3    { <<: *ALL,  gap: null,  stage: special,    material: Si,   side: left, angle: 90, crystal: strip,  active: true }  #crystal: strip,
+  - &TARGET3  { <<: *ALL,  gap: null,  stage: special,    material: Iner, side: left, angle: 90, active: true }
+  - &PIX3     { <<: *ALL,  gap: null,  stage: special,    material: Al,  length: 0.001,   angle: 90}
+
+emittance:
+  x: 2.5e-06
+  y: 2.5e-06
+
+collimators:
+  b1:
+    tclpx.4r1.b1:   { <<: *tclp,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcl.5r1.b1:     { <<: *tclp,    material: cu,    length: 1.0,    angle: 0.0,    active: True }
+    tcl.6r1.b1:     { <<: *tclp,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctph.4l2.b1:   { <<: *tcth2,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpv.4l2.b1:   { <<: *tctv2,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tdisa.a4l2.b1:  { <<: *tdi,    material: cu,    length: 1.565,    angle: 90.0,    active: True }
+    tdisb.a4l2.b1:  { <<: *tdi,    material: cu,    length: 1.565,    angle: 90.0,    active: True }
+    tdisc.a4l2.b1:  { <<: *tdi,    material: cu,    length: 1.565,    angle: 90.0,    active: True }
+    tclia.4r2:      { <<: *tcli,    material: c,    length: 1.0,    angle: 90.0,    active: True }
+    tclib.6r2.b1:   { <<: *tcli,    material: c,    length: 1.0,    angle: 90.0,    active: True }
+    tcld.a11r2.b1:  { <<: *tcryo,    material: iner,    length: 0.6,    angle: 0.0,    active: True }
+    tcp.6l3.b1:     { <<: *tcp3,    material: c,    length: 0.6,    angle: 0.0,    active: True }
+    tcsg.5l3.b1:    { <<: *tcsg3,    material: c,    length: 1.0,    angle: 0.0,    active: True }
+    tcsg.4r3.b1:    { <<: *tcsg3,    material: c,    length: 1.0,    angle: 0.0,    active: True }
+    tcsg.a5r3.b1:   { <<: *tcsg3,    material: c,    length: 1.0,    angle: 170.799865,    active: True }
+    tcsg.b5r3.b1:   { <<: *tcsg3,    material: c,    length: 1.0,    angle: 11.4,    active: True }
+    tcla.a5r3.b1:   { <<: *tcla3,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tcla.b5r3.b1:   { <<: *tcla3,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcla.6r3.b1:    { <<: *tcla3,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcla.7r3.b1:    { <<: *tcla3,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctph.6l5.b1:   { <<: *tcth5,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpv.6l5.b1:   { <<: *tctv5,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tctpxh.4l5.b1:  { <<: *tcth5,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpxv.4l5.b1:  { <<: *tctv5,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tclpx.4r5.b1:   { <<: *tclp,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcl.5r5.b1:     { <<: *tclp,    material: cu,    length: 1.0,    angle: 0.0,    active: True }
+    tcl.6r5.b1:     { <<: *tclp,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcdqa.a4r6.b1:  { <<: *tcdq,    material: c,    length: 3.0,    angle: 0.0,    side: left,    active: True }
+    tcdqa.c4r6.b1:  { <<: *tcdq,    material: c,    length: 3.0,    angle: 0.0,    side: left,    active: True }
+    tcdqa.b4r6.b1:  { <<: *tcdq,    material: c,    length: 3.0,    angle: 0.0,    side: left,    active: True }
+    tcsp.a4r6.b1:   { <<: *tcstcdq,    material: c,    length: 1.0,    angle: 0.0,    active: True }
+    tcp.d6l7.b1:    { <<: *tcp7,    material: mogr,    length: 0.6,    angle: 90.0,    active: True }
+    tcp.c6l7.b1:    { <<: *tcp7,    material: mogr,    length: 0.6,    angle: 0.0,    active: True }
+    tcp.b6l7.b1:    { <<: *tcp7,    material: c,    length: 0.6,    angle: 126.910152,    active: True }
+    tcsg.a6l7.b1:   { <<: *tcsg7,    material: c,    length: 1.0,    angle: 141.100024,    active: True }
+    tcsg.b5l7.b1:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 143.500145,    active: True }
+    tcsg.a5l7.b1:   { <<: *tcsg7,    material: c,    length: 1.0,    angle: 40.700057,    active: True }
+    tcsg.d4l7.b1:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 90.0,    active: True }
+    tcspm.b4l7.b1:  { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 0.0,    active: True }
+    tcsg.a4l7.b1:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 134.599818,    active: True }
+    tcsg.a4r7.b1:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 46.300146,    active: True }
+    tcsg.b5r7.b1:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 141.499949,    active: True }
+    tcsg.d5r7.b1:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 51.400044,    active: True }
+    tcspm.e5r7.b1:  { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 130.499732,    active: True }
+    tcspm.6r7.b1:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 0.500192,    active: True }
+    tcla.a6r7.b1:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tcla.b6r7.b1:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcla.c6r7.b1:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tcla.d6r7.b1:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcla.a7r7.b1:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    #tcld.9r7.b1:    { <<: *tcryo,    material: iner,    length: 0.6,    angle: 0.0,    active: True }
+    tctph.4l8.b1:   { <<: *tcth8,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpv.4l8.b1:   { <<: *tctv8,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tctph.6l1.b1:   { <<: *tcth1,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpv.6l1.b1:   { <<: *tctv1,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tctpxh.4l1.b1:  { <<: *tcth1,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpxv.4l1.b1:  { <<: *tctv1,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+
+  b2:
+    tclpx.4l1.b2:   { <<: *tclp,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcl.5l1.b2:     { <<: *tclp,    material: cu,    length: 1.0,    angle: 0.0,    active: True }
+    tcl.6l1.b2:     { <<: *tclp,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctph.4r2.b2:   { <<: *tcth2,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpv.4r2.b2:   { <<: *tctv2,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tdisa.a4r8.b2:  { <<: *tdi,    material: cu,    length: 1.565,    angle: 90.0,    active: True }
+    tdisb.a4r8.b2:  { <<: *tdi,    material: cu,    length: 1.565,    angle: 90.0,    active: True }
+    tdisc.a4r8.b2:  { <<: *tdi,    material: cu,    length: 1.565,    angle: 90.0,    active: True }
+    tclia.4r2:      { <<: *tcli,    material: c,    length: 1.0,    angle: 90.0,    active: True }
+    tclib.6l8.b2:   { <<: *tcli,    material: c,    length: 1.0,    angle: 90.0,    active: True }
+    tcld.a11l2.b2:  { <<: *tcryo,    material: iner,    length: 0.6,    angle: 0.0,    active: True }
+    tcp.6r3.b2:     { <<: *tcp3,    material: c,    length: 0.6,    angle: 0.0,    active: True }
+    tcsg.5r3.b2:    { <<: *tcsg3,    material: c,    length: 1.0,    angle: 0.0,    active: True }
+    tcsg.4l3.b2:    { <<: *tcsg3,    material: c,    length: 1.0,    angle: 0.0,    active: True }
+    tcsg.a5l3.b2:   { <<: *tcsg3,    material: c,    length: 1.0,    angle: 170.799865,    active: True }
+    tcsg.b5l3.b2:   { <<: *tcsg3,    material: c,    length: 1.0,    angle: 11.4,    active: True }
+    tcla.a5l3.b2:   { <<: *tcla3,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tcla.b5l3.b2:   { <<: *tcla3,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcla.6l3.b2:    { <<: *tcla3,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcla.7l3.b2:    { <<: *tcla3,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctph.6r5.b2:   { <<: *tcth5,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpv.6r5.b2:   { <<: *tctv5,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tctpxh.4r5.b2:  { <<: *tcth5,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpxv.4r5.b2:  { <<: *tctv5,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tclpx.4l5.b2:   { <<: *tclp,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcl.5l5.b2:     { <<: *tclp,    material: cu,    length: 1.0,    angle: 0.0,    active: True }
+    tcl.6l5.b2:     { <<: *tclp,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcdqa.a4l6.b2:  { <<: *tcdq,    material: c,    length: 3.0,    angle: 0.0,    side: left,    active: True }
+    tcdqa.c4l6.b2:  { <<: *tcdq,    material: c,    length: 3.0,    angle: 0.0,    side: left,    active: True }
+    tcdqa.b4l6.b2:  { <<: *tcdq,    material: c,    length: 3.0,    angle: 0.0,    side: left,    active: True }
+    tcsp.a4l6.b2:   { <<: *tcstcdq,    material: c,    length: 1.0,    angle: 0.0,    active: True }
+    tcp.d6r7.b2:    { <<: *tcp7,    material: mogr,    length: 0.6,    angle: 90.0,    active: True }
+    tcp.c6r7.b2:    { <<: *tcp7,    material: mogr,    length: 0.6,    angle: 0.0,    active: True }
+    tcp.b6r7.b2:    { <<: *tcp7,    material: c,    length: 0.6,    angle: 126.910152,    active: True }
+    tcsg.a6r7.b2:   { <<: *tcsg7,    material: c,    length: 1.0,    angle: 141.100024,    active: True }
+    tcsg.b5r7.b2:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 143.500145,    active: True }
+    tcsg.a5r7.b2:   { <<: *tcsg7,    material: c,    length: 1.0,    angle: 40.700057,    active: True }
+    tcsg.d4r7.b2:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 90.0,    active: True }
+    tcspm.b4r7.b2:  { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 0.0,    active: True }
+    tcsg.a4r7.b2:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 134.599818,    active: True }
+    tcsg.a4l7.b2:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 46.300146,    active: True }
+    tcsg.b5l7.b2:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 141.499949,    active: True }
+    tcsg.d5l7.b2:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 51.400044,    active: True }
+    tcspm.e5l7.b2:  { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 130.499732,    active: True }
+    tcspm.6l7.b2:   { <<: *tcsg7,    material: mogr,    length: 1.0,    angle: 0.500192,    active: True }
+    tcla.a6l7.b2:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tcla.b6l7.b2:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcla.c6l7.b2:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tcla.d6l7.b2:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tcla.a7l7.b2:   { <<: *tcla7,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    #tcld.9l7.b2:    { <<: *tcryo,    material: iner,    length: 0.6,    angle: 0.0,    active: True }
+    tctph.4r8.b2:   { <<: *tcth8,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpv.4r8.b2:   { <<: *tctv8,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tctph.6r1.b2:   { <<: *tcth1,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpv.6r1.b2:   { <<: *tctv1,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+    tctpxh.4r1.b2:  { <<: *tcth1,    material: iner,    length: 1.0,    angle: 0.0,    active: True }
+    tctpxv.4r1.b2:  { <<: *tctv1,    material: iner,    length: 1.0,    angle: 90.0,    active: True }
+
+    # ALADDIN
+    tccs.5r3.b2:        { <<: *TCCS3,  gap: 5.0, length: 0.004,  bending_radius: 80.00,  width: 2.0e-3,  height: 35.0e-3}   # INVERT X Y WHEN ROTATE
+    tccp.4l3.b2:        { <<: *TCCP3,  gap: 10, length: 0.070,  angle: 90, bending_radius: 10.00,  width: 2.0e-3,  height: 9.0e-3 }    # width: 10.0e-3
+    target.4l3.b2:      { <<: *TARGET3,  gap: 10, length: 0.005,  angle: 90,  width: 2.0e-3 ,  height: 8.0e-3}   #attention to sigma position
+
+

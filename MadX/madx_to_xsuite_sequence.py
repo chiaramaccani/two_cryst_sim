@@ -15,15 +15,17 @@ import xpart as xp
 input_file  = Path(str(sys.argv[1]))
 beam        = int(sys.argv[2])
 
-output_file = input_file.parent / (input_file.stem + '_no_aper.json')
-# output_file = input_file.parent / (input_file.stem + '_defexp'  + '.json')
+suffix = "_THICK" #'_no_aper' if no_aper else ''
+
+output_file = input_file.parent / (input_file.stem + suffix + '.json')
+
 
 mad = Madx()
 mad.call(input_file.as_posix())
 sequence = 'lhcb1' if beam==1 else 'lhcb2'
 
-#line = xt.Line.from_madx_sequence(mad.sequence[sequence], apply_madx_errors=True, install_apertures=True, deferred_expressions=True)
-line = xt.Line.from_madx_sequence(mad.sequence[sequence], apply_madx_errors=False, install_apertures=False, deferred_expressions=True)
+line = xt.Line.from_madx_sequence(mad.sequence[sequence], apply_madx_errors=True, install_apertures=True, deferred_expressions=True)
+#line = xt.Line.from_madx_sequence(mad.sequence[sequence], apply_madx_errors=False, install_apertures=False, deferred_expressions=True)
 print(f"Imported {len(line.element_names)} elements.")
 line.particle_ref = xp.Particles(mass0=xp.PROTON_MASS_EV, gamma0=mad.sequence[sequence].beam.gamma)
 

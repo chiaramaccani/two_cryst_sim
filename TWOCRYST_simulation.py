@@ -221,8 +221,8 @@ def main():
     RPX_bottom_wall_thickess = 2.14e-3
     PIX_y_distance_to_RPX = 4.26e-3
 
-    TCCS_loc_abs  = 6773.9428  #6773.7 #6775
-    TCCP_loc_abs  = 6653.2543  #6653.3 #6655
+    TCCS_loc_abs  = 6773.9002 #6773.9428  #6773.7 #6775
+    TCCP_loc_abs  =  6653.25   #6653.2543  #6653.3 #6655
     PIX1_loc_abs = 6652.7039
     PIX2_loc_abs = 6652.6929
     PIX3_loc_abs = 6652.6819
@@ -318,23 +318,37 @@ def main():
     # ---------------------------- SETUP COLLIMATORS ----------------------------
     # Set the collimator gaps
     print('\n---- Collimator gaps alignment ----')
-    line[TCCS_name].gap = gaps['TCCS_gap']
-    print('TCCS gap set to: ', line[TCCS_name].gap)
-    line[TCCP_name].gap = gaps['TCCP_gap']
-    print('TCCP gap set to: ', line[TCCP_name].gap) 
-    line[TARGET_name].gap = gaps['TARGET_gap']
-    print('TARGET gap set to: ', line[TARGET_name].gap)
-    line[TCP_name].gap = gaps['TCP_gap']
-    print('TCP', TCP_name, 'gap set to: ', line[TCP_name].gap, ':', line[TCP_name].gap_L, line[TCP_name].gap_R)
-    for pix_idx in ['_1', '_2', '_3']:
-        line[PIXEL_name + pix_idx].gap = gaps['PIXEL_gap']
-        print(PIXEL_name + pix_idx, 'gap set to: ', line[PIXEL_name + pix_idx].gap)
+    if 'TCCS_gap' in gaps.keys():
+        line[TCCS_name].gap = gaps['TCCS_gap']
+        print('TCCS gap set to: ', line[TCCS_name].gap)
+    else:
+        gaps['TCCS_gap'] = line[TCCS_name].gap
+    if 'TCCP_gap' in gaps.keys():
+        line[TCCP_name].gap = gaps['TCCP_gap']
+        print('TCCP gap set to: ', line[TCCP_name].gap) 
+    else:
+        gaps['TCCP_gap'] = line[TCCP_name].gap
+    if 'TARGET_gap' in gaps.keys():
+        line[TARGET_name].gap = gaps['TARGET_gap']
+        print('TARGET gap set to: ', line[TARGET_name].gap)
+    else:
+        gaps['TARGET_gap'] = line[TARGET_name].gap  
+    if 'TCP_gap' in gaps.keys():
+        line[TCP_name].gap = gaps['TCP_gap']
+        print('TCP', TCP_name, 'gap set to: ', line[TCP_name].gap, ':', line[TCP_name].gap_L, line[TCP_name].gap_R)
+    else:
+        gaps['TCP_gap'] = line[TCP_name].gap_L
+    if 'PIXEL_gap' in gaps.keys():
+        for pix_idx in ['_1', '_2', '_3']:
+            line[PIXEL_name + pix_idx].gap = gaps['PIXEL_gap']
+            print(PIXEL_name + pix_idx, 'gap set to: ', line[PIXEL_name + pix_idx].gap)
+    else:
+        gaps['PIXEL_gap'] = line[PIXEL_name + '_1'].gap
     if 'TCLA_gap' in gaps.keys():
         line[TCLA_name].gap = gaps['TCLA_gap']
         print('TCLA gap set to: ', line[TCLA_name].gap)
-    if 'TCT_gap' in gaps.keys():
-        line['tctpv.4r5.b2'].gap = gaps['TCT_gap']
-        print('TCT gap set to: ', line['tctpv.4r5.b2'].gap)
+    else:
+        gaps['TCLA_gap'] = line[TCLA_name].gap
 
     print('\n---- Crystal alignment ----')
     if 'miscut' in  coll_dict[TCCS_name].keys():

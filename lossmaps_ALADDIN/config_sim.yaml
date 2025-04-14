@@ -1,0 +1,68 @@
+%YAML 1.2
+---
+
+run: 
+
+  engine: 'everest'
+  seed: 1
+  fixed_seed: True
+
+  beam: '2'
+  plane: 'V' # DPpos DPneg H V
+  turns: 200 
+  nparticles: 10000 #500 #10000  #100000 #1000 50000
+  normalized_emittance: 2.5e-6  
+  turn_on_cavities: True 
+
+  adt_amplitude: None
+  
+  energy:  None # 450e9 1000e9 3000e9 5000e9 6800e9 None
+
+  TCCS_potential: 'default'
+  TCCP_potential: 'default'
+
+  TCCS_align_angle_step:  0 
+  TCCP_align_angle_step: 2.2251710113544777e-05 
+  
+  
+  TCCS_gap: default
+  TARGET_gap: None
+  TCCP_gap: 9.4 
+  PIXEL_gap: 5.5
+  TFT_gap: 6.4 
+  TCP_gap: default
+  TCLA_gap: default
+
+
+  save_list: ['losses'] 
+  target_mode: ''   
+  input_mode: 'pencil_TCP'  # load  pencil_TCCS  pencil_TCP circular_halo gaussian_halo
+  output_mode:  '' # reduced      
+
+  epsilon_TCCS: 0
+  epsilon_TCCP: 3.0e-3
+  epsilon_TARGET: 0 
+  epsilon_PIXEL: 0 
+  epsilon_TFT: 0.6e-3
+  epsilon_TCLA: 3.5e-3                               
+
+  
+jobsubmission:
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_TCCS_lin_scan_450GeV
+  num_jobs: 200
+  angular_scan: None
+  angular_scan_range_lower: 0
+  angular_scan_range_upper: 0
+  angular_scan_step: 0  
+  run_local: False
+  dryrun: False
+  jobflavour: 'workday' #'espresso' testmatch
+  htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '10240M'}  
+  mask: ${HOME_TWOCRYST}/mask_condor_script.sh
+
+
+input_files:
+  line_b1: ${HOME_TWOCRYST}/lossmaps_ALADDIN/opt_round_150_1500_optphases_b1_patched.json
+  line_b2: ${HOME_TWOCRYST}/lossmaps_ALADDIN/opt_round_150_1500_optphases_b2_patched.json
+  #collimators: ${HOME_TWOCRYST}/lossmaps_ALADDIN/HL_relaxed.yaml  
+  collimators: ${HOME_TWOCRYST}/lossmaps_ALADDIN/HL_relaxed_ALADDIN.yaml  

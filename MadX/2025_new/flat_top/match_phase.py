@@ -21,12 +21,8 @@ def main():
 
     print(f'phase to achieve: {optphase_deg} deg')
 
-    #path = '/afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/generate_xtrack/out/250muradXing20cmBetaNoTCLD-ORBITBUMP-TCPBETARETUNE-OFFSETAPERir7re12c6/'
-    #path = '/afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/ir7_match/'
-    
-    #path = './lines_ref/'
-    line_path_noaper  =  os.path.expandvars('${HOME_TWOCRYST}/input_files/Run3_phase_scan/lines_ref/flat_top_b2_noaper.json') #path + 'flat_top_b2_noaper.json'  #b4_sequence_patched
-    #line_path_noaper = os.path.expandvars('${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2_no_aper.json')
+    #line_path_noaper  =  os.path.expandvars('${HOME_TWOCRYST}/input_files/Run3_phase_scan/lines_ref/flat_top_b2_noaper.json') #path + 'flat_top_b2_noaper.json'  #b4_sequence_patched
+    line_path_noaper = os.path.expandvars('${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2_no_aper_THICK.json')
 
     #line_path_aper =  path + 'flat_top_b2_w_aper.json'  #b4_sequence_patched
     line_path_aper = os.path.expandvars('${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2.json')
@@ -34,8 +30,7 @@ def main():
     print('Loading line.....  ', line_path_noaper)
 
     lhc = xt.line.Line.from_json(line_path_noaper)  #"b4_sequence_noaper.json"
-    #lhcs = xt.Multiline.from_json(path+'hllhc.json')
-    #lhc = lhcs.lhcb2
+
 
     TCCS_loc_abs  = 6773.9428  #6773.7 #6775
     TCCP_loc_abs  = 6653.2543  #6653.3 #6655
@@ -49,7 +44,7 @@ def main():
     s_position = lhc.get_length() - TCCS_loc_abs
     lhc.insert_element('mt_cry1',element=mt_cry1, at_s=s_position)   
     lhc.build_tracker()   
-    lhc.particle_ref = xt.Particles(mass0=xp.PROTON_MASS_EV, p0c=7000e9)
+    lhc.particle_ref = xt.Particles(mass0=xp.PROTON_MASS_EV, p0c=6800e9)
     lhc.twiss_default['method'] = '4d' 
 
     ##### helper functions
@@ -208,14 +203,14 @@ def main():
                     #ele_stop=('mt_cry1'),
                     method='4d', # <- passed to twiss
                     vary=[
-                        #xt.VaryList(['kqtf.b2', 'kqtd.b2'], step=1e-8, tag='quad'),                        # we don't want to change the tune 
-                        #xt.VaryList(['ksf.b2', 'ksd.b2'], step=1e-4, limits=[-0.1, 0.1], tag='sext'),      # we don't want to change the chroma    
+                        xt.VaryList(['kqtf', 'kqtd'], step=1e-8, tag='quad'),                        # we don't want to change the tune 
+                        xt.VaryList(['ksf', 'ksd'], step=1e-4,  tag='sext'),      # we don't want to change the chroma    limits=[-0.1, 0.1],
                         xt.VaryList(list(strDictIR2.keys()), tag='ir2'), 
                         xt.VaryList(list(strDictIR4.keys()), tag='ir4')
                     ],
                     targets = [
-                        #xt.TargetSet(qx=62.313, qy=60.318, tol=1e-6, tag='tune'),                          # we don't want to change the tune 
-                        #xt.TargetSet(dqx=10.0, dqy=12.0, tol=0.01, tag='chrom'),                           # we don't want to change the chroma 
+                        xt.TargetSet(qx=62.28, qy=60.31, tol=1e-6, tag='tune'),                          # we don't want to change the tune 
+                        xt.TargetSet(dqx=10.0, dqy=10.0, tol=0.01, tag='chrom'),                           # we don't want to change the chroma 
                         #xt.Target(action=act_pa2, tar='muy_mod', value=optphase, tol=1e-3, tag='ph'),
                         FractionalPhase('muy', optphase, tol=1e-3, end='mt_cry1', start='tcp.d6r7.b2', tag='ph'),
                         #FractionalPhase('muy', optphase, tol=1e-3, at_1='mt_cry1', at_0='tcp.d6r7.b2', tag='ph'),
@@ -236,6 +231,10 @@ def main():
     opt.disable_vary(tag='ir4')
     doMatch(opt)
 
+    opt.disable_targets(tag='tune')
+    opt.disable_targets(tag='chrom')
+    opt.disable_vary(tag='quad')
+    opt.disable_vary(tag='sext')
     opt.enable_targets(tag='ph')
     opt.enable_targets(tag='ir2')
     opt.enable_targets(tag='ir4')
@@ -243,7 +242,7 @@ def main():
     opt.enable_vary(tag='ir4')
 
     doMatch(opt)
-    #doMatch(opt)
+    doMatch(opt)
 
 
 
@@ -258,7 +257,7 @@ def main():
 
     print('knob values: \n', knobs)
 
-    knob_file = f'./knobs_db/knobs_{deg_name}_new.pkl'
+    knob_file = f'./knobs_db/knobs_{deg_name}_new_test.pkl'
     with open(knob_file, 'wb') as f:
         pickle.dump(knobs, f)
 
@@ -271,7 +270,7 @@ def main():
 
     # ----------------------- Save line with knobs -----------------------
     print('\n----------------------------------------------------------------------')
-    new_line_name = f'flat_top_b2_phadv_{deg_name}_new.json'
+    new_line_name = f'flat_top_b2_phadv_{deg_name}_new_test.json'
     line.to_json(new_line_name)
 
 
@@ -310,6 +309,10 @@ def main():
 
     print(f"Phase adv to achieve:{optphase},\t  Phase adv set: {(df0['muy'].iloc[1] - df0['muy'].iloc[0])%1}")
     print(f"Phase adv: { (float(tw['muy', TCCS_name])% 1* 2*np.pi - float(tw['muy', TCP_name])% 1* 2*np.pi)*180/np.pi}")
+
+    print(f"Tune: {tw['qx']}, {tw['qy']}")
+    print(f"Chrom: {tw['dqx']}, {tw['dqy']}")
+
 
 
 

@@ -42,12 +42,12 @@
 @ SYNCH_5          %le                   0
 @ SYNCH_6          %le                   0
 @ SYNCH_8          %le                   0
-@ DQMIN            %le     4.720847292e-08
-@ DQMIN_PHASE      %le        0.9296471525
+@ DQMIN            %le     2.309085124e-07
+@ DQMIN_PHASE      %le         2.581906205
 @ TITLE            %08s "no-title"
-@ ORIGIN           %16s "5.08.01 Linux 64"
-@ DATE             %08s "27/02/25"
-@ TIME             %08s "17.09.25"
+@ ORIGIN           %16s "5.09.03 Linux 64"
+@ DATE             %08s "04/04/25"
+@ TIME             %08s "11.48.05"
 * NAME                                S                  L               BETX               BETY               ALFX               ALFY                MUX                MUY                  X                  Y                 PX                 PY                 DX                 DY                DPX                DPY 
 $ %s                                %le                %le                %le                %le                %le                %le                %le                %le                %le                %le                %le                %le                %le                %le                %le                %le 
  "TAS.1L1"                       19.979                  0        47.34947636        47.27098865       -1.815289085       -1.815733634       0.1694013394       0.1699345719    -0.002000187173     0.003396465802   -9.070400633e-09    0.0001700001298      0.01666572327      0.01147722295    0.0006295750005     0.001436428283

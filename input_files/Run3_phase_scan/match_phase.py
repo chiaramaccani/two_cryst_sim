@@ -21,17 +21,9 @@ def main():
 
     print(f'phase to achieve: {optphase_deg} deg')
 
-    #path = '/afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/generate_xtrack/out/250muradXing20cmBetaNoTCLD-ORBITBUMP-TCPBETARETUNE-OFFSETAPERir7re12c6/'
-    #path = '/afs/cern.ch/work/b/bjlindst/public/git/madx/hllhc/ir7_match/'
-    
     path = './lines_ref/'
-    #line_path_noaper  = path + 'flat_top_b2_noaper.json'  #b4_sequence_patched
-    line_path_noaper = os.path.expandvars(file_dict['${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2_no_aper.json'])
-
-    #line_path_aper =  path + 'flat_top_b2_w_aper.json'  #b4_sequence_patched
-    line_path_aper = os.path.expandvars(file_dict['${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2.json'])
-
-    lhc = xt.line.Line.from_json(line_path_noaper)  #"b4_sequence_noaper.json"
+ 
+    lhc = xt.line.Line.from_json(path+"flat_top_b2_noaper.json")  #"b4_sequence_noaper.json"
     #lhcs = xt.Multiline.from_json(path+'hllhc.json')
     #lhc = lhcs.lhcb2
 
@@ -221,7 +213,8 @@ def main():
                         xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='ip2', tag='ip2'),
                         #xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.r4.b2', tag='ir4'),
                         xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.l2.b2', tag='ir2'),
-                        #xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.r2.b2', tag='ir2')  
+                        #xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at='s.ds.r2.b2', tag='ir2')
+                        xt.Target('betx',value=0.01,at='ip5', tag='ip5'),
                     ]                                             
     )
     opt.assert_within_tol=False
@@ -234,7 +227,7 @@ def main():
     opt.disable_vary(tag='ir4')
     doMatch(opt)
 
-    opt.enable_targets(tag='ph')
+    #opt.enable_targets(tag='ph')
     opt.enable_targets(tag='ir2')
     opt.enable_targets(tag='ir4')
     opt.enable_vary(tag='ir2')
@@ -261,7 +254,7 @@ def main():
         pickle.dump(knobs, f)
 
 
-    line = xt.Line.from_json(line_path_aper)
+    line = xt.Line.from_json('./lines_ref/flat_top_w_aper.json')
 
     for k, v in knobs.items():
         line.vars[k] = v
@@ -269,7 +262,7 @@ def main():
 
     # ----------------------- Save line with knobs -----------------------
     print('\n----------------------------------------------------------------------')
-    new_line_name = f'flat_top_b2_phadv_{deg_name}_new.json'
+    new_line_name = f'flat_top_b2_phadv_{deg_name}_new2.json'
     line.to_json(new_line_name)
 
 
@@ -288,9 +281,9 @@ def main():
     TCLA_name = 'tcla.a5l3.b2'
     TCP_name = 'tcp.d6r7.b2'
 
-    TCCS_loc = end_s - 6773.7 #6775
-    TCCP_loc = end_s - 6653.3 #6655
-    TARGET_loc = end_s - (6653.3 +  0.070/2 + 0.005/2)
+    TCCS_loc = end_s - TCCS_loc_abs #6773.7
+    TCCP_loc = end_s - TCCP_loc_abs #6653.3
+    TARGET_loc = end_s - (TCCP_loc_abs +  0.070/2 + 0.005/2)
     TCLA_loc = new_line.get_s_position()[new_line.element_names.index(TCLA_name)]
 
 

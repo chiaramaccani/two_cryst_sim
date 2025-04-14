@@ -10,7 +10,7 @@ run:
   beam: '2'
   plane: 'V'
   turns: 200 
-  nparticles:  5000
+  nparticles:  50000
   normalized_emittance: 3.5e-6  
   turn_on_cavities: False 
 
@@ -47,7 +47,7 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_FLATTOP_POT_test_oldREF_
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_FLATTOP_POT_test_2025_PH_150_
   num_jobs: 200 
   angular_scan: None
   angular_scan_range_lower: 0
@@ -62,10 +62,11 @@ jobsubmission:
 
 input_files:
   #line_b2: ${HOME_TWOCRYST}/MadX/2025/flat_top/track_flat_top_b2.json        # 174.13306384643454
-  #line_b2: ${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2.json   # 174.13293239423186
+  line_b2: ${HOME_TWOCRYST}/MadX/2025_new/flat_top/track_flat_top_b2.json   # 174.13293239423186
+  line_b2: ${HOME_TWOCRYST}/MadX/2025_new/flat_top/flat_top_b2_phadv_150_new.json  # 149.74394301854497
   
   #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/lines_ref/flat_top_b2_w_aper.json'  #174.13293239423186
-  line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_150.json'  #150.18942088341294
+  #line_b2: '${HOME_TWOCRYST}/input_files/Run3_phase_scan/flat_top_b2_phadv_150.json'  #150.18942088341294
   collimators: ${HOME_TWOCRYST}/input_files/colldbs/TWOCRYST_colldb_6.8TeV.yaml
   #collimators: ${HOME_TWOCRYST}/input_files/colldbs/tmp.yaml
 
