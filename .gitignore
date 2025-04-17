@@ -213,6 +213,7 @@ xcoll_vers_test/sixtrack_files
 Outputdata/lossmap*.json
 Outputdata/*.out
 Outputdata/*.root
+Outputdata/*.h5
 GR_sim/Outputdata/*
 not_git/
 DC_data/Outputdata/*

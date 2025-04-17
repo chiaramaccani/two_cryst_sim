@@ -29,15 +29,15 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/MD_1000GeV_ANG_SCAN_HALO_
+  working_directory: ${HOME_TWOCRYST}/Condor/MD_1000GeV_ANG_SCAN_v06_NOTRANS_
   num_jobs: 100 # 100  
   angular_scan: 'CRY'
-  angular_scan_range_lower: -24.2e-6 #-81.4e-6
-  angular_scan_range_upper: 31.9e-6
+  angular_scan_range_lower: -81.4e-6
+  angular_scan_range_upper: 39.6e-6 
   angular_scan_step: 2.2e-6
   run_local: False
   dryrun: False
-  jobflavour: 'longlunch'  #'workday' #'espresso' testmatch
+  jobflavour: 'microcentury'  #'workday' #'espresso' testmatch
   htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"', 'request_memory': '10240M'}  # 10240M 5120M
   mask: ${HOME_TWOCRYST}/MD_Energy_Ramp/mask_condor_MD.sh
 
