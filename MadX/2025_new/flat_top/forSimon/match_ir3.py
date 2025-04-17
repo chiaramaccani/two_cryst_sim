@@ -139,8 +139,7 @@ def main():
                         xt.VaryList(knobs_lss4_l, step=1e-6, tag='quad'),                                  
                     ],
                     targets = [
-                        #xt.TargetSet(qx=62.28, qy=60.31, tol=1e-6, tag='tune'),                         
-                                
+                        xt.TargetSet(qx=62.28, qy=60.31, tol=1e-6, tag='tune'),       # TRY WITH TUNE                     
                         xt.TargetRelPhaseAdvance('muy', new_tcp_cry_phase, tol=1e-3, end = TCCS_name, start = TCP_name, tag='ph_tcp_cry'),
                         xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at=MQTLI_l4, tag='MQTLI_l4'),
                         xt.TargetSet(['alfx','alfy','betx','bety','dx','dpx'],value=tw,at=MQTLI_r2, tag='MQTLI_r2'),
