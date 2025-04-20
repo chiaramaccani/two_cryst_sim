@@ -218,4 +218,4 @@ GR_sim/Outputdata/*
 not_git/
 DC_data/Outputdata/*
 
-*.root
+TFT/tmp_gnams/*
