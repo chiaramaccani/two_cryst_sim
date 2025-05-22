@@ -537,14 +537,19 @@ def main():
 
     elif input_mode == 'circular_halo':
         print("\n... Generating 2D uniform circular sector\n")
+        if 'adt_limits' in run_dict.keys():
+            adt_limits = run_dict['adt_limits']
+        else:
+            adt_limits = [0.003,0.002]
         ip1_idx = line.element_names.index('ip1')
         at_s = line.get_s_position(ip1_idx)
-        gap = 5 
+        gap = 5  
+        print('adt_limits: ', adt_limits, 'gap: ', gap)
         # Vertical plane: generate cut halo distribution
         (y_in_sigmas, py_in_sigmas, r_points, theta_points
             )= xp.generate_2D_uniform_circular_sector(
                                                 num_particles=num_particles,
-                                                r_range=(gap - 0.003, gap+0.002), # sigmas
+                                                r_range=(gap - adt_limits[0], gap+adt_limits[1]), # sigmas  r_range=(gap - 0.003, gap+0.002)
                                                 )
 
         x_in_sigmas, px_in_sigmas = xp.generate_2D_gaussian(num_particles)
