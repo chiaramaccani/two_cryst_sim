@@ -17,7 +17,7 @@ run:
   energy:  450e9 
  
   TCCS_align_angle_step:  0 
-  TCCP_align_angle_step:   0 #-8.0e-3
+  TCCP_align_angle_step:   0 
   TCCP_align_angle_additional: 2.2251710113544777e-05 
   
   TCCS_potential: default # 16 default
@@ -55,7 +55,7 @@ jobsubmission:
   angular_scan_step: 2.2e-6
   run_local: False
   dryrun: False
-  jobflavour: 'testmatch'  
+  jobflavour: 'longlunch'  
   htc_arguments: {'accounting_group': 'group_u_BE.ABP.normal', 'notification': 'never', 'MY.WantOS': '"el9"'}  # 10240M 5120M , 'request_memory': '10240M'
   mask: ${HOME_TWOCRYST}/mask_condor_script.sh
 

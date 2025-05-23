@@ -1700,6 +1700,167 @@ def plot_angular_scan(data_dict, cry_name = 'TCCP', normalize = False, figsize=(
     ax2.plot(data_dict.keys(), norm_abs, alpha=0.0, color='k')
     return fig, ax, ax2
 
+def plot_rectangle( ax, x_low, x_up, y_low, y_up, zorder = 100, linewidth = 1, edgecolor = 'r', facecolor='none', alpha=1):
+    rect = matplotlib.patches.Rectangle((x_low, y_low), x_up - x_low, y_up - y_low, edgecolor=edgecolor, facecolor=facecolor, alpha = alpha, zorder=zorder, linewidth=linewidth)
+    ax.add_patch(rect)
+    
+RPX_bottom_wall_thickess = 2.14e-3
+
+def get_pentagonal(y_lim = 0.003):
+    angles = [180-135, 90, 90, 90,135] 
+    side_lengths = [31.1e-3, 10e-3, 32e-3, 32e-3, 10e-3]  
+    angles = np.radians(angles)
+
+    ALFA_x = [0]
+    ALFA_y = [0]
+    for i in range(len(side_lengths)):
+        angle_sum = np.sum(angles[:i])
+        ALFA_x.append(ALFA_x[-1] + side_lengths[i] * np.cos(angle_sum))
+        ALFA_y.append(ALFA_y[-1] + side_lengths[i] * np.sin(angle_sum))
+    # Close the pentagon by appending the first vertex at the end
+    ALFA_x.append(ALFA_x[0])
+    ALFA_y.append(ALFA_y[0])
+
+    # Center in x an apply vertical offset
+    ALFA_x = [i -side_lengths[0]/2 for i in ALFA_x]
+    ALFA_y = [i + y_lim for i in ALFA_y]
+
+    return np.array(ALFA_x), np.array(ALFA_y)
+
+def get_intersections(jaw_L, ALFA_x, ALFA_y, y_horizontal = None, RPX_bottom_wall_thickess = 2.14e-3):
+
+    y_horizontal = jaw_L + RPX_bottom_wall_thickess if y_horizontal is None else y_horizontal
+
+    pentagon = []
+    for i, j in zip(ALFA_x, ALFA_y):
+        pentagon.append([i, j])
+
+    intersections = []
+   
+    # Function to find the intersection between a horizontal line and a line segment
+    def find_intersection(p1, p2, y_horizontal):
+        x1, y1 = p1
+        x2, y2 = p2
+        
+        # Check if the line segment intersects the horizontal line
+        if (y1 - y_horizontal) * (y2 - y_horizontal) <= 0:
+            # Calculate the intersection point
+            if y1 != y2:
+                x_intersect = x1 + (x2 - x1) * (y_horizontal - y1) / (y2 - y1)
+                return (x_intersect, y_horizontal)
+        return None
+
+    for i in range(len(pentagon)):
+        p1 = pentagon[i]
+        p2 = pentagon[(i + 1) % len(pentagon)]
+        intersection = find_intersection(p1, p2, y_horizontal)
+        if intersection:
+            intersections.append(intersection)
+
+    return intersections
+
+def check_bins_2D(ax):
+    image =  ax.collections[0]  # The QuadMesh object
+    x_edges = image._coordinates[0]  # Bin edges along X-axis
+    y_edges = image._coordinates[1]  # Bin edges along Y-axis
+
+    # Compute bin widths
+    retrieved_bin_width_x = x_edges[1] - x_edges[0]
+    retrieved_bin_width_y = y_edges[1] - y_edges[0]
+
+    # Print results
+
+    print(f"Retrieved bin width (X): {retrieved_bin_width_x}")
+    print(f"Retrieved bin width (Y): {retrieved_bin_width_y}")
+
+
+
+def get_TFT_array(df_TFT, show_plot = True):
+    x = df_TFT["x"]
+    y = df_TFT["y"]
+    jaw_L = 5.5 *0.0014479740312245593 #+ RPX_bottom_wall_thickess 
+    abs_y_low = jaw_L #+ 500e-6
+
+    fig, ax = plt.subplots(figsize=(23/2, 35/4))
+    vmax, vmin = None, None
+    ALFA_x, ALFA_y = get_pentagonal(y_lim= jaw_L + 0.003)
+    ax.plot(ALFA_x, ALFA_y, color='r', lw=2)
+    xlim = [-0.023, 0.023] #[min(np.min(ALFA_x) - 1e-3, min(x)), max(np.max(ALFA_x) + 1e-3, max(x))]
+    ylim = [jaw_L, jaw_L+0.035]#[min(jaw_L, min(y)), max(np.max(ALFA_y) + 1e-3, max(y))]
+
+    ax.set_xlabel("x [mm]", fontsize=14)
+    ax.set_ylabel("y [mm]", fontsize=14)
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.grid(linestyle=":")
+
+    alfa_resolution = 30e-6
+    bins_x = 1500 #round((xlim[1] - xlim[0]) / alfa_resolution)
+    bins_y = 1500 #round((ylim[1] - ylim[0]) / alfa_resolution)
+
+    cmap = plt.cm.viridis.copy()
+    cmap.set_under('white')
+    norm = matplotlib.colors.LogNorm(vmin=vmin, vmax=vmax) 
+    h_TFT = ax.hist2d(x, y, norm=norm, bins=[bins_x, bins_y], range=[xlim, ylim], cmap=cmap)
+    check_bins_2D(ax)
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
+    return h_TFT
+
+def get_PIX_array(df_PIX, show_plot=True):
+    x_df = df_PIX["x"]
+    y_df = df_PIX["y"]
+    PIX_y_distance_to_RPX = 0.00314
+    ydim=0.01408
+    xdim=0.04224
+    f = 500
+    fig, ax = plt.subplots(figsize=(xdim*f, ydim*f))
+    jaw_L = 5.5*0.0014479740312245593
+    abs_y_low = jaw_L
+    abs_y_up = jaw_L + ydim
+    abs_x_low = -xdim/2
+    abs_x_up = xdim/2
+    abs_y_up = abs_y_up #+ PIX_y_distance_to_RPX
+    abs_y_low = abs_y_low #+ PIX_y_distance_to_RPX
+    vmax, vmin = None, None
+    plot_rectangle(ax, abs_x_low, abs_x_low + xdim/3, abs_y_low, abs_y_up)
+    plot_rectangle(ax, abs_x_low + xdim/3, abs_x_low + xdim/3*2, abs_y_low, abs_y_up)
+    plot_rectangle(ax, abs_x_low + xdim/3*2, abs_x_up, abs_y_low, abs_y_up)
+    xlim = [-xdim/2, xdim/2] #[min(np.min(ALFA_x) - 1e-3, min(x)), max(np.max(ALFA_x) + 1e-3, max(x))]
+    ylim = [jaw_L, jaw_L + ydim]#[min(jaw_L, min(y)), max(np.max(ALFA_y) + 1e-3, max(y))]
+    x = x_df[(x_df > abs_x_low) & (x_df < abs_x_up) & (y_df > abs_y_low) & (y_df < abs_y_up)]
+    y = y_df[(x_df > abs_x_low) & (x_df < abs_x_up) &(y_df > abs_y_low) & (y_df < abs_y_up)]
+
+    ax.set_xlabel("x [mm]", fontsize=14)
+    ax.set_ylabel("y [mm]", fontsize=14)
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.grid(linestyle=":")
+
+    bins_x = 768 #round((xlim[1] - xlim[0]) / alfa_resolution)
+    bins_y = 256 #round((ylim[1] - ylim[0]) / alfa_resolution)
+
+    cmap = plt.cm.viridis.copy()
+    cmap.set_under('white')
+    norm = matplotlib.colors.LogNorm(vmin=vmin, vmax=vmax) 
+    h_PIX = ax.hist2d(x, y, norm=norm, bins=[bins_x, bins_y], range=[xlim, ylim], cmap=cmap)
+
+    ax.set_xlim(xlim[0]-1e-3, xlim[1]+1e-3)
+    ax.set_ylim(ylim[0]-1e-3, ylim[1]+1e-3)
+    check_bins_2D(ax)
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
+    return h_PIX
+
+
+
+
+
+
+# -------------------------------------------------------------------------------------------------------------------
+
 
 def main():
 
@@ -1719,40 +1880,103 @@ def main():
     print(folder_list)
     i = 0
 
+    text_suffix = ""
     absorbed = {}
+    output_hdf_path = f"./DoubleChanneling_450GeV_ANGSCAN_{text_suffix}.h5"
 
-    for folder in folder_list:
-        ang_dict = {}
-        ang = float(folder.split('__2025')[0].split('_')[-1])
-        print('Loading ', ang)
-       
-        PIX =  TargetAnalysis(n_sigma=5.5, target_type = 'pixel', ydim=0.01408, xdim=0.04224,sigma=0.0014479740312245593)
-        TFT = TargetAnalysis(n_sigma=5.5, target_type='alfa', ydim=0.0297, xdim=0.04525,sigma=0.001457145205173178)
-        PIX.load_particles(folder,'PIXEL_impacts_1', part_per_job=10000) #  n_return=1
-        TFT.load_particles(folder,'TFT_impacts', part_per_job=10000) #  n_return=1
-
-        print("TCCS absorbed: ", TFT.n_TCCS_absorbed, PIX.n_TCCS_absorbed)
-        print("TCCP absorbed: ", TFT.n_TCCP_absorbed, PIX.n_TCCP_absorbed)
-        ang_dict['TCCS_abs'] = TFT.n_TCCS_absorbed
-        ang_dict['TCCP_abs'] = TFT.n_TCCP_absorbed
+    with pd.HDFStore(output_hdf_path, mode='w', complevel=9, complib='blosc') as store:
+        for folder in folder_list:
+            ang_dict = {}
+            ang = float(folder.split('__2025')[0].split('_')[-1])
+            print('\n\nLoading ', ang)
         
-        TCLA_abs_PIX = len(PIX.data[PIX.data["at_element"] == "tcla.a5l3.b2"])
-        TCLA_abs_TFT = len(TFT.data[TFT.data["at_element"] == "tcla.a5l3.b2"])
-        print("TCLA absorbed: ", TCLA_abs_PIX, TCLA_abs_TFT)
-        ang_dict['TCLA_abs'] = max(TCLA_abs_PIX, TCLA_abs_TFT)
-        
-        print("TCCS angle: ", TFT.TCCS_align_angle, PIX.TCCS_align_angle)
-        print("TCCP angle: ", TFT.TCCP_align_angle, PIX.TCCP_align_angle)
-        ang_dict['TCCP_angle'] = TFT.TCCP_align_angle
+            
+            PIX =  TargetAnalysis(n_sigma=5.5, target_type = 'pixel', ydim=0.01408, xdim=0.04224,sigma=0.0014479740312245593)
+            TFT = TargetAnalysis(n_sigma=5.5, target_type='alfa', ydim=0.0297, xdim=0.04525,sigma=0.001457145205173178)
+            PIX.load_particles(folder,'PIXEL_impacts_1', part_per_job=10000, n_return=1) #  n_return=1
+            TFT.load_particles(folder,'TFT_impacts', part_per_job=10000, n_return=1) #  n_return=1
 
-        absorbed[ang] = ang_dict
+            print("\nGetting absorbed data: ")
+            print("TCCS absorbed: ", TFT.n_TCCS_absorbed, PIX.n_TCCS_absorbed)
+            print("TCCP absorbed: ", TFT.n_TCCP_absorbed, PIX.n_TCCP_absorbed)
+            ang_dict['TCCS_abs'] = TFT.n_TCCS_absorbed
+            ang_dict['TCCP_abs'] = TFT.n_TCCP_absorbed
+            
+            TCLA_abs_PIX = len(PIX.data[PIX.data["at_element"] == "tcla.a5l3.b2"])
+            TCLA_abs_TFT = len(TFT.data[TFT.data["at_element"] == "tcla.a5l3.b2"])
+            PIPE_abs_PIX = len(PIX.data[PIX.data["at_element"] == "vmgab.4l3.b.b2_aper"])
+            PIPE_abs_TFT = len(TFT.data[TFT.data["at_element"] == "vmgab.4l3.b.b2_aper"])
 
-        del ang_dict
+            print("TCLA absorbed: ", TCLA_abs_PIX, TCLA_abs_TFT)
+            ang_dict['TCLA_abs'] = max(TCLA_abs_PIX, TCLA_abs_TFT)
+            print("PIPE absorbed: ", PIPE_abs_PIX, PIPE_abs_TFT)
+            ang_dict['PIPE_abs'] = max(PIPE_abs_PIX, PIPE_abs_TFT)
+            
+            print("TCCS angle: ", TFT.TCCS_align_angle, PIX.TCCS_align_angle)
+            print("TCCP angle: ", TFT.TCCP_align_angle, PIX.TCCP_align_angle)
+            ang_dict['TCCP_angle'] = TFT.TCCP_align_angle
+            ang_dict['npart'] = PIX.n_jobs*PIX.part_per_job
+            ang_dict['n_impacts'] = len(PIX.data)
+            print("Npart ", ang_dict['npart'], ang_dict['n_impacts'])
 
+            absorbed[ang] = ang_dict
+
+            del ang_dict
+
+            #Plotting
+            print("\nPlotting 1D: ")
+            fig_pix, ax_pix = PIX.plot_y(return_fig=True, set_y_dim = 36000)
+            fig_tft, ax_tft = TFT.plot_y(return_fig=True, set_y_dim = 15000)
+            
+            PIX_TITLE = f'PIXEL    ' + r'$\Delta\theta_{{TCCP}}:$ ' + f'{ang}' + r' $\mu$rad   $n_{{abs}}$: ' + f'{PIX.n_TCCP_absorbed / sum(PIX.data.xp_crit > -1) * 100:.0f} %' + '  $\epsilon_{{SP}}$: ' + f'{PIX.TCCP_sim_chann_eff * 100:.1f} %'
+            TFT_TITLE = f'TFT    ' + r'$\Delta\theta_{{TCCP}}:$ ' + f'{ang}' + r' $\mu$rad   $n_{{abs}}$: ' + f'{TFT.n_TCCP_absorbed / sum(TFT.data.xp_crit > -1) * 100:.0f} %' + '  $\epsilon_{{SP}}$: ' + f'{TFT.TCCP_sim_chann_eff * 100:.1f} %'
+            ax_pix.set_title(PIX_TITLE, fontsize=14)   
+            ax_tft.set_title(TFT_TITLE, fontsize=14)   
+
+            print("\nPlotting 2D: ")
+            fig_tft2D, ax_tft2D = plt.subplots(figsize=(8, 5))
+            TFT.plot_xy_distribution(fig_tft2D, ax_tft2D, TFT.data['x'], TFT.data['y'], vmax=300)
+            ax_tft2D.set_title(TFT_TITLE, fontsize=14)   
+            
+
+            fig_pix2D, ax_pix2D = plt.subplots(figsize=(8, 5))
+            PIX.plot_xy_distribution(fig_pix2D, ax_pix2D, PIX.data['x'], PIX.data['y'],vmax=1e3)
+
+            ax_pix2D.set_title(PIX_TITLE, fontsize=14)   
+
+            if i <10:
+                i_str = '0'+str(i)
+            else:
+                i_str = str(i)
+
+            fig_pix.savefig(Path(path_out,f'PIX_1D_'+i_str+f'_{ang}_{text_suffix}.png'), dpi=300, bbox_inches='tight')
+            fig_tft.savefig(Path(path_out,f'TFT_1D_'+i_str+f'_{ang}_{text_suffix}.png'), dpi=300, bbox_inches='tight')
+            fig_tft2D.savefig(Path(path_out,f'TFT_2D_'+i_str+f'_{ang}_{text_suffix}.png'), dpi=300, bbox_inches='tight')
+            fig_pix2D.savefig(Path(path_out,f'PIX_2D_'+i_str+f'_{ang}_{text_suffix}.png'), dpi=300, bbox_inches='tight')
+
+            i += 1
+            plt.close(fig_pix)
+            plt.close(fig_tft)
+            plt.close(fig_pix2D)
+            plt.close(fig_tft2D)
+            
+            print("\nGetting arrays: ")
+            # Compute arrays
+            h_PIX = get_PIX_array(PIX.data, show_plot=False)[0]
+            h_TFT = get_TFT_array(TFT.data, show_plot=False)[0]
+
+            # Store arrays directly as DataFrames
+            store.put(f"{ang}/h_PIX", pd.DataFrame(h_PIX), format='table')
+            store.put(f"{ang}/h_TFT", pd.DataFrame(h_TFT), format='table')
+
+
+
+    # Save the absorbed data to HDF5
+    print("\nSaving absorbed data to HDF5")
     df = pd.DataFrame.from_dict(absorbed, orient="index")
     df.index.name = "delta_angle_TCCP"  # optional, for clarity
     df.reset_index(inplace=True)
-    df.to_hdf(Path(path_out, f'Double_Channeling_450_ABSORBED.h5'), key='absorbed', format='table', mode='a',
+    df.to_hdf(Path(path_out, f'Double_Channeling_450_ABSORBED_{text_suffix}.h5'), key='absorbed', format='table', mode='a',
             complevel=9, complib='blosc')
 
 
@@ -1760,94 +1984,6 @@ def main():
 
 
 
-
-    """ch_angle = 2.2251710113544777e-05 +   0.0001474244
-
-    keys = list(ang_scan.keys())
-
-    df_PIX = pd.DataFrame(columns=['y', 'angle'])
-    df_TFT = pd.DataFrame(columns=['y', 'angle'])
-
-    i = 0
-
-    for ang in ang_scan.keys():
-
-        fig_pix, ax_pix = ang_scan[ang]['PIX'].plot_y(return_fig=True, set_y_dim = 36000)
-        fig_tft, ax_tft = ang_scan[ang]['TFT'].plot_y(return_fig=True, set_y_dim = 15000)
-        
-        PIX_TITLE = f'PIXEL    ' + r'$\Delta\theta_{{TCCP}}:$ ' + f'{(ch_angle - ang_scan[ang]["PIX"].TCCP_align_angle)*1e6:.1f}' + r' $\mu$rad   $n_{{abs}}$: ' + f'{ang_scan[ang]["PIX"].n_TCCP_absorbed / sum(ang_scan[ang]["PIX"].data.xp_crit > -1) * 100:.0f} %' + '  $\epsilon_{{SP}}$: ' + f'{ang_scan[ang]["PIX"].TCCP_sim_chann_eff * 100:.1f} %'
-        TFT_TITLE = f'TFT    ' + r'$\Delta\theta_{{TCCP}}:$ ' + f'{(ch_angle - ang_scan[ang]["TFT"].TCCP_align_angle)*1e6:.1f}' + r' $\mu$rad   $n_{{abs}}$: ' + f'{ang_scan[ang]["TFT"].n_TCCP_absorbed / sum(ang_scan[ang]["TFT"].data.xp_crit > -1) * 100:.0f} %' + '  $\epsilon_{{SP}}$: ' + f'{ang_scan[ang]["TFT"].TCCP_sim_chann_eff * 100:.1f} %'
-        ax_pix.set_title(PIX_TITLE, fontsize=14)   
-        ax_tft.set_title(TFT_TITLE, fontsize=14)   
-
-        fig_tft2D, ax_tft2D = plt.subplots(figsize=(8, 5))
-        ang_scan[ang]['TFT'].plot_xy_distribution(fig_tft2D, ax_tft2D, ang_scan[ang]['TFT'].data['x'], ang_scan[ang]['TFT'].data['y'], vmax=300)
-        ax_tft2D.set_title(TFT_TITLE, fontsize=14)   
-        
-
-        fig_pix2D, ax_pix2D = plt.subplots(figsize=(8, 5))
-        ang_scan[ang]['PIX'].plot_xy_distribution(fig_pix2D, ax_pix2D, ang_scan[ang]['PIX'].data['x'], ang_scan[ang]['PIX'].data['y'],vmax=1e3)
-        #ang_scan[ang]['PIX'].plot_xy_distribution(fig_pix2D, ax_pix2D, ang_scan[ang]['PIX'].data['x'], ang_scan[ang]['PIX'].data['y'], bins= round(ang_scan[ang]['PIX'].ydim /55e-6), xlim = xlim, ylim = ylim)
-        ax_pix2D.set_title(PIX_TITLE, fontsize=14)   
-
-        if i <10:
-            i_str = '0'+str(i)
-        else:
-            i_str = str(i)
-
-        fig_pix.savefig(Path(path_out,f'PIX_1D_'+i_str+f'_{ang}.png'), dpi=300, bbox_inches='tight')
-        fig_tft.savefig(Path(path_out,f'TFT_1D_'+i_str+f'_{ang}.png'), dpi=300, bbox_inches='tight')
-        fig_tft2D.savefig(Path(path_out,f'TFT_2D_'+i_str+f'_{ang}.png'), dpi=300, bbox_inches='tight')
-        fig_pix2D.savefig(Path(path_out,f'PIX_2D_'+i_str+f'_{ang}.png'), dpi=300, bbox_inches='tight')
-
-        i += 1
-
-        metadata = pd.DataFrame({
-            'TCCP_align_angle': ang_scan[ang]['PIX'].TCCP_align_angle,
-            'TCCP_absorbed': ang_scan[ang]['PIX'].n_TCCP_absorbed
-        }, index=[0])  # Single row with index 0
-        data_pix = ang_scan[ang]['PIX'].data[['x', 'y']]
-        data_tft = ang_scan[ang]['TFT'].data[['x', 'y']]
-        data_pix.to_hdf(Path(path_out, f'Double_Channeling_450_TCCP_{ang}.h5'), key='PIXEL_data', format='table', mode='a',
-            complevel=9, complib='blosc')
-        data_tft.to_hdf(Path(path_out, f'Double_Channeling_450_TCCP_{ang}.h5'), key='TFT_data', format='table', mode='a',
-            complevel=9, complib='blosc')
-        metadata.to_hdf(Path(path_out, f'Double_Channeling_450_TCCP_{ang}.h5'), key='metadata', format='table', mode='a',
-            complevel=9, complib='blosc')
-        df_key_PIX = pd.DataFrame(columns=['y', 'angle'])
-        df_key_PIX['y'] = ang_scan[ang]['PIX'].data['y']
-        df_key_PIX['angle'] = ang_scan[ang]['TCCP_angle']
-        df_PIX = pd.concat([df_PIX, df_key_PIX], ignore_index=True)
-
-        df_key_TFT = pd.DataFrame(columns=['y', 'angle'])
-        df_key_TFT['y'] = ang_scan[ang]['TFT'].data['y']
-        df_key_TFT['angle'] = ang_scan[ang]['TCCP_angle']
-        df_TFT = pd.concat([df_TFT, df_key_TFT], ignore_index=True)
-
-
-    df_PIX.to_hdf(Path(path_out, f'TOTAL_DC_450_v2.h5'), key='data_PIX', format='table', mode='a',
-            complevel=9, complib='blosc')
-    
-    df_TFT.to_hdf(Path(path_out, f'TOTAL_DC_450_v2.h5'), key='data_TFT', format='table', mode='a',
-            complevel=9, complib='blosc')
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.hist2d(df_PIX.angle, df_PIX.y, bins=[len(ang_scan.keys()), 300], norm=matplotlib.colors.LogNorm() ) #
-    ax.set_xlabel('Angle [rad]')
-    ax.set_ylabel('y [m]')
-    fig.savefig(Path(path_out,'TOTAL_DC_PIX_450_v2.png'), dpi=300, bbox_inches='tight')
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.hist2d(df_TFT.angle, df_TFT.y, bins=[len(ang_scan.keys()), 300], norm=matplotlib.colors.LogNorm() ) #
-    ax.set_xlabel('Angle [rad]')
-    ax.set_ylabel('y [m]')
-    fig.savefig(Path(path_out,'TOTAL_DC_TFT_450_v2.png'), dpi=300, bbox_inches='tight')
-
-    ax = plot_angular_scan(ang_scan)
-    TCCP_xp_crit = 8.25330097732552e-06
-    ax[1].axvline(ang_scan[0.0]['TCCP_angle'] + TCCP_xp_crit, color='r', linestyle='--')
-    ax[1].axvline(ang_scan[0.0]['TCCP_angle'] - TCCP_xp_crit, color='r', linestyle='--')
-    ax[0].savefig(Path(path_out,'ANG_SCAN_DC_450_v2.png'), dpi=300, bbox_inches='tight')"""
 
 if __name__ == '__main__':
 
