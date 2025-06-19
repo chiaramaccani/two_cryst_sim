@@ -16,9 +16,9 @@ run:
 
   energy:  450e9 
  
-  TCCS_align_angle_step:  4.4e-6
+  TCCS_align_angle_step:  2.2e-6
   TCCP_align_angle_step:   0 
-  TCCP_align_angle_additional: 2.3748599227745932e-05
+  TCCP_align_angle_additional: 2.2555434613210902e-05
   
   TCCS_potential: default # 16 default
   TCCP_potential: default # default
@@ -27,7 +27,7 @@ run:
   
   TCCS_gap: 5.0
   TARGET_gap: None
-  TCCP_gap:  10.1
+  TCCP_gap:  9.77
   PIXEL_gap: 5.5
   TFT_gap: 5.5 #6.4 
   TCP_gap: 6.0
@@ -47,9 +47,9 @@ run:
 
   
 jobsubmission:
-  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_DC_450GeV_TCCS_rotated_4.4_TCCP_ANGSCAN_
+  working_directory: ${HOME_TWOCRYST}/Condor/TWOCRYST_DC_450GeV_TCCS_rotated_2.2_TCCP_ANGSCAN__0.0_
   num_jobs: 200 
-  angular_scan: TCCP
+  angular_scan: None
   angular_scan_range_lower: -20.9e-6
   angular_scan_range_upper: 20.9e-6
   angular_scan_step: 2.2e-6

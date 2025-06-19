@@ -47,6 +47,8 @@ from scipy.stats import norm
 import uproot 
 from IPython import embed
 
+import re
+
 
 # ---------------------------- SIMULATION CHECKING FUNCTIONS ----------------------------
 def ls(return_list = False, path="/eos/home-c/cmaccani/xsuite_sim/two_cryst_sim/Condor/"):
@@ -1229,7 +1231,7 @@ class TargetAnalysis(ParticleAnalysis):
 
   def plot_xy_distribution(self, fig, ax, x, y, bins=None, print_vmax = False, sigma_line = False, vmin = None, vmax = None, lines = True, plot_support = True, axins_params=["100%", "5%", "right", -6],  **kwargs,):
     
-    print("Target \Analysis plot distrib")
+ 
 
 
     if self.type == 'alfa':
@@ -1277,7 +1279,6 @@ class TargetAnalysis(ParticleAnalysis):
 
     ax.set_xlabel(r'x [mm]')
     ax.set_ylabel(r'y [mm]')
-    print('Setting ticks')
     ax.set_xticks(ticks=ax.get_xticks(), labels=[f"{x_tick*1e3:.{1}f}" for x_tick in ax.get_xticks()])
     ax.set_yticks(ticks=ax.get_yticks(), labels=[f"{x_tick*1e3:.{1}f}" for x_tick in ax.get_yticks()])
 
@@ -1295,17 +1296,15 @@ class TargetAnalysis(ParticleAnalysis):
     axins = inset_axes(ax, height=axins_params[0],  width=axins_params[1], loc=axins_params[2], borderpad=axins_params[3] )
     fig.colorbar(h[3], cax=axins, orientation='vertical', label='Count (log scale)')
 
-    print(xlim, ylim)
+
     ax.set_ylim(ylim[0], ylim[1])
     ax.set_xlim(xlim[0], xlim[1])
-    print(ax.get_xlim(), ax.get_ylim())
+
     
     ax_tw = ax.twinx()
     sigma_abs = self.sigma #self.jaw_L/self.n_sigma
     ax_tw.set_ylim((ax.get_ylim()[0]-self.ref)/sigma_abs, (ax.get_ylim()[1]-self.ref)/sigma_abs)
-    print((ax.get_ylim()[0]-self.ref)/sigma_abs, (ax.get_ylim()[1]-self.ref)/sigma_abs)
-    print(sigma_abs)
-    print(ax.get_ylim()[0], ax.get_ylim()[1])
+
     
     if ax_tw.get_ylim()[1] - ax_tw.get_ylim()[0] < 20:
         n_ticks = 2
@@ -1577,10 +1576,10 @@ class TargetAnalysis(ParticleAnalysis):
     if self.type == 'alfa':
        
         bins = int(np.ceil((self.abs_y_up-min(self.data.y))/ 30e-6) )
-        print(self.abs_y_up, min(self.data.y), bins)
+        #print(self.abs_y_up, min(self.data.y), bins)
     elif self.type == 'pixel':
         bins =  int(np.ceil((self.abs_y_up-min(self.data.y))/ 55e-6) )
-        print(self.abs_y_up, min(self.data.y), bins)
+        #print(self.abs_y_up, min(self.data.y), bins)
     else:
         bins = 400
 
@@ -1606,7 +1605,6 @@ class TargetAnalysis(ParticleAnalysis):
     ax.legend()
     ax.axvline(self.abs_y_low, color='grey', linestyle='-')
     ax.axvline(self.abs_y_up, color='grey', linestyle='-')
-    print('Setting Labels')
     ax.set_xlabel('y [m]')
     ax.set_ylabel('Counts [a.u.]')
 
@@ -1871,16 +1869,20 @@ def main():
         os.makedirs(path_out)
 
     #ang_scan = load_angular_scan('TWOCRYST_DC_450GeV_TCCP_ANGSCAN_') #, folder_suffix='20250128')
-    folder_prefix = 'TWOCRYST_DC_450GeV_TCCP_ANGSCAN_'
-    folder_suffix = ''
+    folder_prefix = 'TWOCRYST_DC_450GeV_TCCS_rotated_'
+    folder_suffix = '_2.2_'
 
     folder_list = ls(return_list=True)
     folder_list = [folder for folder in folder_list if (folder_prefix in folder) and (folder_suffix in folder)]
-    folder_list = sorted(folder_list)
+
+    def extract_angle(s):
+        match = re.search(r'__(-?\d+(?:\.\d+)?)__', s)
+        return float(match.group(1)) if match else float('inf')
+
+    folder_list = sorted(folder_list, key=extract_angle)
     print(folder_list)
     i = 0
-
-    text_suffix = ""
+    text_suffix = "ROT2.2murad"
     absorbed = {}
     output_hdf_path = f"./DoubleChanneling_450GeV_ANGSCAN_{text_suffix}.h5"
 
@@ -1893,8 +1895,8 @@ def main():
             
             PIX =  TargetAnalysis(n_sigma=5.5, target_type = 'pixel', ydim=0.01408, xdim=0.04224,sigma=0.0014479740312245593)
             TFT = TargetAnalysis(n_sigma=5.5, target_type='alfa', ydim=0.0297, xdim=0.04525,sigma=0.001457145205173178)
-            PIX.load_particles(folder,'PIXEL_impacts_1', part_per_job=10000, n_return=1) #  n_return=1
-            TFT.load_particles(folder,'TFT_impacts', part_per_job=10000, n_return=1) #  n_return=1
+            PIX.load_particles(folder,'PIXEL_impacts_1', part_per_job=10000) #  n_return=1
+            TFT.load_particles(folder,'TFT_impacts', part_per_job=10000) #  n_return=1
 
             print("\nGetting absorbed data: ")
             print("TCCS absorbed: ", TFT.n_TCCS_absorbed, PIX.n_TCCS_absorbed)
@@ -1941,7 +1943,6 @@ def main():
 
             fig_pix2D, ax_pix2D = plt.subplots(figsize=(8, 5))
             PIX.plot_xy_distribution(fig_pix2D, ax_pix2D, PIX.data['x'], PIX.data['y'],vmax=1e3)
-
             ax_pix2D.set_title(PIX_TITLE, fontsize=14)   
 
             if i <10:
@@ -1949,10 +1950,10 @@ def main():
             else:
                 i_str = str(i)
 
-            fig_pix.savefig(Path(path_out,f'PIX_1D_'+i_str+f'_{ang}_{text_suffix}.png'), dpi=300, bbox_inches='tight')
-            fig_tft.savefig(Path(path_out,f'TFT_1D_'+i_str+f'_{ang}_{text_suffix}.png'), dpi=300, bbox_inches='tight')
-            fig_tft2D.savefig(Path(path_out,f'TFT_2D_'+i_str+f'_{ang}_{text_suffix}.png'), dpi=300, bbox_inches='tight')
-            fig_pix2D.savefig(Path(path_out,f'PIX_2D_'+i_str+f'_{ang}_{text_suffix}.png'), dpi=300, bbox_inches='tight')
+            fig_pix.savefig(Path(path_out,f'PIX_1D_{text_suffix}_'+i_str+f'_{ang}.png'), dpi=300, bbox_inches='tight')
+            fig_tft.savefig(Path(path_out,f'TFT_1D_{text_suffix}_'+i_str+f'_{ang}.png'), dpi=300, bbox_inches='tight')
+            fig_tft2D.savefig(Path(path_out,f'TFT_2D_{text_suffix}_'+i_str+f'_{ang}.png'), dpi=300, bbox_inches='tight')
+            fig_pix2D.savefig(Path(path_out,f'PIX_2D_{text_suffix}_'+i_str+f'_{ang}.png'), dpi=300, bbox_inches='tight')
 
             i += 1
             plt.close(fig_pix)
